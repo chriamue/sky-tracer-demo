@@ -9,7 +9,7 @@ pub struct SearchBoxProps {
 #[function_component(SearchBox)]
 pub fn search_box(props: &SearchBoxProps) -> Html {
     html! {
-        <form class="search-box" action="/" method="get">
+        <form class="search-box" action="" method="get">
             <input
                 type="text"
                 name="q"

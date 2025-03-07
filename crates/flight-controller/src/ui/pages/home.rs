@@ -17,7 +17,7 @@ pub fn home(props: &HomeProps) -> Html {
 
             <main>
                 <section class="search-section">
-                    <form action="/" method="get">
+                    <form action="" method="get">
                         <div class="form-group">
                             <label for="departure">{"From:"}</label>
                             <input type="text" id="departure" name="departure" />

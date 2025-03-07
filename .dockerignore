@@ -1,0 +1,9 @@
+target/
+**/target/
+.git/
+.gitignore
+.env
+Dockerfile
+**/Dockerfile
+docker-compose.yml
+README.md

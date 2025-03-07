@@ -1,0 +1,45 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      - "8000:8000"
+      - "8080:8080" # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+
+  airport-anywhere:
+    build:
+      context: .
+      dockerfile: crates/airport-anywhere/Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.airports.rule=PathPrefix(`/airports`)"
+      - "traefik.http.services.airports.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.airports-strip.stripprefix.prefixes=/airports"
+      - "traefik.http.routers.airports.middlewares=airports-strip@docker"
+    environment:
+      - RUST_LOG=info
+    volumes:
+      - ./assets:/usr/local/bin/assets
+
+  flight-controller:
+    build:
+      context: .
+      dockerfile: crates/flight-controller/Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flights.rule=PathPrefix(`/flights`)"
+      - "traefik.http.services.flights.loadbalancer.server.port=3001"
+      - "traefik.http.middlewares.flights-strip.stripprefix.prefixes=/flights"
+      - "traefik.http.routers.flights.middlewares=flights-strip@docker"
+    environment:
+      - RUST_LOG=info
+
+networks:
+  default:
+    name: sky-tracer
