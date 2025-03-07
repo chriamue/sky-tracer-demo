@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = [ "crates/airport-anywhere","crates/sky-tracer"]
+members = ["crates/airport-anywhere", "crates/sky-tracer"]
 
 [dependencies]
 sky-tracer = { path = "crates/sky-tracer" }
+airport-anywhere = { path = "crates/airport-anywhere" }
