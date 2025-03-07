@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+pub mod error;
 
 /// Represents an airport with its location and metadata
 #[derive(Debug, Clone, Deserialize, Serialize)]
