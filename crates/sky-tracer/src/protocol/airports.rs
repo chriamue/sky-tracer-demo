@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct AirportResponse {
@@ -7,16 +7,25 @@ pub struct AirportResponse {
     pub id: u32,
     /// Airport name
     pub name: String,
-    /// City where the airport is located
-    pub city: String,
-    /// Country where the airport is located
-    pub country: String,
-    /// IATA code (3-letter code)
-    pub iata: String,
-    /// ICAO code (4-letter code)
-    pub icao: String,
+    /// Combined IATA/ICAO code (e.g., "LAX/KLAX")
+    pub code: String,
     /// Airport position details
     pub position: Position,
+}
+
+impl From<&crate::model::airport::Airport> for AirportResponse {
+    fn from(airport: &crate::model::airport::Airport) -> Self {
+        let (latitude, longitude) = airport.position();
+        Self {
+            id: airport.id,
+            name: airport.name.clone(),
+            code: airport.code.clone(),
+            position: Position {
+                latitude,
+                longitude,
+            },
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -25,18 +34,15 @@ pub struct Position {
     pub latitude: f64,
     /// Longitude in decimal degrees
     pub longitude: f64,
-    /// Altitude in feet
-    pub altitude: i32,
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Deserialize, ToSchema, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct SearchAirportsRequest {
-    /// Optional name to search for (matches against name, city, or country)
+    /// Optional name to search for
     pub name: Option<String>,
-    /// Optional IATA code for exact match
-    pub iata: Option<String>,
-    /// Optional ICAO code for exact match
-    pub icao: Option<String>,
+    /// Optional code (IATA/ICAO) for exact match
+    pub code: Option<String>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -46,6 +52,26 @@ pub struct SearchAirportsResponse {
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ErrorResponse {
+    /// Error message
     pub error: String,
+    /// Error code for categorization
     pub code: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::airport::Airport;
+
+    #[test]
+    fn test_airport_response_conversion() {
+        let airport = Airport::frankfurt();
+        let response = AirportResponse::from(&airport);
+
+        assert_eq!(response.id, airport.id);
+        assert_eq!(response.name, airport.name);
+        assert_eq!(response.code, airport.code);
+        assert_eq!(response.position.latitude, airport.latitude);
+        assert_eq!(response.position.longitude, airport.longitude);
+    }
 }
