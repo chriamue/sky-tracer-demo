@@ -1,0 +1,10 @@
+[package]
+name = "sky-tracer-demo"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["crates/sky-tracer"]
+
+[dependencies]
+sky-tracer = { path = "crates/sky-tracer" }
