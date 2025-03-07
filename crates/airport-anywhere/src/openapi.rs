@@ -15,6 +15,10 @@ use utoipa::OpenApi;
     ),
     tags(
         (name = "airports", description = "Airport management API")
+    ),
+    servers(
+        (url = "/", description = "Local server"),
+        (url = "/airports", description = "Airports API server")
     )
 )]
 pub struct ApiDoc;

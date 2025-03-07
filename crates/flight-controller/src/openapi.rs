@@ -17,6 +17,10 @@ use utoipa::OpenApi;
     ),
     tags(
         (name = "flights", description = "Flight management API")
+    ),
+    servers(
+        (url = "/flights/", description = "Flight API"),
+        (url = "/", description = "Local development server")
     )
 )]
 pub struct ApiDoc;

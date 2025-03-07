@@ -76,7 +76,6 @@ pub async fn search_airports(
 mod tests {
     use super::*;
     use axum::extract::Query;
-    use sky_tracer::model::airport::Airport;
 
     #[tokio::test]
     async fn test_list_airports() {

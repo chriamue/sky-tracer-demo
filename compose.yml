@@ -26,6 +26,10 @@ services:
       - "traefik.http.services.airports.loadbalancer.server.port=3000"
       - "traefik.http.middlewares.airports-strip.stripprefix.prefixes=/airports"
       - "traefik.http.routers.airports.middlewares=airports-strip@docker"
+      # Additional route for /api/airports
+      - "traefik.http.routers.airports-api.entrypoints=web"
+      - "traefik.http.routers.airports-api.rule=PathPrefix(`/api/airports`)"
+      - "traefik.http.routers.airports-api.service=airports"
     environment:
       - RUST_LOG=info
     volumes:
@@ -44,6 +48,10 @@ services:
       - "traefik.http.services.flights.loadbalancer.server.port=3001"
       - "traefik.http.middlewares.flights-strip.stripprefix.prefixes=/flights"
       - "traefik.http.routers.flights.middlewares=flights-strip@docker"
+      # Additional route for /api/flights
+      - "traefik.http.routers.flights-api.entrypoints=web"
+      - "traefik.http.routers.flights-api.rule=PathPrefix(`/api/flights`)"
+      - "traefik.http.routers.flights-api.service=flights"
     environment:
       - RUST_LOG=info
     networks:
