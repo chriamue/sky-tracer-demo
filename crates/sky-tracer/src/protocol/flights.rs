@@ -15,7 +15,7 @@ pub struct CreateFlightRequest {
     pub departure_time: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
 pub struct FlightResponse {
     /// Flight number
     pub flight_number: String,
