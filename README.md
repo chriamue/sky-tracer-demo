@@ -50,3 +50,15 @@ Once the system is running:
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Assets Directory
+
+This directory contains various data files and assets used by the application.
+
+### airports.dat
+
+The file `airports.dat` is sourced from the OpenFlights database.
+
+OpenFlights provides data on airports, airlines, and routes, and is a valuable resource for researchers and developers working on travel and aviation-related projects.
+
+For more details and for the most up-to-date data, please visit the OpenFlights repository on GitHub: [OpenFlights on GitHub](https://github.com/jpatokal/openflights)
