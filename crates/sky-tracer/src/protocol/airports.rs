@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
 pub struct AirportResponse {
     /// Airport unique identifier
     pub id: u32,
@@ -28,7 +28,7 @@ impl From<&crate::model::airport::Airport> for AirportResponse {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
 pub struct Position {
     /// Latitude in decimal degrees
     pub latitude: f64,
