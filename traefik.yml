@@ -2,10 +2,10 @@ api:
   dashboard: true
   insecure: true
 
-providers:
-  docker:
-    exposedByDefault: false
-
 entryPoints:
   web:
     address: ":8000"
+
+providers:
+  docker:
+    exposedByDefault: false

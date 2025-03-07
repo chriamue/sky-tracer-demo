@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 members = [
     "crates/airport-anywhere",
-    "crates/flight-controller",
+    "crates/flight-controller", "crates/flightmare-tracker",
     "crates/sky-tracer",
 ]
 

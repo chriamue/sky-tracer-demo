@@ -5,12 +5,15 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:8000"
     ports:
-      - "8000:8000"
-      - "8080:8080" # Traefik dashboard
+      - "8000:8000" # Web entrypoint
+      - "8080:8080" # Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - sky-tracer
 
   airport-anywhere:
     build:
@@ -18,6 +21,7 @@ services:
       dockerfile: crates/airport-anywhere/Dockerfile
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.airports.entrypoints=web"
       - "traefik.http.routers.airports.rule=PathPrefix(`/airports`)"
       - "traefik.http.services.airports.loadbalancer.server.port=3000"
       - "traefik.http.middlewares.airports-strip.stripprefix.prefixes=/airports"
@@ -26,6 +30,8 @@ services:
       - RUST_LOG=info
     volumes:
       - ./assets:/usr/local/bin/assets
+    networks:
+      - sky-tracer
 
   flight-controller:
     build:
@@ -33,13 +39,31 @@ services:
       dockerfile: crates/flight-controller/Dockerfile
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.flights.entrypoints=web"
       - "traefik.http.routers.flights.rule=PathPrefix(`/flights`)"
       - "traefik.http.services.flights.loadbalancer.server.port=3001"
       - "traefik.http.middlewares.flights-strip.stripprefix.prefixes=/flights"
       - "traefik.http.routers.flights.middlewares=flights-strip@docker"
     environment:
       - RUST_LOG=info
+    networks:
+      - sky-tracer
+
+  flightmare-tracker:
+    build:
+      context: .
+      dockerfile: crates/flightmare-tracker/Dockerfile
+    ports:
+      - "8081:80" # For debugging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flightmare.rule=PathPrefix(`/flightmare`)"
+      - "traefik.http.services.flightmare.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.flightmare-strip.stripprefix.prefixes=/flightmare"
+      - "traefik.http.routers.flightmare.middlewares=flightmare-strip@docker"
+    networks:
+      - sky-tracer
 
 networks:
-  default:
+  sky-tracer:
     name: sky-tracer
