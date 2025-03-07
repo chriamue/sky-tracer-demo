@@ -72,6 +72,20 @@ services:
     networks:
       - sky-tracer
 
+  cockpit:
+    build:
+      context: .
+      dockerfile: crates/cockpit/Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cockpit.entrypoints=web"
+      - "traefik.http.routers.cockpit.rule=PathPrefix(`/cockpit`)"
+      - "traefik.http.services.cockpit.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.cockpit-strip.stripprefix.prefixes=/cockpit"
+      - "traefik.http.routers.cockpit.middlewares=cockpit-strip@docker"
+    networks:
+      - sky-tracer
+
 networks:
   sky-tracer:
     name: sky-tracer

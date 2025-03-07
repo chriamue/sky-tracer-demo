@@ -6,11 +6,15 @@ edition = "2021"
 [workspace]
 members = [
     "crates/airport-anywhere",
-    "crates/flight-controller", "crates/flightmare-tracker",
+    "crates/flight-controller",
+    "crates/flightmare-tracker",
     "crates/sky-tracer",
+    "crates/cockpit",
 ]
 
 [dependencies]
 sky-tracer = { path = "crates/sky-tracer" }
 airport-anywhere = { path = "crates/airport-anywhere" }
 flight-controller = { path = "crates/flight-controller" }
+flightmare-tracker = { path = "crates/flightmare-tracker" }
+cockpit = { path = "crates/cockpit" }
