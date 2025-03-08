@@ -31,7 +31,9 @@ services:
       - "traefik.http.routers.airports-api.rule=PathPrefix(`/api/airports`)"
       - "traefik.http.routers.airports-api.service=airports"
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=info,tower_http=debug
+      - ENABLE_TELEMETRY=true
+      - OTEL_ENDPOINT=http://jaeger:4317
     volumes:
       - ./assets:/usr/local/bin/assets
     networks:
@@ -106,7 +108,9 @@ services:
       - "traefik.http.routers.position-api.rule=PathPrefix(`/api/position`)"
       - "traefik.http.routers.position-api.service=satellites"
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=info,tower_http=debug
+      - ENABLE_TELEMETRY=true
+      - OTEL_ENDPOINT=http://jaeger:4317
       - AIRPORTS_SERVICE_URL=http://airport-anywhere:3000
       - PATH_PREFIX=/satellites
     networks:
@@ -121,6 +125,17 @@ services:
       - ./docs/:/usr/local/structurizr/
     environment:
       - STRUCTURIZR_WORKSPACE_PATH=.
+
+  # Jaeger backend
+  jaeger:
+    image: jaegertracing/jaeger:2.4.0
+    ports:
+      - "16686:16686" # UI
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - sky-tracer
 
 networks:
   sky-tracer:

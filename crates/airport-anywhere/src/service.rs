@@ -1,9 +1,9 @@
+use crate::airports_service::AirportsService;
 use axum::{extract::Query, Json};
 use sky_tracer::protocol::airports::{
     AirportResponse, SearchAirportsRequest, SearchAirportsResponse,
 };
-
-use crate::airports_service::AirportsService;
+use tracing::{info, instrument};
 
 /// List all airports
 #[utoipa::path(
@@ -42,9 +42,15 @@ pub async fn list_airports() -> Json<SearchAirportsResponse> {
     ),
     tag = "airports"
 )]
+#[instrument]
 pub async fn search_airports(
     Query(params): Query<SearchAirportsRequest>,
 ) -> Json<SearchAirportsResponse> {
+    info!(
+        code = params.code.as_deref().unwrap_or("none"),
+        name = params.name.as_deref().unwrap_or("none"),
+        "Searching for airport"
+    );
     match AirportsService::instance() {
         Ok(service) => {
             let airports = if let Some(code) = params.code {
