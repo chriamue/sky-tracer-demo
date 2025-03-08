@@ -10,6 +10,7 @@ use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
     UpdateSatelliteStatusRequest,
 };
+use tracing::instrument;
 use uuid::Uuid;
 
 /// Create a new satellite
@@ -23,6 +24,7 @@ use uuid::Uuid;
     ),
     tag = "satellites"
 )]
+#[instrument(skip(service))]
 pub async fn create_satellite(
     State(service): State<SatelliteService>,
     Json(request): Json<CreateSatelliteRequest>,
@@ -50,6 +52,7 @@ pub async fn create_satellite(
     ),
     tag = "satellites"
 )]
+#[instrument(skip(service))]
 pub async fn update_satellite_status(
     State(service): State<SatelliteService>,
     Path(id): Path<Uuid>,
@@ -84,6 +87,7 @@ pub async fn update_satellite_status(
     ),
     tag = "satellites"
 )]
+#[instrument(skip(service))]
 pub async fn list_satellites(State(service): State<SatelliteService>) -> impl IntoResponse {
     let satellites = service.list_satellites().await;
     let response: Vec<SatelliteResponse> = satellites

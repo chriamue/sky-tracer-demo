@@ -4,6 +4,7 @@ use sky_tracer::model::{Position, Satellite, SatelliteStatus};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
+use tracing::{info, instrument};
 use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
@@ -30,19 +31,26 @@ impl SatelliteService {
         }
     }
 
+    #[instrument(skip(self))]
     pub async fn create_satellite(&self, name: String) -> Satellite {
+        info!(name = %name, "Creating new satellite");
         let satellite = Satellite::new(name);
         let mut satellites = self.satellites.write().await;
         satellites.insert(satellite.id, satellite.clone());
+        info!(id = %satellite.id, "Satellite created");
         satellite
     }
 
+    #[instrument(skip(self))]
     pub async fn update_status(&self, id: Uuid, status: SatelliteStatus) -> Option<Satellite> {
+        info!(id = %id, status = ?status, "Updating satellite status");
         let mut satellites = self.satellites.write().await;
         if let Some(satellite) = satellites.get_mut(&id) {
             satellite.status = status;
+            info!(id = %id, "Satellite status updated");
             Some(satellite.clone())
         } else {
+            info!(id = %id, "Satellite not found");
             None
         }
     }
@@ -57,6 +65,7 @@ impl SatelliteService {
         satellites.values().cloned().collect()
     }
 
+    #[instrument(skip(self))]
     pub async fn calculate_position(
         &self,
         departure_code: &str,
@@ -72,6 +81,11 @@ impl SatelliteService {
         ),
         SatelliteServiceError,
     > {
+        info!(
+            departure = %departure_code,
+            arrival = %arrival_code,
+            "Calculating flight position"
+        );
         let satellites = self.satellites.read().await;
         let active_satellites: Vec<_> = satellites
             .values()
@@ -114,10 +128,12 @@ impl SatelliteService {
         Ok((positions, Some(departure_airport), Some(arrival_airport)))
     }
 
+    #[instrument(skip(self))]
     async fn fetch_airport(
         &self,
         code: &str,
     ) -> Result<Option<sky_tracer::model::Airport>, reqwest::Error> {
+        info!(code = %code, "Fetching airport information");
         let url = format!(
             "{}/api/airports/search?code={}",
             self.airport_service_url, code
