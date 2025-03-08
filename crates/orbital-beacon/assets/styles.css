@@ -5,6 +5,7 @@
     --error-color: #f44336;
     --background-color: #f5f5f5;
     --card-background: #ffffff;
+    --map-border-color: #ddd;
 }
 
 body {
@@ -408,4 +409,189 @@ button:hover {
     margin: 1rem 0;
     border-radius: 4px;
     text-align: center;
+}
+
+/* Map Styles */
+.map-container {
+    width: 100%;
+    height: 400px;
+    border: 1px solid var(--map-border-color);
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-section {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-info {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.map-route {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    font-weight: 500;
+}
+
+/* Custom Map Markers */
+.custom-div-icon {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.airport-marker {
+    padding: 8px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.departure-marker {
+    background-color: var(--success-color);
+}
+
+.arrival-marker {
+    background-color: var(--error-color);
+}
+
+/* Airplane Icon */
+.airplane-icon {
+    color: var(--primary-color);
+    font-size: 24px;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+    transition: transform 0.3s ease;
+}
+
+.airplane-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Flight Path */
+.flight-path {
+    stroke: var(--primary-color);
+    stroke-width: 2;
+    stroke-dasharray: 5, 10;
+    stroke-opacity: 0.6;
+    animation: dash 20s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: -100;
+    }
+}
+
+/* Position Container */
+.position-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.position-info {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.position-info h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.position-info p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.flight-info {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .position-container {
+        grid-template-columns: 1fr;
+    }
+
+    .map-container {
+        height: 300px;
+    }
+
+    .airplane-icon {
+        font-size: 20px;
+    }
+
+    .airport-marker {
+        padding: 6px;
+        font-size: 10px;
+    }
+}
+
+/* Map Popup Styles */
+.leaflet-popup-content-wrapper {
+    background: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+    margin: 0.8rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.leaflet-popup-tip {
+    background: var(--card-background);
+}
+
+/* Map Controls */
+.leaflet-control-zoom {
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.leaflet-control-zoom a {
+    background-color: var(--card-background) !important;
+    color: #333 !important;
+    border: 1px solid var(--map-border-color) !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background-color: #f5f5f5 !important;
+}
+
+/* Map Attribution */
+.leaflet-control-attribution {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    padding: 0 5px !important;
+    border-radius: 3px !important;
+    font-size: 10px !important;
 }

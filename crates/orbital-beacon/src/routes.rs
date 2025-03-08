@@ -35,16 +35,19 @@ fn render_html(title: &str, body: String) -> Html<String> {
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>{title}</title>
+                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                 <style>
                     {}
                 </style>
             </head>
             <body>
-                {}
+                {body}
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                <script>{}</script>
             </body>
         </html>"#,
         include_str!("../assets/styles.css"),
-        body
+        include_str!("../assets/map.js"),
     ))
 }
 
