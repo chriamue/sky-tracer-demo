@@ -1,4 +1,4 @@
-use crate::satellite_service::SatelliteService;
+use crate::satellite_service::{SatelliteService, SatelliteServiceError};
 use crate::ui::pages::{
     FlightPosition, FlightPositionProps, Home, HomeProps, Launch, LaunchProps, UpdateStatus,
     UpdateStatusProps,
@@ -152,59 +152,90 @@ pub async fn render_flight_position(
     State(service): State<SatelliteService>,
     Query(params): Query<HashMap<String, String>>,
 ) -> Html<String> {
-    let position_data =
+    let (position_data, error_message) =
         if let (Some(departure), Some(arrival), Some(departure_time), Some(arrival_time)) = (
             params.get("departure"),
             params.get("arrival"),
             params.get("departure_time"),
             params.get("arrival_time"),
         ) {
-            // Parse the times
-            let departure_time = DateTime::parse_from_rfc3339(departure_time)
-                .map(|dt| dt.with_timezone(&Utc))
-                .ok();
-            let arrival_time = DateTime::parse_from_rfc3339(arrival_time)
-                .map(|dt| dt.with_timezone(&Utc))
-                .ok();
+            let parse_datetime = |dt_str: &str| -> Option<DateTime<Utc>> {
+                if let Ok(dt) = DateTime::parse_from_str(
+                    &format!("{}:00+00:00", dt_str),
+                    "%Y-%m-%dT%H:%M:%S%:z",
+                ) {
+                    return Some(dt.with_timezone(&Utc));
+                }
 
-            if let (Some(departure_time), Some(arrival_time)) = (departure_time, arrival_time) {
-                let request = sky_tracer::protocol::satellite::CalculatePositionRequest {
-                    departure: departure.clone(),
-                    arrival: arrival.clone(),
-                    departure_time,
-                    arrival_time,
-                    current_time: None,
-                };
+                if let Ok(dt) =
+                    DateTime::parse_from_str(&format!("{}+00:00", dt_str), "%Y-%m-%dT%H:%M%:z")
+                {
+                    return Some(dt.with_timezone(&Utc));
+                }
 
-                let (positions, departure_airport, arrival_airport) = service
-                    .calculate_position(
-                        &request.departure,
-                        &request.arrival,
-                        request.departure_time,
-                        request.arrival_time,
-                        request.current_time,
-                    )
-                    .await;
-
-                let departure_airport_response = departure_airport
-                    .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
-                let arrival_airport_response = arrival_airport
-                    .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
-
-                Some(sky_tracer::protocol::satellite::CalculatePositionResponse {
-                    positions,
-                    departure_airport: departure_airport_response,
-                    arrival_airport: arrival_airport_response,
-                })
-            } else {
                 None
+            };
+
+            let departure_time = parse_datetime(departure_time);
+            let arrival_time = parse_datetime(arrival_time);
+
+            match (departure_time, arrival_time) {
+                (Some(departure_time), Some(arrival_time)) => {
+                    match service
+                        .calculate_position(departure, arrival, departure_time, arrival_time, None)
+                        .await
+                    {
+                        Ok((positions, departure_airport, arrival_airport)) => {
+                            if positions.is_empty() {
+                                (
+                                    None,
+                                    Some("Flight is not currently in progress.".to_string()),
+                                )
+                            } else {
+                                let departure_airport_response = departure_airport.map(|airport| {
+                                    sky_tracer::protocol::airports::AirportResponse::from(&airport)
+                                });
+                                let arrival_airport_response = arrival_airport.map(|airport| {
+                                    sky_tracer::protocol::airports::AirportResponse::from(&airport)
+                                });
+
+                                (
+                                Some(sky_tracer::protocol::satellite::CalculatePositionResponse {
+                                    positions,
+                                    departure_airport: departure_airport_response,
+                                    arrival_airport: arrival_airport_response,
+                                }),
+                                None,
+                            )
+                            }
+                        }
+                        Err(SatelliteServiceError::NoActiveSatellites) => (
+                            None,
+                            Some("No active satellites available for tracking.".to_string()),
+                        ),
+                        Err(SatelliteServiceError::AirportNotFound(code)) => {
+                            (None, Some(format!("Airport not found: {}", code)))
+                        }
+                        Err(SatelliteServiceError::AirportFetchError(e)) => {
+                            (None, Some(format!("Failed to fetch airport data: {}", e)))
+                        }
+                    }
+                }
+                _ => (
+                    None,
+                    Some(
+                        "Invalid date/time format. Please use YYYY-MM-DDTHH:MM format.".to_string(),
+                    ),
+                ),
             }
         } else {
-            None
+            (None, None)
         };
 
-    let renderer =
-        ServerRenderer::<FlightPosition>::with_props(move || FlightPositionProps { position_data });
+    let renderer = ServerRenderer::<FlightPosition>::with_props(move || FlightPositionProps {
+        position_data,
+        error_message,
+    });
 
     let body = renderer.render().await;
     render_html("Flight Position", body)

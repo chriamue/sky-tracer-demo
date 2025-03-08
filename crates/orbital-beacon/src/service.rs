@@ -1,10 +1,11 @@
-use crate::satellite_service::SatelliteService;
+use crate::satellite_service::{SatelliteService, SatelliteServiceError};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
+use serde_json::json;
 use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
     UpdateSatelliteStatusRequest,
@@ -111,7 +112,7 @@ pub async fn calculate_position(
     State(service): State<SatelliteService>,
     Json(request): Json<CalculatePositionRequest>,
 ) -> impl IntoResponse {
-    let (positions, departure_airport, arrival_airport) = service
+    match service
         .calculate_position(
             &request.departure,
             &request.arrival,
@@ -119,17 +120,44 @@ pub async fn calculate_position(
             request.arrival_time,
             request.current_time,
         )
-        .await;
+        .await
+    {
+        Ok((positions, departure_airport, arrival_airport)) => {
+            let departure_airport_response = departure_airport
+                .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
+            let arrival_airport_response = arrival_airport
+                .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
 
-    let departure_airport_response = departure_airport
-        .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
-
-    let arrival_airport_response = arrival_airport
-        .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
-
-    Json(CalculatePositionResponse {
-        positions,
-        departure_airport: departure_airport_response,
-        arrival_airport: arrival_airport_response,
-    })
+            (
+                StatusCode::OK,
+                Json(CalculatePositionResponse {
+                    positions,
+                    departure_airport: departure_airport_response,
+                    arrival_airport: arrival_airport_response,
+                }),
+            )
+                .into_response()
+        }
+        Err(SatelliteServiceError::NoActiveSatellites) => (
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "error": "No active satellites available for tracking"
+            })),
+        )
+            .into_response(),
+        Err(SatelliteServiceError::AirportNotFound(code)) => (
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "error": format!("Airport not found: {}", code)
+            })),
+        )
+            .into_response(),
+        Err(SatelliteServiceError::AirportFetchError(e)) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "error": format!("Failed to fetch airport data: {}", e)
+            })),
+        )
+            .into_response(),
+    }
 }

@@ -6,6 +6,16 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
+#[derive(thiserror::Error, Debug)]
+pub enum SatelliteServiceError {
+    #[error("No active satellites available")]
+    NoActiveSatellites,
+    #[error("Failed to fetch airport data: {0}")]
+    AirportFetchError(#[from] reqwest::Error),
+    #[error("Airport not found: {0}")]
+    AirportNotFound(String),
+}
+
 #[derive(Clone)]
 pub struct SatelliteService {
     satellites: Arc<RwLock<HashMap<Uuid, Satellite>>>,
@@ -54,11 +64,14 @@ impl SatelliteService {
         departure_time: DateTime<Utc>,
         arrival_time: DateTime<Utc>,
         current_time: Option<DateTime<Utc>>,
-    ) -> (
-        Vec<Position>,
-        Option<sky_tracer::model::Airport>,
-        Option<sky_tracer::model::Airport>,
-    ) {
+    ) -> Result<
+        (
+            Vec<Position>,
+            Option<sky_tracer::model::Airport>,
+            Option<sky_tracer::model::Airport>,
+        ),
+        SatelliteServiceError,
+    > {
         let satellites = self.satellites.read().await;
         let active_satellites: Vec<_> = satellites
             .values()
@@ -67,48 +80,38 @@ impl SatelliteService {
             .collect();
 
         if active_satellites.is_empty() {
-            return (vec![], None, None);
+            return Err(SatelliteServiceError::NoActiveSatellites);
         }
 
-        let departure_airport_result = self.fetch_airport(departure_code).await;
-        let arrival_airport_result = self.fetch_airport(arrival_code).await;
+        let departure_airport_result = self.fetch_airport(departure_code).await?;
+        let arrival_airport_result = self.fetch_airport(arrival_code).await?;
 
-        match (departure_airport_result, arrival_airport_result) {
-            (Ok(Some(dep)), Ok(Some(arr))) => {
-                let now = current_time.unwrap_or_else(Utc::now);
-                let total_duration = arrival_time - departure_time;
-                let elapsed = now - departure_time;
+        let departure_airport = departure_airport_result
+            .ok_or_else(|| SatelliteServiceError::AirportNotFound(departure_code.to_string()))?;
+        let arrival_airport = arrival_airport_result
+            .ok_or_else(|| SatelliteServiceError::AirportNotFound(arrival_code.to_string()))?;
 
-                if elapsed > total_duration || elapsed < chrono::Duration::zero() {
-                    return (vec![], Some(dep), Some(arr));
-                }
+        let now = current_time.unwrap_or_else(Utc::now);
+        let total_duration = arrival_time - departure_time;
+        let elapsed = now - departure_time;
 
-                let progress = elapsed.num_seconds() as f64 / total_duration.num_seconds() as f64;
-                let current_lat = dep.latitude + (arr.latitude - dep.latitude) * progress;
-                let current_lon = dep.longitude + (arr.longitude - dep.longitude) * progress;
-                let altitude = 10000.0;
-
-                let positions: Vec<Position> = active_satellites
-                    .iter()
-                    .map(|satellite| {
-                        Position::new(current_lat, current_lon, altitude as f32, satellite.id)
-                    })
-                    .collect();
-                (positions, Some(dep), Some(arr))
-            }
-            (Err(e), _) => {
-                println!("Failed to fetch departure airport data: {}", e);
-                (vec![], None, None)
-            }
-            (_, Err(e)) => {
-                println!("Failed to fetch arrival airport data: {}", e);
-                (vec![], None, None)
-            }
-            _ => {
-                println!("Departure or arrival airport not found");
-                (vec![], None, None)
-            }
+        if elapsed > total_duration || elapsed < chrono::Duration::zero() {
+            return Ok((vec![], Some(departure_airport), Some(arrival_airport)));
         }
+
+        let progress = elapsed.num_seconds() as f64 / total_duration.num_seconds() as f64;
+        let current_lat = departure_airport.latitude
+            + (arrival_airport.latitude - departure_airport.latitude) * progress;
+        let current_lon = departure_airport.longitude
+            + (arrival_airport.longitude - departure_airport.longitude) * progress;
+        let altitude = 10000.0;
+
+        let positions: Vec<Position> = active_satellites
+            .iter()
+            .map(|satellite| Position::new(current_lat, current_lon, altitude as f32, satellite.id))
+            .collect();
+
+        Ok((positions, Some(departure_airport), Some(arrival_airport)))
     }
 
     async fn fetch_airport(
