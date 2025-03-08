@@ -25,7 +25,7 @@ pub fn update_status(props: &UpdateStatusProps) -> Html {
 
             <main>
                 <p>{"Select a satellite to update its status:"}</p>
-                <a href="/" class="back-link">{"Back to Home"}</a>
+                <a href={format!("{}/", crate::utils::get_path_prefix())} class="back-link">{"Back to Home"}</a>
             </main>
         </div>
     }

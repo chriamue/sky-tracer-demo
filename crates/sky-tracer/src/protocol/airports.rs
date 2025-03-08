@@ -45,7 +45,7 @@ pub struct SearchAirportsRequest {
     pub code: Option<String>,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct SearchAirportsResponse {
     pub airports: Vec<AirportResponse>,
 }

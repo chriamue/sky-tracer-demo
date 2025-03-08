@@ -1,11 +1,10 @@
 use crate::satellite_service::SatelliteService;
 use axum::{
-    extract::{Form, Path, State},
+    extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
-use serde::Deserialize;
 use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
     UpdateSatelliteStatusRequest,
@@ -28,24 +27,6 @@ pub async fn create_satellite(
     Json(request): Json<CreateSatelliteRequest>,
 ) -> impl IntoResponse {
     let satellite = service.create_satellite(request.name).await;
-    let response = SatelliteResponse {
-        id: satellite.id,
-        name: satellite.name,
-        status: satellite.status,
-    };
-    (StatusCode::CREATED, Json(response))
-}
-
-#[derive(Debug, Deserialize)]
-pub struct CreateSatelliteForm {
-    pub name: String,
-}
-
-pub async fn create_satellite_form(
-    State(service): State<SatelliteService>,
-    Form(form): Form<CreateSatelliteForm>,
-) -> impl IntoResponse {
-    let satellite = service.create_satellite(form.name).await;
     let response = SatelliteResponse {
         id: satellite.id,
         name: satellite.name,
@@ -130,18 +111,25 @@ pub async fn calculate_position(
     State(service): State<SatelliteService>,
     Json(request): Json<CalculatePositionRequest>,
 ) -> impl IntoResponse {
-    // For demonstration, using hardcoded coordinates
-    let departure = (50.033333, 8.570556); // Frankfurt
-    let arrival = (48.353783, 11.786086); // Munich
-
-    let positions = service
+    let (positions, departure_airport, arrival_airport) = service
         .calculate_position(
-            departure,
-            arrival,
+            &request.departure,
+            &request.arrival,
             request.departure_time,
+            request.arrival_time,
             request.current_time,
         )
         .await;
 
-    Json(CalculatePositionResponse { positions })
+    let departure_airport_response = departure_airport
+        .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
+
+    let arrival_airport_response = arrival_airport
+        .map(|airport| sky_tracer::protocol::airports::AirportResponse::from(&airport));
+
+    Json(CalculatePositionResponse {
+        positions,
+        departure_airport: departure_airport_response,
+        arrival_airport: arrival_airport_response,
+    })
 }

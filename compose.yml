@@ -86,6 +86,32 @@ services:
     networks:
       - sky-tracer
 
+  orbital-beacon:
+    build:
+      context: .
+      dockerfile: crates/orbital-beacon/Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.satellites.entrypoints=web"
+      - "traefik.http.routers.satellites.rule=PathPrefix(`/satellites`)"
+      - "traefik.http.services.satellites.loadbalancer.server.port=3002"
+      - "traefik.http.middlewares.satellites-strip.stripprefix.prefixes=/satellites"
+      - "traefik.http.routers.satellites.middlewares=satellites-strip@docker"
+      # Additional route for /api/satellites
+      - "traefik.http.routers.satellites-api.entrypoints=web"
+      - "traefik.http.routers.satellites-api.rule=PathPrefix(`/api/satellites`)"
+      - "traefik.http.routers.satellites-api.service=satellites"
+      # Additional route for /api/position
+      - "traefik.http.routers.position-api.entrypoints=web"
+      - "traefik.http.routers.position-api.rule=PathPrefix(`/api/position`)"
+      - "traefik.http.routers.position-api.service=satellites"
+    environment:
+      - RUST_LOG=info
+      - AIRPORTS_SERVICE_URL=http://airport-anywhere:3000
+      - PATH_PREFIX=/satellites
+    networks:
+      - sky-tracer
+
 networks:
   sky-tracer:
     name: sky-tracer

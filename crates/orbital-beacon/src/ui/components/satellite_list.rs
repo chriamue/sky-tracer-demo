@@ -1,6 +1,10 @@
 use sky_tracer::protocol::satellite::SatelliteResponse;
 use yew::prelude::*;
 
+fn get_path_prefix() -> String {
+    std::env::var("PATH_PREFIX").unwrap_or_else(|_| "".to_string())
+}
+
 #[derive(Properties, PartialEq)]
 pub struct SatelliteListProps {
     pub satellites: Vec<SatelliteResponse>,
@@ -26,7 +30,7 @@ pub fn satellite_list(props: &SatelliteListProps) -> Html {
                             </p>
                             <p class="id">{"ID: "}{satellite.id}</p>
                             <form
-                                action={format!("/update_status/{}", satellite.id)}
+                                action={format!("{}/update_status/{}", get_path_prefix(), satellite.id)}
                                 method="POST"
                                 class="satellite-form"
                             >

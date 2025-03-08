@@ -1,4 +1,5 @@
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Utc};
+use reqwest;
 use sky_tracer::model::{Position, Satellite, SatelliteStatus};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -8,12 +9,14 @@ use uuid::Uuid;
 #[derive(Clone)]
 pub struct SatelliteService {
     satellites: Arc<RwLock<HashMap<Uuid, Satellite>>>,
+    airport_service_url: String,
 }
 
 impl SatelliteService {
-    pub fn new() -> Self {
+    pub fn new(airport_service_url: String) -> Self {
         Self {
             satellites: Arc::new(RwLock::new(HashMap::new())),
+            airport_service_url,
         }
     }
 
@@ -46,11 +49,16 @@ impl SatelliteService {
 
     pub async fn calculate_position(
         &self,
-        departure: (f64, f64),
-        arrival: (f64, f64),
+        departure_code: &str,
+        arrival_code: &str,
         departure_time: DateTime<Utc>,
+        arrival_time: DateTime<Utc>,
         current_time: Option<DateTime<Utc>>,
-    ) -> Vec<Position> {
+    ) -> (
+        Vec<Position>,
+        Option<sky_tracer::model::Airport>,
+        Option<sky_tracer::model::Airport>,
+    ) {
         let satellites = self.satellites.read().await;
         let active_satellites: Vec<_> = satellites
             .values()
@@ -59,27 +67,79 @@ impl SatelliteService {
             .collect();
 
         if active_satellites.is_empty() {
-            return vec![];
+            return (vec![], None, None);
         }
 
-        let now = current_time.unwrap_or_else(Utc::now);
-        let flight_duration = Duration::hours(
-            ((arrival.0 - departure.0).powi(2) + (arrival.1 - departure.1).powi(2)).sqrt() as i64,
+        let departure_airport_result = self.fetch_airport(departure_code).await;
+        let arrival_airport_result = self.fetch_airport(arrival_code).await;
+
+        match (departure_airport_result, arrival_airport_result) {
+            (Ok(Some(dep)), Ok(Some(arr))) => {
+                let now = current_time.unwrap_or_else(Utc::now);
+                let total_duration = arrival_time - departure_time;
+                let elapsed = now - departure_time;
+
+                if elapsed > total_duration || elapsed < chrono::Duration::zero() {
+                    return (vec![], Some(dep), Some(arr));
+                }
+
+                let progress = elapsed.num_seconds() as f64 / total_duration.num_seconds() as f64;
+                let current_lat = dep.latitude + (arr.latitude - dep.latitude) * progress;
+                let current_lon = dep.longitude + (arr.longitude - dep.longitude) * progress;
+                let altitude = 10000.0;
+
+                let positions: Vec<Position> = active_satellites
+                    .iter()
+                    .map(|satellite| {
+                        Position::new(current_lat, current_lon, altitude as f32, satellite.id)
+                    })
+                    .collect();
+                (positions, Some(dep), Some(arr))
+            }
+            (Err(e), _) => {
+                println!("Failed to fetch departure airport data: {}", e);
+                (vec![], None, None)
+            }
+            (_, Err(e)) => {
+                println!("Failed to fetch arrival airport data: {}", e);
+                (vec![], None, None)
+            }
+            _ => {
+                println!("Departure or arrival airport not found");
+                (vec![], None, None)
+            }
+        }
+    }
+
+    async fn fetch_airport(
+        &self,
+        code: &str,
+    ) -> Result<Option<sky_tracer::model::Airport>, reqwest::Error> {
+        let url = format!(
+            "{}/api/airports/search?code={}",
+            self.airport_service_url, code
         );
-        let elapsed = now - departure_time;
+        println!("Fetching airport from: {}", url);
 
-        if elapsed > flight_duration || elapsed < Duration::zero() {
-            return vec![];
+        let response = reqwest::get(&url).await?;
+
+        if response.status().is_success() {
+            let search_response = response
+                .json::<sky_tracer::protocol::airports::SearchAirportsResponse>()
+                .await?;
+
+            Ok(search_response
+                .airports
+                .first()
+                .map(|airport| sky_tracer::model::Airport {
+                    id: airport.id,
+                    latitude: airport.position.latitude,
+                    longitude: airport.position.longitude,
+                    name: airport.name.clone(),
+                    code: airport.code.clone(),
+                }))
+        } else {
+            Ok(None)
         }
-
-        let progress = elapsed.num_seconds() as f64 / flight_duration.num_seconds() as f64;
-        let current_lat = departure.0 + (arrival.0 - departure.0) * progress;
-        let current_lon = departure.1 + (arrival.1 - departure.1) * progress;
-        let altitude = 10000.0;
-
-        active_satellites
-            .iter()
-            .map(|satellite| Position::new(current_lat, current_lon, altitude, satellite.id))
-            .collect()
     }
 }
