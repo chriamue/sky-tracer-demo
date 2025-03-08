@@ -24,7 +24,6 @@ pub struct SatelliteResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CalculatePositionRequest {
-    pub flight_number: String,
     pub departure: String,
     pub arrival: String,
     pub departure_time: DateTime<Utc>,

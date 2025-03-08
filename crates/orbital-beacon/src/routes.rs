@@ -38,7 +38,7 @@ pub async fn render_home(State(service): State<SatelliteService>) -> Html<String
     let satellites = service.list_satellites().await;
     let satellites = satellites
         .into_iter()
-        .map(|s| sky_tracer::protocol::protocol::SatelliteResponse {
+        .map(|s| sky_tracer::protocol::satellite::SatelliteResponse {
             id: s.id,
             name: s.name,
             status: s.status,

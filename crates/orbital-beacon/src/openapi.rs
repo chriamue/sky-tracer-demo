@@ -1,6 +1,6 @@
 use crate::service;
 use sky_tracer::model::SatelliteStatus;
-use sky_tracer::protocol::protocol::{
+use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
     UpdateSatelliteStatusRequest,
 };

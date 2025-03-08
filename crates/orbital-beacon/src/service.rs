@@ -6,7 +6,7 @@ use axum::{
     Json,
 };
 use serde::Deserialize;
-use sky_tracer::protocol::protocol::{
+use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
     UpdateSatelliteStatusRequest,
 };
@@ -136,7 +136,6 @@ pub async fn calculate_position(
 
     let positions = service
         .calculate_position(
-            &request.flight_number,
             departure,
             arrival,
             request.departure_time,

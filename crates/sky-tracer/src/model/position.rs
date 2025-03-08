@@ -4,7 +4,6 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct Position {
-    pub flight_number: String,
     pub latitude: f64,
     pub longitude: f64,
     pub altitude: f32,
@@ -13,15 +12,8 @@ pub struct Position {
 }
 
 impl Position {
-    pub fn new(
-        flight_number: String,
-        latitude: f64,
-        longitude: f64,
-        altitude: f32,
-        satellite_id: Uuid,
-    ) -> Self {
+    pub fn new(latitude: f64, longitude: f64, altitude: f32, satellite_id: Uuid) -> Self {
         Self {
-            flight_number,
             latitude,
             longitude,
             altitude,

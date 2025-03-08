@@ -1,4 +1,4 @@
-use sky_tracer::protocol::protocol::SatelliteResponse;
+use sky_tracer::protocol::satellite::SatelliteResponse;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]

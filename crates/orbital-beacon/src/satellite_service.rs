@@ -46,7 +46,6 @@ impl SatelliteService {
 
     pub async fn calculate_position(
         &self,
-        flight_number: &str,
         departure: (f64, f64),
         arrival: (f64, f64),
         departure_time: DateTime<Utc>,
@@ -80,15 +79,7 @@ impl SatelliteService {
 
         active_satellites
             .iter()
-            .map(|satellite| {
-                Position::new(
-                    flight_number.to_string(),
-                    current_lat,
-                    current_lon,
-                    altitude,
-                    satellite.id,
-                )
-            })
+            .map(|satellite| Position::new(current_lat, current_lon, altitude, satellite.id))
             .collect()
     }
 }
