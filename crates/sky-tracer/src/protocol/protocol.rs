@@ -15,7 +15,7 @@ pub struct UpdateSatelliteStatusRequest {
     pub status: SatelliteStatus,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema)]
 pub struct SatelliteResponse {
     pub id: Uuid,
     pub name: String,

@@ -3,6 +3,10 @@ name = "orbital-beacon"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = ["ssr"]
+ssr = ["yew"]
+
 [dependencies]
 sky-tracer = { path = "../sky-tracer" }
 axum = "0.8"
@@ -15,3 +19,4 @@ utoipa-swagger-ui = { version = "9.0", features = ["axum"] }
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.15", features = ["v4", "serde"] }
 thiserror = "1.0"
+yew = { version = "0.21", optional = true, features = ["ssr"] }
