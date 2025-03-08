@@ -112,6 +112,16 @@ services:
     networks:
       - sky-tracer
 
+  structurizr:
+    image: structurizr/lite:latest
+    platform: linux/amd64
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./docs/:/usr/local/structurizr/
+    environment:
+      - STRUCTURIZR_WORKSPACE_PATH=.
+
 networks:
   sky-tracer:
     name: sky-tracer
