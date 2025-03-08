@@ -19,6 +19,8 @@ async fn main() {
             "/launch",
             get(routes::render_launch).post(routes::handle_launch),
         )
+        .route("/update_status", get(routes::render_update_status))
+        .route("/update_status/{id}", post(routes::handle_update_status))
         .route("/api/satellites", post(service::create_satellite))
         .route(
             "/api/satellites/{id}/status",

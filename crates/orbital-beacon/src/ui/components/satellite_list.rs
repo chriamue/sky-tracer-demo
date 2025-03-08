@@ -26,10 +26,9 @@ pub fn satellite_list(props: &SatelliteListProps) -> Html {
                             </p>
                             <p class="id">{"ID: "}{satellite.id}</p>
                             <form
-                                action={format!("/api/satellites/{}/status", satellite.id)}
-                                method="PUT"
+                                action={format!("/update_status/{}", satellite.id)}
+                                method="POST"
                                 class="satellite-form"
-                                enctype="application/json"
                             >
                                 <select name="status">
                                     <option value="Active">{"Active"}</option>
