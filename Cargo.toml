@@ -10,6 +10,7 @@ members = [
     "crates/flightmare-tracker",
     "crates/sky-tracer",
     "crates/cockpit",
+    "crates/orbital-beacon",
 ]
 
 [dependencies]
@@ -18,3 +19,4 @@ airport-anywhere = { path = "crates/airport-anywhere" }
 flight-controller = { path = "crates/flight-controller" }
 flightmare-tracker = { path = "crates/flightmare-tracker" }
 cockpit = { path = "crates/cockpit" }
+orbital-beacon = { path = "crates/orbital-beacon" }
