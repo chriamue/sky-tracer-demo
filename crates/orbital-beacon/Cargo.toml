@@ -9,7 +9,7 @@ ssr = ["yew"]
 
 [dependencies]
 sky-tracer = { path = "../sky-tracer" }
-axum = "0.8"
+axum = { version = "0.8", features = ["macros"] }
 tokio = { version = "1.43.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

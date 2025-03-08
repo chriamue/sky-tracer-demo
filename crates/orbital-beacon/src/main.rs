@@ -1,60 +1,24 @@
-use axum::extract::State;
-use axum::{
-    response::Html,
-    routing::{get, post, put},
-    Router,
-};
-use orbital_beacon::{
-    openapi::ApiDoc,
-    satellite_service::SatelliteService,
-    service,
-    ui::pages::{Home, HomeProps},
-};
+use axum::routing::{get, post, put};
+use axum::Router;
+use orbital_beacon::openapi::ApiDoc;
+use orbital_beacon::satellite_service::SatelliteService;
+use orbital_beacon::service;
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-async fn render_page(State(service): axum::extract::State<SatelliteService>) -> Html<String> {
-    let satellites = service.list_satellites().await;
-    let satellites = satellites
-        .into_iter()
-        .map(|s| sky_tracer::protocol::protocol::SatelliteResponse {
-            id: s.id,
-            name: s.name,
-            status: s.status,
-        })
-        .collect();
-
-    let renderer = yew::ServerRenderer::<Home>::with_props(move || HomeProps { satellites });
-
-    let html = renderer.render().await;
-
-    Html(format!(
-        r#"<!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Orbital Beacon</title>
-                <style>
-                    {}
-                </style>
-            </head>
-            <body>
-                {}
-            </body>
-        </html>"#,
-        include_str!("../styles.css"),
-        html
-    ))
-}
+use orbital_beacon::routes;
 
 #[tokio::main]
 async fn main() {
     let satellite_service = SatelliteService::new();
 
     let app = Router::new()
-        .route("/", get(render_page))
+        .route("/", get(routes::render_home))
+        .route(
+            "/launch",
+            get(routes::render_launch).post(routes::handle_launch),
+        )
         .route("/api/satellites", post(service::create_satellite))
         .route(
             "/api/satellites/{id}/status",

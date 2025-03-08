@@ -1,10 +1,11 @@
 use crate::satellite_service::SatelliteService;
 use axum::{
-    extract::{Path, State},
+    extract::{Form, Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
+use serde::Deserialize;
 use sky_tracer::protocol::protocol::{
     CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
     UpdateSatelliteStatusRequest,
@@ -27,6 +28,24 @@ pub async fn create_satellite(
     Json(request): Json<CreateSatelliteRequest>,
 ) -> impl IntoResponse {
     let satellite = service.create_satellite(request.name).await;
+    let response = SatelliteResponse {
+        id: satellite.id,
+        name: satellite.name,
+        status: satellite.status,
+    };
+    (StatusCode::CREATED, Json(response))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateSatelliteForm {
+    pub name: String,
+}
+
+pub async fn create_satellite_form(
+    State(service): State<SatelliteService>,
+    Form(form): Form<CreateSatelliteForm>,
+) -> impl IntoResponse {
+    let satellite = service.create_satellite(form.name).await;
     let response = SatelliteResponse {
         id: satellite.id,
         name: satellite.name,

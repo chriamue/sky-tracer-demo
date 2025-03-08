@@ -2,7 +2,7 @@ use crate::ui::components::{PositionForm, SatelliteList};
 use sky_tracer::protocol::protocol::SatelliteResponse;
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq, Clone)]
+#[derive(Properties, PartialEq)]
 pub struct HomeProps {
     pub satellites: Vec<SatelliteResponse>,
 }
@@ -14,6 +14,7 @@ pub fn home(props: &HomeProps) -> Html {
             <header>
                 <h1>{"🛰️ Orbital Beacon"}</h1>
                 <p class="subtitle">{"Satellite Control & Flight Tracking"}</p>
+                <a href="/launch" class="launch-link">{"Launch New Satellite"}</a>
             </header>
 
             <main>
