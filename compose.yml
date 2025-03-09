@@ -141,6 +141,20 @@ services:
     networks:
       - sky-tracer
 
+  index:
+    image: nginx:alpine
+    volumes:
+      - ./assets/index/:/usr/share/nginx/html/:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.index.entrypoints=web"
+      - "traefik.http.routers.index.rule=PathPrefix(`/`)"
+      - "traefik.http.services.index.loadbalancer.server.port=80"
+    ports:
+      - "8083:80"
+    networks:
+      - sky-tracer
+
 networks:
   sky-tracer:
     name: sky-tracer
