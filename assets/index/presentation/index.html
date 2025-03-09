@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>Sky Tracer Demo Presentation</title>
+
+        <!-- Reveal.js CDN Links -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reset.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.css"
+        />
+
+        <!-- Theme used for syntax highlighting of code -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.css"
+        />
+
+        <style>
+            /* Additional custom styles if needed */
+            .slides {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+                    "Helvetica Neue", sans-serif;
+            }
+            .slides h1,
+            .slides h2 {
+                text-transform: none;
+            }
+            .slides a {
+                color: #42affa;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <h1>Sky Tracer Demo</h1>
+                    <p>A Rust Microservices Demo</p>
+                </section>
+
+                <section>
+                    <h2>Project Overview</h2>
+                    <p>Demonstrating observability, architecture, and more!</p>
+                </section>
+
+                <section>
+                    <h2>Services Overview</h2>
+                    <p>The system consists of several interacting services.</p>
+                </section>
+
+                <section>
+                    <h2>Airport Anywhere</h2>
+                    <p>Description: Provides airport information lookup.</p>
+                    <p>Technology: Rust, Axum</p>
+                    <p>URL: <a href="/airports">/airports</a></p>
+                </section>
+
+                <section>
+                    <h2>Flight Controller</h2>
+                    <p>Description: Manages flight schedules and data.</p>
+                    <p>Technology: Rust, Axum</p>
+                    <p>URL: <a href="/flights">/flights</a></p>
+                </section>
+
+                <section>
+                    <h2>Orbital Beacon</h2>
+                    <p>Description: Satellite positioning service.</p>
+                    <p>Technology: Rust, Axum</p>
+                    <p>URL: <a href="/satellites">/satellites</a></p>
+                </section>
+
+                <section>
+                    <h2>Cockpit Dashboard</h2>
+                    <p>Description: Flight monitoring dashboard.</p>
+                    <p>Technology: Yew</p>
+                    <p>URL: <a href="/cockpit">/cockpit</a></p>
+                </section>
+
+                <section>
+                    <h2>Flightmare Tracker</h2>
+                    <p>Description: Simulated flight delay tracker.</p>
+                    <p>Technology: Yew</p>
+                    <p>URL: <a href="/flightmare">/flightmare</a></p>
+                </section>
+
+                <section>
+                    <h2>Traefik</h2>
+                    <p>Description: Reverse proxy and load balancer.</p>
+                    <p>Technology: Go</p>
+                    <p>URL: <a href="//localhost:8080">Dashboard</a></p>
+                </section>
+
+                <section>
+                    <h2>Structurizr</h2>
+                    <p>Description: Architecture documentation tool.</p>
+                    <p>Technology: Java</p>
+                    <p>URL: <a href="//localhost:8082">Documentation</a></p>
+                </section>
+
+                <section>
+                    <h2>Jaeger</h2>
+                    <p>Description: Distributed tracing tool.</p>
+                    <p>Technology: Go</p>
+                    <p>URL: <a href="//localhost:16686">Tracing UI</a></p>
+                </section>
+
+                <section>
+                    <h2>Jaeger and OpenTelemetry</h2>
+                    <p>Describe the tracing components and setup</p>
+                    <p>
+                        Explain the importance of the telemetry and the spans.
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Thank You!</h2>
+                    <p>Questions?</p>
+                </section>
+            </div>
+        </div>
+
+        <!-- Reveal.js Scripts from CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.js"></script>
+
+        <script>
+            Reveal.initialize({
+                hash: true,
+                slideNumber: true,
+                plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+                // Optional configurations
+                controls: true,
+                progress: true,
+                center: true,
+                transition: "slide", // none/fade/slide/convex/concave/zoom
+            });
+        </script>
+    </body>
+</html>
