@@ -34,6 +34,18 @@ pub struct FlightResponse {
     pub arrival_time: Option<DateTime<Utc>>,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
+pub struct FlightPositionResponse {
+    /// Flight number
+    pub flight_number: String,
+    /// Latitude
+    pub latitude: f64,
+    /// Longitude
+    pub longitude: f64,
+    /// Time
+    pub timestamp: chrono::DateTime<chrono::Utc>,
+}
+
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
 #[into_params(parameter_in = Query)]
 pub struct ListFlightsRequest {

@@ -23,7 +23,7 @@ pub struct SatelliteResponse {
     pub status: SatelliteStatus,
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct CalculatePositionRequest {
     pub departure: String,
     pub arrival: String,
