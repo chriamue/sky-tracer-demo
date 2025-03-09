@@ -13,4 +13,6 @@ pub struct Flight {
     pub arrival: String, // Airport code
     /// Scheduled departure time
     pub departure_time: DateTime<Utc>,
+    /// Scheduled arrival time
+    pub arrival_time: Option<DateTime<Utc>>,
 }

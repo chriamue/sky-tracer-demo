@@ -51,6 +51,7 @@ async fn render_page(
                 departure: f.departure,
                 arrival: f.arrival,
                 departure_time: f.departure_time,
+                arrival_time: f.arrival_time,
             })
             .collect(),
     });

@@ -9,7 +9,8 @@ pub fn flight_form() -> Html {
     let aircraft_ref = use_node_ref();
     let departure_ref = use_node_ref();
     let arrival_ref = use_node_ref();
-    let time_ref = use_node_ref();
+    let departure_time_ref = use_node_ref();
+    let arrival_time_ref = use_node_ref();
     let status = use_state(|| None::<String>);
 
     // Set default values when component mounts
@@ -17,7 +18,8 @@ pub fn flight_form() -> Html {
         let aircraft_ref = aircraft_ref.clone();
         let departure_ref = departure_ref.clone();
         let arrival_ref = arrival_ref.clone();
-        let time_ref = time_ref.clone();
+        let departure_time_ref = departure_time_ref.clone();
+        let arrival_time_ref = arrival_time_ref.clone();
 
         use_effect_with((), move |_| {
             // Set default values
@@ -30,12 +32,19 @@ pub fn flight_form() -> Html {
             if let Some(input) = arrival_ref.cast::<HtmlInputElement>() {
                 input.set_value("LIS");
             }
-            if let Some(input) = time_ref.cast::<HtmlInputElement>() {
-                // Get current time and format it for datetime-local input
-                let now = chrono::Local::now();
-                let formatted_time = now.format("%Y-%m-%dT%H:%M").to_string();
-                input.set_value(&formatted_time);
+
+            // Set departure time to 10 minutes from now
+            let departure_time = chrono::Local::now() + chrono::Duration::minutes(10);
+            if let Some(input) = departure_time_ref.cast::<HtmlInputElement>() {
+                input.set_value(&departure_time.format("%Y-%m-%dT%H:%M").to_string());
             }
+
+            // Set arrival time to 2 hours after departure
+            let arrival_time = departure_time + chrono::Duration::hours(2);
+            if let Some(input) = arrival_time_ref.cast::<HtmlInputElement>() {
+                input.set_value(&arrival_time.format("%Y-%m-%dT%H:%M").to_string());
+            }
+
             || ()
         });
     }
@@ -44,7 +53,8 @@ pub fn flight_form() -> Html {
         let aircraft_ref = aircraft_ref.clone();
         let departure_ref = departure_ref.clone();
         let arrival_ref = arrival_ref.clone();
-        let time_ref = time_ref.clone();
+        let departure_time_ref = departure_time_ref.clone();
+        let arrival_time_ref = arrival_time_ref.clone();
         let status = status.clone();
 
         Callback::from(move |e: SubmitEvent| {
@@ -55,22 +65,40 @@ pub fn flight_form() -> Html {
             let aircraft = aircraft_ref.cast::<HtmlInputElement>().unwrap().value();
             let departure = departure_ref.cast::<HtmlInputElement>().unwrap().value();
             let arrival = arrival_ref.cast::<HtmlInputElement>().unwrap().value();
-            let time = time_ref.cast::<HtmlInputElement>().unwrap().value();
+            let departure_time = departure_time_ref
+                .cast::<HtmlInputElement>()
+                .unwrap()
+                .value();
+            let arrival_time = arrival_time_ref.cast::<HtmlInputElement>().unwrap().value();
 
-            // Convert datetime-local format to RFC3339
-            let parsed_time = match convert_datetime_local_to_utc(&time) {
+            // Convert departure time
+            let parsed_departure_time = match convert_datetime_local_to_utc(&departure_time) {
                 Ok(time) => time,
                 Err(err) => {
-                    status.set(Some(format!("Error parsing time: {}", err)));
+                    status.set(Some(format!("Error parsing departure time: {}", err)));
                     return;
                 }
+            };
+
+            // Convert arrival time if provided
+            let parsed_arrival_time = if !arrival_time.is_empty() {
+                match convert_datetime_local_to_utc(&arrival_time) {
+                    Ok(time) => Some(time),
+                    Err(err) => {
+                        status.set(Some(format!("Error parsing arrival time: {}", err)));
+                        return;
+                    }
+                }
+            } else {
+                None
             };
 
             let request = CreateFlightRequest {
                 aircraft_number: aircraft,
                 departure,
                 arrival,
-                departure_time: parsed_time,
+                departure_time: parsed_departure_time,
+                arrival_time: parsed_arrival_time,
             };
 
             spawn_local(async move {
@@ -123,16 +151,24 @@ pub fn flight_form() -> Html {
                         placeholder="LIS"
                     />
                 </div>
-                <div class="form-group">
-                    <label for="time">{"Departure Time"}</label>
-                    <input
-                        type="datetime-local"
-                        id="time"
-                        ref={time_ref}
-                        required=true
-                    />
-                </div>
-                <button type="submit">{"Create Flight"}</button>
+                    <div class="form-group">
+                        <label for="departure_time">{"Departure Time"}</label>
+                        <input
+                            type="datetime-local"
+                            id="departure_time"
+                            ref={departure_time_ref}
+                            required=true
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="arrival_time">{"Arrival Time"}</label>
+                        <input
+                            type="datetime-local"
+                            id="arrival_time"
+                            ref={arrival_time_ref}
+                        />
+                    </div>
+                    <button type="submit">{"Create Flight"}</button>
             </form>
             if let Some(message) = &*status {
                 <div class={classes!(

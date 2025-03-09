@@ -26,6 +26,7 @@ impl FlightService {
             departure: request.departure,
             arrival: request.arrival,
             departure_time: request.departure_time,
+            arrival_time: request.arrival_time,
         };
 
         let mut flights = self.flights.write().await;

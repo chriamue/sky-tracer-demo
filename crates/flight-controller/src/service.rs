@@ -55,6 +55,7 @@ pub async fn create_flight(
                 departure: flight.departure,
                 arrival: flight.arrival,
                 departure_time: flight.departure_time,
+                arrival_time: flight.arrival_time,
             })
         })
         .map_err(ApiError::FlightCreationError)
@@ -102,6 +103,7 @@ pub async fn list_flights(
                 departure: flight.departure,
                 arrival: flight.arrival,
                 departure_time: flight.departure_time,
+                arrival_time: flight.arrival_time,
             })
             .collect(),
     ))

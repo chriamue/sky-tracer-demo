@@ -13,6 +13,9 @@ pub struct CreateFlightRequest {
     /// Scheduled departure time (ISO 8601)
     #[schema(value_type = String, format = "date-time", example = "2025-03-01T10:00:00Z")]
     pub departure_time: DateTime<Utc>,
+    /// Scheduled arrival time (ISO 8601)
+    #[schema(value_type = String, format = "date-time", example = "2025-03-01T11:30:00Z")]
+    pub arrival_time: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ToSchema)]
@@ -27,6 +30,8 @@ pub struct FlightResponse {
     pub arrival: String,
     /// Scheduled departure time
     pub departure_time: DateTime<Utc>,
+    /// Scheduled arrival time
+    pub arrival_time: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
