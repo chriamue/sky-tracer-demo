@@ -1,11 +1,12 @@
 use gloo_net::http::Request;
-use serde_json::json;
+use gloo_utils::document;
+use leaflet::{LatLng, Map, MapOptions, TileLayer};
 use sky_tracer::protocol::airports::AirportResponse;
-use sky_tracer::protocol::flights::{FlightPositionResponse, FlightResponse};
+use sky_tracer::protocol::flights::FlightPositionResponse;
+use sky_tracer::protocol::flights::FlightResponse;
 use std::collections::HashMap;
-use uuid::Uuid;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
+use wasm_bindgen::JsCast;
+use web_sys::{Element, HtmlElement, Node};
 use yew::prelude::*;
 
 #[derive(Clone)]
@@ -20,210 +21,193 @@ struct MapState {
     airports: HashMap<String, AirportResponse>,
 }
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = window)]
-    fn initializeFlightsMap(containerId: &str, mapData: &str);
+pub enum Msg {
+    UpdateFlights(Vec<FlightResponse>),
+    UpdatePosition(String, FlightPositionResponse),
+    UpdateAirport(String, AirportResponse),
+    FetchFlights,
+    FetchPositions,
 }
 
-#[function_component(FlightMap)]
-pub fn flight_map() -> Html {
-    let map_id = use_state(|| format!("map-{}", Uuid::new_v4()));
-    let map_state = use_state(MapState::default);
-    let loading = use_state(|| true);
+pub struct FlightMap {
+    map: Map,
+    container: HtmlElement,
+    state: MapState,
+    _flights_interval: Option<gloo_timers::callback::Interval>,
+    _positions_interval: Option<gloo_timers::callback::Interval>,
+}
 
-    // Function to fetch flight positions
-    let fetch_positions = {
-        let map_state = map_state.clone();
-        let map_id = map_id.clone();
+impl Component for FlightMap {
+    type Message = Msg;
+    type Properties = ();
 
-        move || {
-            let map_state = map_state.clone();
-            let map_id = map_id.clone();
-            let flight_numbers: Vec<String> = map_state.flights.keys().cloned().collect();
+    fn create(_ctx: &Context<Self>) -> Self {
+        // Create map container
+        let container: Element = document().create_element("div").unwrap();
+        let container: HtmlElement = container.dyn_into().unwrap();
+        container.set_class_name("map-container");
 
-            for flight_number in flight_numbers {
-                let map_state = map_state.clone();
-                let map_id = map_id.clone();
+        // Initialize map
+        let map = Map::new_with_element(&container, &MapOptions::default());
 
-                spawn_local(async move {
-                    match Request::get(&format!("/api/flights/{}/position", flight_number))
-                        .send()
-                        .await
-                    {
-                        Ok(response) => {
-                            if let Ok(position) = response.json::<FlightPositionResponse>().await {
-                                map_state.set({
-                                    let mut new_state = (*map_state).clone();
-                                    if let Some(flight_data) =
-                                        new_state.flights.get_mut(&flight_number)
-                                    {
-                                        flight_data.position = Some(position);
-                                    }
-                                    new_state
-                                });
-
-                                update_map(&map_id, &*map_state);
-                            }
-                        }
-                        Err(err) => log::error!(
-                            "Error fetching position for flight {}: {}",
-                            flight_number,
-                            err
-                        ),
-                    }
-                });
-            }
+        Self {
+            map,
+            container,
+            state: MapState::default(),
+            _flights_interval: None,
+            _positions_interval: None,
         }
-    };
+    }
 
-    // Function to fetch airport data
-    let fetch_airport = {
-        let map_state = map_state.clone();
+    fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
+        if first_render {
+            // Set initial view
+            self.map.set_view(&LatLng::new(50.0, 10.0), 4.0);
 
-        move |code: &str| {
-            let code = code.to_string();
-            let map_state = map_state.clone();
+            // Add tile layer
+            TileLayer::new("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").add_to(&self.map);
 
-            spawn_local(async move {
-                if !map_state.airports.contains_key(&code) {
-                    match Request::get(&format!("/api/airports/search?code={}", code))
-                        .send()
-                        .await
-                    {
-                        Ok(response) => {
-                            if let Ok(mut airports) = response.json::<Vec<AirportResponse>>().await
-                            {
-                                if let Some(airport) = airports.pop() {
-                                    map_state.set({
-                                        let mut new_state = (*map_state).clone();
-                                        new_state.airports.insert(code, airport);
-                                        new_state
-                                    });
-                                }
-                            }
-                        }
-                        Err(err) => log::error!("Error fetching airport {}: {}", code, err),
-                    }
-                }
-            });
-        }
-    };
+            // Setup intervals
+            let link = ctx.link().clone();
+            self._flights_interval = Some(gloo_timers::callback::Interval::new(5_000, move || {
+                link.send_message(Msg::FetchFlights);
+            }));
 
-    // Function to fetch flights data
-    let fetch_flights = {
-        let map_state = map_state.clone();
-        let loading = loading.clone();
-        let map_id = map_id.clone();
-        let fetch_airport = fetch_airport.clone();
-
-        move || {
-            let map_state = map_state.clone();
-            let loading = loading.clone();
-            let map_id = map_id.clone();
-            let fetch_airport = fetch_airport.clone();
-
-            spawn_local(async move {
-                match Request::get("/api/flights").send().await {
-                    Ok(response) => {
-                        if let Ok(flights) = response.json::<Vec<FlightResponse>>().await {
-                            // Update flights in state
-                            map_state.set({
-                                let mut new_state = (*map_state).clone();
-                                for flight in flights {
-                                    // Fetch airport data if not already present
-                                    fetch_airport(&flight.departure);
-                                    fetch_airport(&flight.arrival);
-
-                                    new_state.flights.insert(
-                                        flight.flight_number.clone(),
-                                        FlightData {
-                                            flight,
-                                            position: None,
-                                        },
-                                    );
-                                }
-                                new_state
-                            });
-
-                            update_map(&map_id, &*map_state);
-                        }
-                    }
-                    Err(err) => log::error!("Error fetching flights: {}", err),
-                }
-                loading.set(false);
-            });
-        }
-    };
-
-    // Initial load and setup periodic refresh
-    {
-        let fetch_flights = fetch_flights.clone();
-        let fetch_positions = fetch_positions.clone();
-
-        use_effect_with((), move |_| {
-            let fetch_flights = fetch_flights.clone();
-            let fetch_positions = fetch_positions.clone();
+            let link = ctx.link().clone();
+            self._positions_interval =
+                Some(gloo_timers::callback::Interval::new(5_000, move || {
+                    link.send_message(Msg::FetchPositions);
+                }));
 
             // Initial fetch
-            fetch_flights();
-
-            // Set up interval for flights
-            let flights_interval = gloo_timers::callback::Interval::new(30_000, move || {
-                fetch_flights();
-            });
-
-            // Set up separate fetch_positions clone for the second interval
-            let fetch_positions2 = fetch_positions.clone();
-
-            // Set up interval for positions
-            let positions_interval = gloo_timers::callback::Interval::new(10_000, move || {
-                fetch_positions2();
-            });
-
-            // Cleanup function
-            move || {
-                drop(flights_interval);
-                drop(positions_interval);
-            }
-        });
+            ctx.link().send_message(Msg::FetchFlights);
+        }
     }
 
-    html! {
-        <div class="map-section">
-            <h2>{"Live Flight Map"}</h2>
-            if *loading {
-                <div class="loading-overlay">
-                    <span>{"Loading flights..."}</span>
-                </div>
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            Msg::FetchFlights => {
+                let link = ctx.link().clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    if let Ok(response) = Request::get("/api/flights").send().await {
+                        if let Ok(flights) = response.json::<Vec<FlightResponse>>().await {
+                            link.send_message(Msg::UpdateFlights(flights));
+                        }
+                    }
+                });
+                false
             }
-            <div id={(*map_id).clone()}
-                 class="map-container">
+            Msg::UpdateFlights(flights) => {
+                for flight in flights {
+                    // Fetch airport data if needed
+                    let link = ctx.link().clone();
+                    let code = flight.departure.clone();
+                    if !self.state.airports.contains_key(&code) {
+                        wasm_bindgen_futures::spawn_local(async move {
+                            if let Ok(response) =
+                                Request::get(&format!("/api/airports/search?code={}", code))
+                                    .send()
+                                    .await
+                            {
+                                if let Ok(mut airports) =
+                                    response.json::<Vec<AirportResponse>>().await
+                                {
+                                    if let Some(airport) = airports.pop() {
+                                        link.send_message(Msg::UpdateAirport(code, airport));
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    let link = ctx.link().clone();
+                    let code = flight.arrival.clone();
+                    if !self.state.airports.contains_key(&code) {
+                        wasm_bindgen_futures::spawn_local(async move {
+                            if let Ok(response) =
+                                Request::get(&format!("/api/airports/search?code={}", code))
+                                    .send()
+                                    .await
+                            {
+                                if let Ok(mut airports) =
+                                    response.json::<Vec<AirportResponse>>().await
+                                {
+                                    if let Some(airport) = airports.pop() {
+                                        link.send_message(Msg::UpdateAirport(code, airport));
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    self.state.flights.insert(
+                        flight.flight_number.clone(),
+                        FlightData {
+                            flight,
+                            position: None,
+                        },
+                    );
+                }
+                self.update_map_markers();
+                true
+            }
+            Msg::FetchPositions => {
+                let flight_numbers: Vec<String> = self.state.flights.keys().cloned().collect();
+                for flight_number in flight_numbers {
+                    let link = ctx.link().clone();
+                    let flight_number_clone = flight_number.clone();
+                    wasm_bindgen_futures::spawn_local(async move {
+                        if let Ok(response) =
+                            Request::get(&format!("/api/flights/{}/position", flight_number_clone))
+                                .send()
+                                .await
+                        {
+                            if let Ok(position) = response.json::<FlightPositionResponse>().await {
+                                link.send_message(Msg::UpdatePosition(
+                                    flight_number_clone,
+                                    position,
+                                ));
+                            }
+                        }
+                    });
+                }
+                false
+            }
+            Msg::UpdatePosition(flight_number, position) => {
+                if let Some(flight_data) = self.state.flights.get_mut(&flight_number) {
+                    flight_data.position = Some(position);
+                    self.update_map_markers();
+                }
+                true
+            }
+            Msg::UpdateAirport(code, airport) => {
+                self.state.airports.insert(code, airport);
+                self.update_map_markers();
+                true
+            }
+        }
+    }
+
+    fn view(&self, _ctx: &Context<Self>) -> Html {
+        html! {
+            <div class="map-section">
+                <h2>{"Live Flight Map"}</h2>
+                {self.render_map()}
             </div>
-        </div>
+        }
     }
 }
 
-fn update_map(map_id: &str, state: &MapState) {
-    let map_data = json!({
-        "flights": state.flights.values().map(|data| {
-            let flight = &data.flight;
-            json!({
-                "flightNumber": flight.flight_number,
-                "departure": {
-                    "code": flight.departure,
-                    "position": state.airports.get(&flight.departure).map(|a| [a.position.latitude, a.position.longitude])
-                        .unwrap_or([50.033333, 8.570556])
-                },
-                "arrival": {
-                    "code": flight.arrival,
-                    "position": state.airports.get(&flight.arrival).map(|a| [a.position.latitude, a.position.longitude])
-                        .unwrap_or([38.7223, -9.1393])
-                },
-                "position": data.position.as_ref().map(|pos| [pos.latitude, pos.longitude])
-            })
-        }).collect::<Vec<_>>()
-    });
+impl FlightMap {
+    fn render_map(&self) -> Html {
+        let node: &Node = &self.container.clone().into();
+        Html::VRef(node.clone())
+    }
 
-    initializeFlightsMap(map_id, &map_data.to_string());
+    fn update_map_markers(&mut self) {
+        // Add new markers and paths
+        for data in self.state.flights.values() {
+            // ... (implement marker creation code here)
+        }
+    }
 }

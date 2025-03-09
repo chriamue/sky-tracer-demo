@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 use flight_controller::{
     flight_service::FlightService,
     openapi::ApiDoc,
-    service::{create_flight, list_flights},
+    service::{create_flight, get_flight_position, list_flights},
     ui::pages::{Home, HomeProps},
 };
 use serde::Deserialize;
@@ -89,6 +89,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/api/flights", post(create_flight))
         .route("/api/flights", get(list_flights))
+        .route(
+            "/api/flights/{flight_number}/position",
+            get(get_flight_position),
+        )
         .layer(OtelInResponseLayer::default())
         .layer(OtelAxumLayer::default())
         .layer(

@@ -33,16 +33,19 @@ pub fn flight_form() -> Html {
                 input.set_value("LIS");
             }
 
-            // Set departure time to 10 minutes from now
-            let departure_time = chrono::Local::now() + chrono::Duration::minutes(10);
+            // Get current UTC time and add 10 minutes
+            let utc_now = chrono::Utc::now();
+            let departure_time = utc_now;
+
             if let Some(input) = departure_time_ref.cast::<HtmlInputElement>() {
-                input.set_value(&departure_time.format("%Y-%m-%dT%H:%M").to_string());
+                // Format in UTC time
+                input.set_value(&departure_time.format("%Y-%m-%dT%H:%M:%SZ").to_string());
             }
 
-            // Set arrival time to 2 hours after departure
-            let arrival_time = departure_time + chrono::Duration::hours(2);
+            // Set arrival time to 2 hours after departure (in UTC time)
+            let arrival_time = departure_time + chrono::Duration::minutes(10);
             if let Some(input) = arrival_time_ref.cast::<HtmlInputElement>() {
-                input.set_value(&arrival_time.format("%Y-%m-%dT%H:%M").to_string());
+                input.set_value(&arrival_time.format("%Y-%m-%dT%H:%M:%SZ").to_string());
             }
 
             || ()
@@ -71,19 +74,19 @@ pub fn flight_form() -> Html {
                 .value();
             let arrival_time = arrival_time_ref.cast::<HtmlInputElement>().unwrap().value();
 
-            // Convert departure time
-            let parsed_departure_time = match convert_datetime_local_to_utc(&departure_time) {
-                Ok(time) => time,
+            // Use parsed times directly from the input
+            let parsed_departure_time = match chrono::DateTime::parse_from_rfc3339(&departure_time)
+            {
+                Ok(time) => time.with_timezone(&chrono::Utc),
                 Err(err) => {
                     status.set(Some(format!("Error parsing departure time: {}", err)));
                     return;
                 }
             };
 
-            // Convert arrival time if provided
             let parsed_arrival_time = if !arrival_time.is_empty() {
-                match convert_datetime_local_to_utc(&arrival_time) {
-                    Ok(time) => Some(time),
+                match chrono::DateTime::parse_from_rfc3339(&arrival_time) {
+                    Ok(time) => Some(time.with_timezone(&chrono::Utc)),
                     Err(err) => {
                         status.set(Some(format!("Error parsing arrival time: {}", err)));
                         return;
@@ -151,24 +154,26 @@ pub fn flight_form() -> Html {
                         placeholder="LIS"
                     />
                 </div>
-                    <div class="form-group">
-                        <label for="departure_time">{"Departure Time"}</label>
-                        <input
-                            type="datetime-local"
-                            id="departure_time"
-                            ref={departure_time_ref}
-                            required=true
-                        />
-                    </div>
-                    <div class="form-group">
-                        <label for="arrival_time">{"Arrival Time"}</label>
-                        <input
-                            type="datetime-local"
-                            id="arrival_time"
-                            ref={arrival_time_ref}
-                        />
-                    </div>
-                    <button type="submit">{"Create Flight"}</button>
+                <div class="form-group">
+                    <label for="departure_time">{"Departure Time"}</label>
+                    <input
+                        type="datetime"
+                        id="departure_time"
+                        ref={departure_time_ref}
+                        required=true
+                        step="60"
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="arrival_time">{"Arrival Time"}</label>
+                    <input
+                        type="datetime"
+                        id="arrival_time"
+                        ref={arrival_time_ref}
+                        step="60"
+                    />
+                </div>
+                <button type="submit">{"Create Flight"}</button>
             </form>
             if let Some(message) = &*status {
                 <div class={classes!(
@@ -180,22 +185,4 @@ pub fn flight_form() -> Html {
             }
         </div>
     }
-}
-
-fn convert_datetime_local_to_utc(
-    datetime_local: &str,
-) -> Result<chrono::DateTime<chrono::Utc>, String> {
-    // datetime-local format is: "YYYY-MM-DDThh:mm"
-    // We need to parse it and convert to UTC
-    let datetime = chrono::NaiveDateTime::parse_from_str(
-        &format!("{}:00", datetime_local), // Add seconds
-        "%Y-%m-%dT%H:%M:%S",
-    )
-    .map_err(|e| format!("Failed to parse datetime: {}", e))?;
-
-    // Convert to UTC
-    Ok(chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-        datetime,
-        chrono::Utc,
-    ))
 }

@@ -11,6 +11,7 @@ use reqwest_tracing::TracingMiddleware;
 use sky_tracer::protocol::flights::{
     CreateFlightRequest, FlightPositionResponse, FlightResponse, ListFlightsRequest,
 };
+use tracing::{debug, error, info, instrument, warn};
 
 // Custom error type for our API
 #[derive(Debug)]
@@ -45,14 +46,25 @@ impl IntoResponse for ApiError {
     ),
     tag = "flights"
 )]
+#[instrument(skip(flight_service, request), fields(
+    aircraft = %request.aircraft_number,
+    departure = %request.departure,
+    arrival = %request.arrival
+))]
 pub async fn create_flight(
     State(flight_service): State<FlightService>,
     Json(request): Json<CreateFlightRequest>,
 ) -> Result<Json<FlightResponse>, ApiError> {
+    debug!("Creating new flight");
+
     flight_service
         .create_flight(request)
         .await
         .map(|flight| {
+            info!(
+                flight_number = %flight.flight_number,
+                "Flight created successfully"
+            );
             Json(FlightResponse {
                 flight_number: flight.flight_number,
                 aircraft_number: flight.aircraft_number,
@@ -62,7 +74,10 @@ pub async fn create_flight(
                 arrival_time: flight.arrival_time,
             })
         })
-        .map_err(ApiError::FlightCreationError)
+        .map_err(|e| {
+            error!(error = %e, "Failed to create flight");
+            ApiError::FlightCreationError(e)
+        })
 }
 
 /// List flights
@@ -80,16 +95,28 @@ pub async fn create_flight(
     ),
     tag = "flights"
 )]
+#[instrument(skip(flight_service), fields(
+    departure = ?params.departure,
+    arrival = ?params.arrival,
+    date = ?params.date
+))]
 pub async fn list_flights(
     State(flight_service): State<FlightService>,
     Query(params): Query<ListFlightsRequest>,
 ) -> Result<Json<Vec<FlightResponse>>, ApiError> {
+    debug!("Listing flights with filters");
+
     let date = if let Some(date_str) = params.date {
-        Some(
-            DateTime::parse_from_rfc3339(&date_str)
-                .map_err(|e| ApiError::ParseError(format!("Invalid date format: {}", e)))?
-                .with_timezone(&Utc),
-        )
+        match DateTime::parse_from_rfc3339(&date_str) {
+            Ok(dt) => {
+                debug!(parsed_date = %dt, "Parsed date filter");
+                Some(dt.with_timezone(&Utc))
+            }
+            Err(e) => {
+                error!(error = %e, "Failed to parse date");
+                return Err(ApiError::ParseError(format!("Invalid date format: {}", e)));
+            }
+        }
     } else {
         None
     };
@@ -97,6 +124,11 @@ pub async fn list_flights(
     let flights = flight_service
         .list_flights(params.departure, params.arrival, date)
         .await;
+
+    info!(
+        flights_count = flights.len(),
+        "Retrieved flights matching criteria"
+    );
 
     Ok(Json(
         flights
@@ -126,36 +158,83 @@ pub async fn list_flights(
     ),
     tag = "flights"
 )]
+#[instrument(skip(flight_service), fields(flight_number = %flight_number))]
 pub async fn get_flight_position(
     State(flight_service): State<FlightService>,
     Path(flight_number): Path<String>,
 ) -> Result<Json<FlightPositionResponse>, ApiError> {
-    let flight = flight_service
-        .get_flight(&flight_number)
-        .await
-        .ok_or(ApiError::NotFound)?;
+    debug!("Fetching flight position for flight {}", flight_number);
+
+    let flight = match flight_service.get_flight(&flight_number).await {
+        Some(f) => {
+            debug!(
+                departure = %f.departure,
+                arrival = %f.arrival,
+                departure_time = %f.departure_time,
+                "Found flight details"
+            );
+            f
+        }
+        None => {
+            warn!("Flight not found: {}", flight_number);
+            return Err(ApiError::NotFound);
+        }
+    };
 
     // Create HTTP client with tracing middleware
     let client: ClientWithMiddleware = ClientBuilder::new(reqwest::Client::new())
         .with(TracingMiddleware::default())
         .build();
 
-    let orbital_beacon_url = std::env::var("ORBITAL_BEACON_URL")
-        .unwrap_or_else(|_| "http://orbital-beacon:3002".to_string());
+    let orbital_beacon_url = std::env::var("ORBITAL_BEACON_URL").unwrap_or_else(|_| {
+        debug!("ORBITAL_BEACON_URL not set, using default");
+        "http://orbital-beacon:3002".to_string()
+    });
+
+    debug!(url = %orbital_beacon_url, "Using orbital beacon URL");
+
+    let arrival_time = flight.arrival_time.unwrap_or_else(|| {
+        let calculated_time = flight.departure_time + chrono::Duration::hours(2);
+        debug!(
+            departure_time = %flight.departure_time,
+            calculated_arrival = %calculated_time,
+            "Calculated default arrival time"
+        );
+        calculated_time
+    });
 
     let position_request = sky_tracer::protocol::satellite::CalculatePositionRequest {
         departure: flight.departure.clone(),
         arrival: flight.arrival.clone(),
         departure_time: flight.departure_time,
-        arrival_time: flight
-            .arrival_time
-            .unwrap_or_else(|| flight.departure_time + chrono::Duration::hours(2)),
-        current_time: None, // Use current time
+        arrival_time,
+        current_time: Some(chrono::Utc::now()),
     };
 
+    debug!(
+        departure = %position_request.departure,
+        arrival = %position_request.arrival,
+        departure_time = %position_request.departure_time,
+        arrival_time = %position_request.arrival_time,
+        "Preparing position request"
+    );
+
     // Convert to JSON string first
-    let json_body = serde_json::to_string(&position_request)
-        .map_err(|e| ApiError::ParseError(format!("Failed to serialize request: {}", e)))?;
+    let json_body = match serde_json::to_string(&position_request) {
+        Ok(body) => {
+            debug!(request_body = %body, "Serialized request body");
+            body
+        }
+        Err(e) => {
+            error!(error = %e, "Failed to serialize position request");
+            return Err(ApiError::ParseError(format!(
+                "Failed to serialize request: {}",
+                e
+            )));
+        }
+    };
+
+    debug!("Sending position request to orbital beacon");
 
     match client
         .post(&format!("{}/api/position", orbital_beacon_url))
@@ -165,37 +244,72 @@ pub async fn get_flight_position(
         .await
     {
         Ok(response) => {
+            let status = response.status();
+            debug!(status = %status, "Received response from orbital beacon");
+
             if response.status().is_success() {
-                let position_data = response
+                match response
                     .json::<sky_tracer::protocol::satellite::CalculatePositionResponse>()
                     .await
-                    .map_err(|e| ApiError::ParseError(e.to_string()))?;
+                {
+                    Ok(position_data) => {
+                        debug!(
+                            positions_count = position_data.positions.len(),
+                            "Received position data"
+                        );
 
-                // Get the first position from the response
-                let position = position_data.positions.first().ok_or_else(|| {
-                    ApiError::FlightCreationError("No position data available".to_string())
-                })?;
+                        match position_data.positions.first() {
+                            Some(position) => {
+                                info!(
+                                    flight_number = %flight_number,
+                                    latitude = position.latitude,
+                                    longitude = position.longitude,
+                                    timestamp = %position.timestamp,
+                                    "Successfully calculated flight position"
+                                );
 
-                Ok(Json(FlightPositionResponse {
-                    flight_number: flight.flight_number,
-                    latitude: position.latitude,
-                    longitude: position.longitude,
-                    timestamp: position.timestamp,
-                }))
+                                Ok(Json(FlightPositionResponse {
+                                    flight_number: flight.flight_number,
+                                    latitude: position.latitude,
+                                    longitude: position.longitude,
+                                    timestamp: position.timestamp,
+                                }))
+                            }
+                            None => {
+                                warn!("No position data available in response");
+                                Err(ApiError::FlightCreationError(
+                                    "No position data available".to_string(),
+                                ))
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        error!(error = %e, "Failed to parse position response");
+                        Err(ApiError::ParseError(e.to_string()))
+                    }
+                }
             } else {
                 let error_text = response
                     .text()
                     .await
                     .unwrap_or_else(|_| "Unknown error".to_string());
+                error!(
+                    status = %status,
+                    error = %error_text,
+                    "Failed to calculate position"
+                );
                 Err(ApiError::FlightCreationError(format!(
                     "Failed to calculate position: {}",
                     error_text
                 )))
             }
         }
-        Err(e) => Err(ApiError::FlightCreationError(format!(
-            "Failed to connect to orbital beacon: {}",
-            e
-        ))),
+        Err(e) => {
+            error!(error = %e, "Failed to connect to orbital beacon");
+            Err(ApiError::FlightCreationError(format!(
+                "Failed to connect to orbital beacon: {}",
+                e
+            )))
+        }
     }
 }
