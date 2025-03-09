@@ -8,11 +8,15 @@ pub fn flight_list() -> Html {
     let flights = use_state(Vec::<FlightResponse>::new);
     let loading = use_state(|| true);
 
-    {
+    // Function to fetch flights data
+    let fetch_flights = {
         let flights = flights.clone();
         let loading = loading.clone();
 
-        use_effect_with((), move |_| {
+        move || {
+            let flights = flights.clone();
+            let loading = loading.clone();
+
             spawn_local(async move {
                 match Request::get("/api/flights").send().await {
                     Ok(response) => {
@@ -24,7 +28,24 @@ pub fn flight_list() -> Html {
                 }
                 loading.set(false);
             });
-            || ()
+        }
+    };
+
+    // Initial load and setup periodic refresh
+    {
+        let fetch_flights = fetch_flights.clone();
+
+        use_effect_with((), move |_| {
+            // Initial fetch
+            fetch_flights();
+
+            // Set up interval for periodic updates
+            let interval = gloo_timers::callback::Interval::new(5_000, move || {
+                fetch_flights();
+            });
+
+            // Cleanup function to remove interval when component unmounts
+            move || drop(interval)
         });
     }
 

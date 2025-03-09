@@ -12,6 +12,34 @@ pub fn flight_form() -> Html {
     let time_ref = use_node_ref();
     let status = use_state(|| None::<String>);
 
+    // Set default values when component mounts
+    {
+        let aircraft_ref = aircraft_ref.clone();
+        let departure_ref = departure_ref.clone();
+        let arrival_ref = arrival_ref.clone();
+        let time_ref = time_ref.clone();
+
+        use_effect_with((), move |_| {
+            // Set default values
+            if let Some(input) = aircraft_ref.cast::<HtmlInputElement>() {
+                input.set_value("X-A320");
+            }
+            if let Some(input) = departure_ref.cast::<HtmlInputElement>() {
+                input.set_value("FRA");
+            }
+            if let Some(input) = arrival_ref.cast::<HtmlInputElement>() {
+                input.set_value("LIS");
+            }
+            if let Some(input) = time_ref.cast::<HtmlInputElement>() {
+                // Get current time and format it for datetime-local input
+                let now = chrono::Local::now();
+                let formatted_time = now.format("%Y-%m-%dT%H:%M").to_string();
+                input.set_value(&formatted_time);
+            }
+            || ()
+        });
+    }
+
     let onsubmit = {
         let aircraft_ref = aircraft_ref.clone();
         let departure_ref = departure_ref.clone();
@@ -54,7 +82,6 @@ pub fn flight_form() -> Html {
                 {
                     Ok(_) => {
                         status.set(Some("Flight created successfully".to_string()));
-                        // Could add code here to reset form
                     }
                     Err(err) => status.set(Some(format!("Error: {}", err))),
                 }
@@ -68,19 +95,42 @@ pub fn flight_form() -> Html {
             <form {onsubmit}>
                 <div class="form-group">
                     <label for="aircraft">{"Aircraft Number"}</label>
-                    <input type="text" id="aircraft" ref={aircraft_ref} required=true />
+                    <input
+                        type="text"
+                        id="aircraft"
+                        ref={aircraft_ref}
+                        required=true
+                        placeholder="LH-A320"
+                    />
                 </div>
                 <div class="form-group">
                     <label for="departure">{"Departure Airport"}</label>
-                    <input type="text" id="departure" ref={departure_ref} required=true />
+                    <input
+                        type="text"
+                        id="departure"
+                        ref={departure_ref}
+                        required=true
+                        placeholder="FRA"
+                    />
                 </div>
                 <div class="form-group">
                     <label for="arrival">{"Arrival Airport"}</label>
-                    <input type="text" id="arrival" ref={arrival_ref} required=true />
+                    <input
+                        type="text"
+                        id="arrival"
+                        ref={arrival_ref}
+                        required=true
+                        placeholder="LIS"
+                    />
                 </div>
                 <div class="form-group">
                     <label for="time">{"Departure Time"}</label>
-                    <input type="datetime-local" id="time" ref={time_ref} required=true />
+                    <input
+                        type="datetime-local"
+                        id="time"
+                        ref={time_ref}
+                        required=true
+                    />
                 </div>
                 <button type="submit">{"Create Flight"}</button>
             </form>
