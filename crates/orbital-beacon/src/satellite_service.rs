@@ -1,5 +1,7 @@
 use chrono::{DateTime, Utc};
 use reqwest;
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_tracing::TracingMiddleware;
 use sky_tracer::model::{Position, Satellite, SatelliteStatus};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -12,7 +14,7 @@ pub enum SatelliteServiceError {
     #[error("No active satellites available")]
     NoActiveSatellites,
     #[error("Failed to fetch airport data: {0}")]
-    AirportFetchError(#[from] reqwest::Error),
+    AirportFetchError(#[from] reqwest_middleware::Error),
     #[error("Airport not found: {0}")]
     AirportNotFound(String),
 }
@@ -132,7 +134,7 @@ impl SatelliteService {
     async fn fetch_airport(
         &self,
         code: &str,
-    ) -> Result<Option<sky_tracer::model::Airport>, reqwest::Error> {
+    ) -> Result<Option<sky_tracer::model::Airport>, reqwest_middleware::Error> {
         info!(code = %code, "Fetching airport information");
         let url = format!(
             "{}/api/airports/search?code={}",
@@ -140,7 +142,11 @@ impl SatelliteService {
         );
         println!("Fetching airport from: {}", url);
 
-        let response = reqwest::get(&url).await?;
+        let client: ClientWithMiddleware = ClientBuilder::new(reqwest::Client::new())
+            .with(TracingMiddleware::default())
+            .build();
+
+        let response = client.get(&url).send().await?;
 
         if response.status().is_success() {
             let search_response = response

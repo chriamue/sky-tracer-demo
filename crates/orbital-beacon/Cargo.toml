@@ -8,7 +8,7 @@ default = ["ssr"]
 ssr = ["yew"]
 
 [dependencies]
-sky-tracer = { path = "../sky-tracer", features = ["protocol", "telemetry"] }
+sky-tracer = { path = "../sky-tracer", features = ["protocol"] }
 axum = { version = "0.8", features = ["macros"] }
 tokio = { version = "1.43.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
@@ -31,3 +31,5 @@ init-tracing-opentelemetry = { version = "0.27.1", features = [
     "tracing_subscriber_ext",
 ] }
 tracing = { version = "0.1" }
+reqwest-tracing = { version = "0.5", features = ["opentelemetry_0_28"] }
+reqwest-middleware = "0.4"

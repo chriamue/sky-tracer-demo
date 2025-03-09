@@ -35,6 +35,7 @@ services:
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
+      - SERVICE_NAME=airport-anywhere
     volumes:
       - ./assets:/usr/local/bin/assets
     networks:
@@ -113,6 +114,7 @@ services:
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
+      - SERVICE_NAME=orbital-beacon
       - AIRPORTS_SERVICE_URL=http://airport-anywhere:3000
       - PATH_PREFIX=/satellites
     networks:
