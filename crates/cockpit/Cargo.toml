@@ -16,3 +16,4 @@ gloo-net = "0.4"
 gloo-timers = "0.3"
 sky-tracer = { path = "../sky-tracer" }
 web-sys = { version = "0.3", features = ["HtmlInputElement"] }
+uuid = { version = "1.15", features = ["v4", "serde", "js"] }

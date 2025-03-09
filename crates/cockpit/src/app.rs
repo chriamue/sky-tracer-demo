@@ -1,4 +1,4 @@
-use crate::components::{FlightForm, FlightList, StatusPanel};
+use crate::components::{FlightForm, FlightList, FlightMap, StatusPanel};
 use yew::prelude::*;
 
 #[function_component(App)]
@@ -17,6 +17,7 @@ pub fn app() -> Html {
                         <FlightForm />
                     </div>
                     <div class="dashboard-right">
+                        <FlightMap />
                         <FlightList />
                     </div>
                 </div>
