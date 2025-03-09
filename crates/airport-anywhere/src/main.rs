@@ -1,17 +1,16 @@
-use axum::{extract::Query, response::Html, routing::get, Json, Router};
-use serde::Deserialize;
-use sky_tracer::prelude::*;
-use tower_http::cors::{Any, CorsLayer};
-use tracing::{info, instrument};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
-
 use airport_anywhere::{
     openapi::ApiDoc,
     service::{list_airports, search_airports},
     ui::pages::{Home, HomeProps},
 };
+use axum::{extract::Query, response::Html, routing::get, Json, Router};
+use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
+use serde::Deserialize;
 use sky_tracer::protocol::airports::{AirportResponse, SearchAirportsRequest};
+use tower_http::cors::{Any, CorsLayer};
+use tracing::{info, instrument};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Debug, Deserialize)]
 struct SearchParams {
@@ -93,13 +92,15 @@ async fn render_page(Query(params): Query<SearchParams>) -> Html<String> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
-    // Initialize telemetry
-    setup_telemetry()?;
+    let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers()?;
+
     info!("Starting Airport Anywhere service");
 
     let api_router = Router::new()
         .route("/api/airports", get(list_airports))
         .route("/api/airports/search", get(search_airports))
+        .layer(OtelInResponseLayer::default())
+        .layer(OtelAxumLayer::default())
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -126,7 +127,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         tracing::error!("Server error: {}", e);
     }
 
-    // Shutdown telemetry before exiting
-    shutdown_telemetry();
     Ok(())
 }

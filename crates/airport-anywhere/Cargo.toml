@@ -16,7 +16,7 @@ default = ["ssr"]
 ssr = ["yew"]
 
 [dependencies]
-sky-tracer = { path = "../sky-tracer", features = ["protocol", "telemetry"] }
+sky-tracer = { path = "../sky-tracer", features = ["protocol"] }
 axum = "0.8"
 csv = "1.3"
 tokio = { version = "1.43.0", features = ["full"] }
@@ -25,7 +25,14 @@ serde_json = "1.0"
 tower-http = { version = "0.6", features = ["cors"] }
 utoipa = { version = "5.3", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "9.0", features = ["axum"] }
-tracing = { version = "0.1" }
 
-# SSR dependencies
+# SSR
 yew = { version = "0.21", optional = true, features = ["ssr"] }
+
+# Tracing
+axum-tracing-opentelemetry = "0.26.1"
+init-tracing-opentelemetry = { version = "0.27.1", features = [
+    "otlp",
+    "tracing_subscriber_ext",
+] }
+tracing = { version = "0.1" }

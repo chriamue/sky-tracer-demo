@@ -7,20 +7,14 @@ use orbital_beacon::routes;
 use orbital_beacon::satellite_service::SatelliteService;
 use orbital_beacon::service;
 use orbital_beacon::utils::get_path_prefix;
-use sky_tracer::prelude::*;
 use std::env;
 use tower_http::cors::{Any, CorsLayer};
-use tower_http::trace::{self, TraceLayer};
 use tracing::info;
-use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 #[tokio::main]
 async fn main() {
-    // Initialize telemetry
-    //setup_telemetry().expect("Failed to setup telemetry");
-
     let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers().unwrap();
 
     let airport_service_url =
@@ -30,13 +24,6 @@ async fn main() {
     info!(airport_service_url = %airport_service_url, "Configured airport service");
 
     let satellite_service = SatelliteService::new(airport_service_url);
-
-    // Configure trace layer
-    let trace_layer = TraceLayer::new_for_http()
-        .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
-        .on_response(trace::DefaultOnResponse::new().level(Level::INFO))
-        .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
-        .on_failure(trace::DefaultOnFailure::new().level(Level::ERROR));
 
     let api_routes = Router::new()
         .route("/satellites", post(service::create_satellite))
@@ -64,7 +51,8 @@ async fn main() {
                 .allow_methods(Any)
                 .allow_headers(Any),
         )
-        .layer(trace_layer)
+        .layer(OtelInResponseLayer::default())
+        .layer(OtelAxumLayer::default())
         .with_state(satellite_service);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3002").await.unwrap();

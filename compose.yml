@@ -32,9 +32,9 @@ services:
       - "traefik.http.routers.airports-api.service=airports"
     environment:
       - RUST_LOG=info,tower_http=debug
-      - ENABLE_TELEMETRY=true
-      - OTEL_ENDPOINT=http://jaeger:4317
-      - SERVICE_NAME=airport-anywhere
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=always_on
     volumes:
       - ./assets:/usr/local/bin/assets
     networks:
@@ -110,12 +110,9 @@ services:
       - "traefik.http.routers.position-api.service=satellites"
     environment:
       - RUST_LOG=info,tower_http=debug,orbital_beacon=debug
-      - ENABLE_TELEMETRY=true
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
-      - OTEL_ENDPOINT=http://jaeger:4317
-      - SERVICE_NAME=orbital-beacon
       - AIRPORTS_SERVICE_URL=http://airport-anywhere:3000
       - PATH_PREFIX=/satellites
     networks:
