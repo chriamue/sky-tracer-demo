@@ -4,19 +4,20 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
-use sky_tracer::protocol::flights::FlightResponse;
-use tower_http::cors::{Any, CorsLayer};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
-
 use flight_controller::{
     flight_service::FlightService,
     openapi::ApiDoc,
     service::{create_flight, list_flights},
     ui::pages::{Home, HomeProps},
 };
+use serde::Deserialize;
+use sky_tracer::protocol::flights::FlightResponse;
+use tower_http::cors::{Any, CorsLayer};
+use tracing::{info, instrument};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Debug, Deserialize)]
 struct PageParams {
@@ -25,10 +26,13 @@ struct PageParams {
     date: Option<String>,
 }
 
+#[instrument(skip(params, flight_service))]
 async fn render_page(
     Query(params): Query<PageParams>,
     State(flight_service): State<FlightService>,
 ) -> Html<String> {
+    info!(?params, "Rendering page with search parameters");
+
     let date = params
         .date
         .and_then(|d| DateTime::parse_from_rfc3339(&d).ok())
@@ -74,7 +78,9 @@ async fn render_page(
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers()?;
+
     let flight_service = FlightService::new();
 
     let app = Router::new()
@@ -82,6 +88,8 @@ async fn main() {
         .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/api/flights", post(create_flight))
         .route("/api/flights", get(list_flights))
+        .layer(OtelInResponseLayer::default())
+        .layer(OtelAxumLayer::default())
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -90,8 +98,18 @@ async fn main() {
         )
         .with_state(flight_service);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
-    println!("Flight Controller running on http://localhost:3001");
-    println!("API documentation available at http://localhost:3001/api/docs");
-    axum::serve(listener, app).await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await?;
+    info!("Server running on http://localhost:3001");
+    info!("API documentation available at http://localhost:3001/api/docs");
+
+    let server = axum::serve(listener, app);
+
+    info!("Server started");
+
+    // Run the server and handle shutdown
+    if let Err(e) = server.await {
+        tracing::error!("Server error: {}", e);
+    }
+
+    Ok(())
 }

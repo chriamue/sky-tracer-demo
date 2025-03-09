@@ -57,7 +57,11 @@ services:
       - "traefik.http.routers.flights-api.rule=PathPrefix(`/api/flights`)"
       - "traefik.http.routers.flights-api.service=flights"
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=info,tower_http=debug
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=always_on
+      - SERVICE_NAME=flight-controller
     networks:
       - sky-tracer
 
