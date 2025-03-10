@@ -154,7 +154,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.index.entrypoints=web"
       # Specific paths only
-      - "traefik.http.routers.index.rule=Path(`/index.html`) || Path(`/`) || Path(`/presentation`)"
+      - "traefik.http.routers.index.rule=Path(`/index.html`) || Path(`/`) || Path(`/presentation/`)"
       # Lower priority (default is 0, lower numbers = lower priority)
       - "traefik.http.routers.index.priority=1"
       - "traefik.http.services.index.loadbalancer.server.port=80"
