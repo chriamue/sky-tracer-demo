@@ -1,7 +1,11 @@
 use axum::{extract::Path, extract::State, routing::get, Router};
 use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use tower_http::cors::{Any, CorsLayer};
-use tower_of_babel::{create_client, openapi::ApiDoc, service::list_flights_by_airport};
+use tower_of_babel::{
+    create_client,
+    openapi::ApiDoc,
+    service::{get_flight_position, list_flights_by_airport},
+};
 use tracing::info;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -25,6 +29,19 @@ async fn get_flights_by_airport(
     .await
 }
 
+#[tracing::instrument(skip(state))]
+async fn get_flight_position_handler(
+    Path(flight_number): Path<String>,
+    State(state): State<AppState>,
+) -> impl axum::response::IntoResponse {
+    get_flight_position(
+        state.flight_controller_url.clone(),
+        flight_number,
+        state.client.clone(),
+    )
+    .await
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers()?;
@@ -41,6 +58,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     let app = Router::new()
         .route("/api/babel/{airport_code}", get(get_flights_by_airport))
+        .route(
+            "/api/babel/{flight_number}/position",
+            get(get_flight_position_handler),
+        )
         .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .layer(OtelInResponseLayer::default())
         .layer(OtelAxumLayer::default())
