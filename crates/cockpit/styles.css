@@ -253,3 +253,46 @@ tr:hover {
 .progress-bar.completed {
     background-color: #4caf50;
 }
+
+.flight-tracker {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.airport-list {
+    padding: 1rem;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.airport-list h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.airport-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.airport-list li {
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.airport-list li:last-child {
+    border-bottom: none;
+}
