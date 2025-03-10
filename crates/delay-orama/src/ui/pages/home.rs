@@ -1,10 +1,11 @@
 use crate::ui::components::DelayTable;
-use sky_tracer::protocol::flights::FlightResponse;
+use sky_tracer::protocol::flights::{FlightPositionResponse, FlightResponse};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct HomeProps {
-    pub flights: Vec<FlightResponse>,
+    pub flights: Vec<(FlightResponse, Option<FlightPositionResponse>)>,
+    pub airport_position: Option<(f64, f64)>,
 }
 
 #[function_component(Home)]
@@ -17,7 +18,10 @@ pub fn home(props: &HomeProps) -> Html {
             </header>
 
             <main>
-                <DelayTable flights={props.flights.clone()} />
+                <DelayTable
+                    flights={props.flights.clone()}
+                    airport_position={props.airport_position}
+                />
             </main>
         </div>
     }

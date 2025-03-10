@@ -9,7 +9,9 @@ use delay_orama::{
     create_client,
     ui::pages::{Home, HomeProps},
 };
+use futures::future::join_all;
 use reqwest_middleware::ClientWithMiddleware;
+use sky_tracer::protocol::flights::FlightPositionResponse;
 use sky_tracer::protocol::flights::FlightResponse;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{error, info, instrument, warn};
@@ -18,6 +20,25 @@ use tracing::{error, info, instrument, warn};
 struct AppState {
     tower_babel_url: String,
     client: ClientWithMiddleware,
+}
+
+async fn fetch_flight_position(
+    client: &ClientWithMiddleware,
+    tower_babel_url: &str,
+    flight_number: &str,
+) -> Option<FlightPositionResponse> {
+    let url = format!("{}/api/babel/{}/position", tower_babel_url, flight_number);
+
+    match client.get(&url).send().await {
+        Ok(res) => {
+            if res.status().is_success() {
+                res.json::<FlightPositionResponse>().await.ok()
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
+    }
 }
 
 #[instrument]
@@ -57,49 +78,40 @@ async fn render_airport_page(
 
     let url = format!("{}/api/babel/{}", state.tower_babel_url, airport_code);
 
-    let response = state.client.get(&url).send().await;
-
-    let flights = match response {
+    let flights = match state.client.get(&url).send().await {
         Ok(res) => {
             if res.status().is_success() {
-                match res.json::<Vec<FlightResponse>>().await {
-                    Ok(flights) => {
-                        info!(
-                            airport = %airport_code,
-                            flights_count = flights.len(),
-                            "Retrieved flights successfully"
-                        );
-                        flights
-                    }
-                    Err(e) => {
-                        error!(
-                            airport = %airport_code,
-                            error = %e,
-                            "Failed to parse flights response"
-                        );
-                        Vec::new()
-                    }
-                }
+                res.json::<Vec<FlightResponse>>().await.unwrap_or_default()
             } else {
-                warn!(
-                    airport = %airport_code,
-                    status = %res.status(),
-                    "No flights found"
-                );
                 Vec::new()
             }
         }
-        Err(e) => {
-            error!(
-                airport = %airport_code,
-                error = %e,
-                "Failed to fetch flights"
-            );
-            Vec::new()
-        }
+        Err(_) => Vec::new(),
     };
 
-    let renderer = yew::ServerRenderer::<Home>::with_props(move || HomeProps { flights });
+    // Fetch positions for all flights
+    let position_futures = flights.iter().map(|flight| {
+        fetch_flight_position(&state.client, &state.tower_babel_url, &flight.flight_number)
+    });
+
+    let positions = join_all(position_futures).await;
+
+    // Combine flights with their positions
+    let flights_with_positions: Vec<(FlightResponse, Option<FlightPositionResponse>)> =
+        flights.into_iter().zip(positions).collect();
+
+    // TODO: In a real application, you would fetch the airport's position from a service
+    let airport_position = match airport_code.as_str() {
+        "FRA" => Some((50.033333, 8.570556)),
+        "CDG" => Some((49.012798, 2.55)),
+        // Add more airports as needed
+        _ => None,
+    };
+
+    let renderer = yew::ServerRenderer::<Home>::with_props(move || HomeProps {
+        flights: flights_with_positions,
+        airport_position,
+    });
 
     let html = renderer.render().await;
 

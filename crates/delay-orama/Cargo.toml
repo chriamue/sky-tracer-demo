@@ -8,6 +8,7 @@ default = ["ssr"]
 ssr = ["yew"]
 
 [dependencies]
+futures = "0.3"
 sky-tracer = { path = "../sky-tracer" }
 axum = "0.8"
 chrono = { version = "0.4", features = ["serde"] }
