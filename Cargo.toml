@@ -11,6 +11,8 @@ members = [
     "crates/sky-tracer",
     "crates/cockpit",
     "crates/orbital-beacon",
+    "crates/tower-of-babel",
+    "crates/delay-orama",
 ]
 
 [dependencies]
@@ -20,3 +22,5 @@ flight-controller = { path = "crates/flight-controller" }
 flightmare-tracker = { path = "crates/flightmare-tracker" }
 cockpit = { path = "crates/cockpit" }
 orbital-beacon = { path = "crates/orbital-beacon" }
+tower-of-babel = { path = "crates/tower-of-babel" }
+delay-orama = { path = "crates/delay-orama" }
