@@ -125,6 +125,31 @@ services:
     networks:
       - sky-tracer
 
+  tower-of-babel:
+    build:
+      context: .
+      dockerfile: crates/tower-of-babel/Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.babel.entrypoints=web"
+      - "traefik.http.routers.babel.rule=PathPrefix(`/babel`)"
+      - "traefik.http.services.babel.loadbalancer.server.port=3003"
+      - "traefik.http.middlewares.babel-strip.stripprefix.prefixes=/babel"
+      - "traefik.http.routers.babel.middlewares=babel-strip@docker"
+      # Additional route for /api/flights
+      - "traefik.http.routers.babel-api.entrypoints=web"
+      - "traefik.http.routers.babel-api.rule=PathPrefix(`/api/babel`)"
+      - "traefik.http.routers.babel-api.service=babel"
+    environment:
+      - RUST_LOG=info,tower_http=debug
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=always_on
+      - SERVICE_NAME=tower-of-babel
+      - FLIGHT_CONTROLLER_URL=http://flight-controller:3001
+    networks:
+      - sky-tracer
+
   structurizr:
     image: structurizr/lite:latest
     platform: linux/amd64

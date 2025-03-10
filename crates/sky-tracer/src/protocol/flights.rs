@@ -56,3 +56,9 @@ pub struct ListFlightsRequest {
     /// Optional date (YYYY-MM-DD)
     pub date: Option<String>,
 }
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ErrorResponse {
+    pub error: String,
+    pub code: String,
+}
