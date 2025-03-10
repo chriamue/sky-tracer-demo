@@ -150,6 +150,27 @@ services:
     networks:
       - sky-tracer
 
+  delay-orama:
+    build:
+      context: .
+      dockerfile: crates/delay-orama/Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.delays.entrypoints=web"
+      - "traefik.http.routers.delays.rule=PathPrefix(`/delays`)"
+      - "traefik.http.services.delays.loadbalancer.server.port=3004"
+      - "traefik.http.middlewares.delays-strip.stripprefix.prefixes=/delays"
+      - "traefik.http.routers.delays.middlewares=delays-strip@docker"
+    environment:
+      - RUST_LOG=info,tower_http=debug
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=always_on
+      - SERVICE_NAME=delay-orama
+      - TOWER_BABEL_URL=http://tower-of-babel:3003
+    networks:
+      - sky-tracer
+
   structurizr:
     image: structurizr/lite:latest
     platform: linux/amd64
