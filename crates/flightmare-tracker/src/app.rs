@@ -20,30 +20,6 @@ pub fn app() -> Html {
     let error = use_state(|| Option::<String>::None);
     let error_grund = use_state(|| get_random_grund());
 
-    // Define flight_list before using it
-    let flight_list = flights
-        .iter()
-        .map(|flight_with_delay| {
-            html! {
-                <div class="flight-item">
-                    <div class="flight-info">
-                        <h3>{&flight_with_delay.flight.flight_number}</h3>
-                        <p class="route">
-                            {&flight_with_delay.flight.departure}
-                            {" → "}
-                            {&flight_with_delay.flight.arrival}
-                        </p>
-                        <p class="time">
-                            {"Scheduled: "}
-                            {flight_with_delay.flight.departure_time.format("%H:%M")}
-                        </p>
-                    </div>
-                    <GrundDisplay grund={flight_with_delay.grund.clone()} />
-                </div>
-            }
-        })
-        .collect::<Html>();
-
     {
         let flights = flights.clone();
         let loading = loading.clone();
@@ -85,21 +61,19 @@ pub fn app() -> Html {
         });
     }
 
-    if *loading {
-        html! {
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>{"Loading flights..."}</p>
-            </div>
-        }
-    } else if let Some(err) = &*error {
-        html! {
-            <div class="container">
-                <header>
-                    <h1>{"🛫 Flightmare Tracker"}</h1>
-                    <p class="subtitle">{"Your premier source for simulated flight delays!"}</p>
-                </header>
-                <main>
+    html! {
+        <div class="container">
+            <header>
+                <h1>{"🛫 Flightmare Tracker"}</h1>
+                <p class="subtitle">{"Your premier source for simulated flight delays!"}</p>
+            </header>
+            <main>
+                if *loading {
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>{"Loading flights..."}</p>
+                    </div>
+                } else if let Some(err) = &*error {
                     <div class="error-container">
                         <div class="error">
                             <h2>{"System Delay"}</h2>
@@ -118,22 +92,36 @@ pub fn app() -> Html {
                             {"Get Another Reason"}
                         </button>
                     </div>
-                </main>
-            </div>
-        }
-    } else {
-        html! {
-            <div class="container">
-                <header>
-                    <h1>{"🛫 Flightmare Tracker"}</h1>
-                    <p class="subtitle">{"Your premier source for simulated flight delays!"}</p>
-                </header>
-                <main>
+                } else {
                     <div class="flight-list">
-                        {flight_list}
+                        {flights.iter().map(|flight_with_delay| {
+                            html! {
+                                <div class="flight-item">
+                                    <div class="flight-info">
+                                        <h3>{&flight_with_delay.flight.flight_number}</h3>
+                                        <p class="route">
+                                            {&flight_with_delay.flight.departure}
+                                            {" → "}
+                                            {&flight_with_delay.flight.arrival}
+                                        </p>
+                                        <p class="time">
+                                            {"Departure: "}
+                                            {flight_with_delay.flight.departure_time.format("%Y-%m-%d %H:%M")}
+                                        </p>
+                                        if let Some(arrival_time) = flight_with_delay.flight.arrival_time {
+                                            <p class="time">
+                                                {"Arrival: "}
+                                                {arrival_time.format("%Y-%m-%d %H:%M")}
+                                            </p>
+                                        }
+                                    </div>
+                                    <GrundDisplay grund={flight_with_delay.grund.clone()} />
+                                </div>
+                            }
+                        }).collect::<Html>()}
                     </div>
-                </main>
-            </div>
-        }
+                }
+            </main>
+        </div>
     }
 }
