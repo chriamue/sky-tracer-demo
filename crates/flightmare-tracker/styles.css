@@ -7,6 +7,7 @@ body {
 
 .container {
     width: 80%;
+    max-width: 900px;
     margin: 20px auto;
     background-color: #fff;
     padding: 20px;
@@ -14,15 +15,23 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-    color: #333;
-    text-align: center;
-}
-
-h2 {
-    color: #666;
+header {
     text-align: center;
     margin-bottom: 20px;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #666;
+    font-style: italic;
+}
+
+main {
+    margin-top: 20px;
 }
 
 .flight-list {
@@ -30,23 +39,47 @@ h2 {
 }
 
 .flight-item {
-    background-color: #e9e9e9;
-    padding: 10px;
-    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 15px;
     border-radius: 5px;
+    border: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.flight-item p {
+.flight-info {
+    flex-grow: 1;
+}
+
+.flight-info h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.flight-info p {
     margin: 5px 0;
+    color: #555;
+}
+
+.route {
+    font-weight: bold;
+}
+
+.time {
+    font-size: 0.9em;
 }
 
 .grund-display {
-    padding: 10px;
+    padding: 10px 15px;
     border-radius: 4px;
-    margin: 5px 0;
     display: flex;
     align-items: center;
     gap: 10px;
+    font-size: 0.9em;
+    white-space: nowrap;
 }
 
 .grund-display.on-time {
@@ -62,9 +95,68 @@ h2 {
 }
 
 .status-icon {
-    font-size: 1.5em;
+    font-size: 1.2em;
 }
 
 .status-message {
     flex-grow: 1;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.error-container {
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #f00;
+    background-color: #fee;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.error h2 {
+    color: #f00;
+}
+
+.technical-details {
+    margin-top: 10px;
+    font-size: 0.8em;
+    color: #777;
+}
+
+button {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #3e8e41;
 }
