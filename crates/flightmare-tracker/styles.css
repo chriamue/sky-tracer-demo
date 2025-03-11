@@ -6,7 +6,7 @@ body {
 }
 
 .container {
-    width: 80%;
+    width: 70%;
     max-width: 900px;
     margin: 20px auto;
     background-color: #fff;
@@ -159,4 +159,371 @@ button {
 
 button:hover {
     background-color: #3e8e41;
+}
+
+:root {
+    --primary-color: #ff4757;
+    --secondary-color: #2f3542;
+    --accent-color: #ffa502;
+    --background-color: #f1f2f6;
+    --card-background: #ffffff;
+}
+
+body {
+    font-family: "Comic Sans MS", cursive; /* Intentionally using Comic Sans for extra sarcasm */
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Sarcastic Header Styles */
+.sarcastic-header {
+    background: linear-gradient(
+        135deg,
+        var(--primary-color),
+        var(--secondary-color)
+    );
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    animation: wobble 2s infinite;
+}
+
+.tagline {
+    font-style: italic;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+.awards {
+    margin: 15px 0;
+}
+
+.award {
+    font-size: 2em;
+    margin: 0 10px;
+    cursor: help;
+    animation: spin 3s infinite;
+    display: inline-block;
+}
+
+.special-offer {
+    background-color: var(--accent-color);
+    padding: 10px;
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+/* Airline Ad Styles */
+.airline-ad {
+    background: var(--card-background);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.airline-ad:hover {
+    transform: translateY(-5px);
+}
+
+.ad-emoji {
+    font-size: 4em;
+    text-align: center;
+    margin-bottom: 15px;
+    animation: float 3s infinite;
+}
+
+.ad-content h3 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.slogan {
+    font-style: italic;
+    color: var(--secondary-color);
+}
+
+.price {
+    font-size: 1.2em;
+    margin: 15px 0;
+}
+
+.amount {
+    color: var(--primary-color);
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.disclaimer {
+    font-size: 0.7em;
+    color: #666;
+    font-style: italic;
+}
+
+/* Animations */
+@keyframes wobble {
+    0%,
+    100% {
+        transform: rotate(0);
+    }
+    25% {
+        transform: rotate(-5deg);
+    }
+    75% {
+        transform: rotate(5deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Update existing flight item styles */
+.flight-item {
+    background: var(--card-background);
+    border: 2px dashed var(--primary-color);
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.flight-item::before {
+    content: "🎪";
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    font-size: 2em;
+    transform: rotate(15deg);
+}
+
+.hell-ad {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    z-index: 1000;
+    perspective: 1000px;
+}
+
+.hell-ad-left {
+    left: 20px;
+    transform: translateY(-50%) rotate(-5deg);
+}
+
+.hell-ad-right {
+    right: 20px;
+    transform: translateY(-50%) rotate(5deg);
+}
+
+.hell-content {
+    background: linear-gradient(135deg, #ff0000, #800000);
+    border: 3px solid #ff6666;
+    border-radius: 15px;
+    padding: 20px;
+    color: #fff;
+    text-align: center;
+    box-shadow:
+        0 0 20px rgba(255, 0, 0, 0.3),
+        inset 0 0 30px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: hell-glow 2s infinite;
+}
+
+.hell-content:hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 30px rgba(255, 0, 0, 0.5),
+        inset 0 0 50px rgba(0, 0, 0, 0.7);
+}
+
+.hell-emojis {
+    font-size: 3em;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.floating-emojis {
+    position: absolute;
+    top: -20px;
+    left: 0;
+    right: 0;
+    font-size: 0.5em;
+    display: flex;
+    justify-content: space-around;
+    animation: float-fire 2s infinite;
+}
+
+.hell-title {
+    font-family: "Creepster", cursive;
+    font-size: 1.5em;
+    margin: 10px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hell-slogan {
+    font-style: italic;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+    color: #ffcccc;
+}
+
+.hell-features {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 0.9em;
+}
+
+.hell-features div {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.hell-price {
+    margin: 15px 0;
+}
+
+.price-tag {
+    font-size: 2em;
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+    animation: price-pulse 1s infinite;
+}
+
+.soul-disclaimer {
+    font-size: 0.7em;
+    color: #ff9999;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.hell-button {
+    background: #ff3333;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 15px;
+    animation: button-pulse 2s infinite;
+}
+
+@keyframes hell-glow {
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
+    }
+}
+
+@keyframes float-fire {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes price-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes button-pulse {
+    0%,
+    100% {
+        background: #ff3333;
+    }
+    50% {
+        background: #cc0000;
+    }
+}
+
+/* Add some smokey effect */
+.hell-content::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(rgba(0, 0, 0, 0.2), transparent);
+    filter: blur(5px);
+    animation: smoke 3s infinite;
+}
+
+@keyframes smoke {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translateY(-10px) scale(1.2);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-20px) scale(1.4);
+        opacity: 0;
+    }
 }

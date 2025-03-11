@@ -4,7 +4,7 @@ use sky_tracer::protocol::flights::FlightResponse;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
-use crate::components::GrundDisplay;
+use crate::components::{AirlineAd, GrundDisplay, HellAd, HellAdPosition, SarcasticHeader};
 use crate::grund::{get_random_grund, Grund};
 
 #[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
@@ -36,7 +36,7 @@ pub fn app() -> Html {
                                 .into_iter()
                                 .map(|flight| FlightWithDelay {
                                     flight,
-                                    grund: if rand::random::<f32>() < 0.3 {
+                                    grund: if rand::random::<f32>() < 0.5 {
                                         Some(get_random_grund())
                                     } else {
                                         None
@@ -62,66 +62,76 @@ pub fn app() -> Html {
     }
 
     html! {
-        <div class="container">
-            <header>
-                <h1>{"🛫 Flightmare Tracker"}</h1>
-                <p class="subtitle">{"Your premier source for simulated flight delays!"}</p>
-            </header>
-            <main>
-                if *loading {
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>{"Loading flights..."}</p>
-                    </div>
-                } else if let Some(err) = &*error {
-                    <div class="error-container">
-                        <div class="error">
-                            <h2>{"System Delay"}</h2>
-                            <GrundDisplay grund={Some((*error_grund).clone())} />
-                            <div class="technical-details">
-                                <p>{"Technical Details:"}</p>
-                                <code>{err}</code>
-                            </div>
+        <>
+            <HellAd position={HellAdPosition::Left} />
+            <HellAd position={HellAdPosition::Right} />
+            <div class="container">
+            <SarcasticHeader />
+
+            // Random ads section
+            <div class="ads-container">
+                <AirlineAd />
+            </div>
+                <main>
+                    if *loading {
+                        <div class="loading">
+                            <div class="spinner">{"🌪️"}</div>
+                            <p>{"Finding excuses..."}</p>
                         </div>
-                        <button onclick={
-                            let error_grund = error_grund.clone();
-                            Callback::from(move |_| {
-                                error_grund.set(get_random_grund());
-                            })
-                        }>
-                            {"Get Another Reason"}
-                        </button>
-                    </div>
-                } else {
-                    <div class="flight-list">
-                        {flights.iter().map(|flight_with_delay| {
-                            html! {
-                                <div class="flight-item">
-                                    <div class="flight-info">
-                                        <h3>{&flight_with_delay.flight.flight_number}</h3>
-                                        <p class="route">
-                                            {&flight_with_delay.flight.departure}
-                                            {" → "}
-                                            {&flight_with_delay.flight.arrival}
-                                        </p>
-                                        <p class="time">
-                                            {"Departure: "}
-                                            {flight_with_delay.flight.departure_time.format("%Y-%m-%d %H:%M")}
-                                        </p>
-                                        if let Some(arrival_time) = flight_with_delay.flight.arrival_time {
-                                            <p class="time">
-                                                {"Arrival: "}
-                                                {arrival_time.format("%Y-%m-%d %H:%M")}
-                                            </p>
-                                        }
-                                    </div>
-                                    <GrundDisplay grund={flight_with_delay.grund.clone()} />
+                    } else if let Some(err) = &*error {
+                        <div class="error-container">
+                            <div class="error">
+                                <h2>{"System Delay"}</h2>
+                                <GrundDisplay grund={Some((*error_grund).clone())} />
+                                <div class="technical-details">
+                                    <p>{"Technical Details:"}</p>
+                                    <code>{err}</code>
                                 </div>
-                            }
-                        }).collect::<Html>()}
-                    </div>
-                }
-            </main>
-        </div>
+                            </div>
+                            <button onclick={
+                                let error_grund = error_grund.clone();
+                                Callback::from(move |_| {
+                                    error_grund.set(get_random_grund());
+                                })
+                            }>
+                                {"Get Another Reason"}
+                            </button>
+                        </div>
+                    } else {
+                        <div class="flight-list">
+                            {flights.iter().map(|flight_with_delay| {
+                                html! {
+                                    <div class="flight-item">
+                                        <div class="flight-info">
+                                            <h3>{&flight_with_delay.flight.flight_number}</h3>
+                                            <p class="route">
+                                                {&flight_with_delay.flight.departure}
+                                                {" → "}
+                                                {&flight_with_delay.flight.arrival}
+                                            </p>
+                                            <p class="time">
+                                                {"Departure: "}
+                                                {flight_with_delay.flight.departure_time.format("%Y-%m-%d %H:%M")}
+                                            </p>
+                                            if let Some(arrival_time) = flight_with_delay.flight.arrival_time {
+                                                <p class="time">
+                                                    {"Arrival: "}
+                                                    {arrival_time.format("%Y-%m-%d %H:%M")}
+                                                </p>
+                                            }
+                                        </div>
+                                        <GrundDisplay grund={flight_with_delay.grund.clone()} />
+                                    </div>
+                                }
+                            }).collect::<Html>()}
+                        </div>
+                    }
+                </main>
+                <div class="ads-container">
+                    <AirlineAd />
+                    <AirlineAd />
+                </div>
+            </div>
+        </>
     }
 }
