@@ -1,27 +1,27 @@
 workspace {
     model {
-        flightStaff = person "Flight Staff" "Airline and airport personnel monitoring flights" {
+        flightStaff = person "✈️ Flight Staff" "Airline and airport personnel monitoring flights" {
             tags "staff"
         }
 
-        traveler = person "Traveler" "Passenger checking flight status and delays" {
+        traveler = person "🧳 Traveler" "Passenger checking flight status and delays" {
             tags "traveler"
         }
 
-        satelliteOperator = person "Satellite Operator" "Orbital Beacon staff managing satellites" {
+        satelliteOperator = person "🛸 Satellite Operator" "Orbital Beacon staff managing satellites" {
             tags "operator"
         }
 
-        skyTracer = softwareSystem "Sky Tracer System" "Flight tracking and monitoring system" {
+        skyTracer = softwareSystem "🛩️ Sky Tracer System" "Flight tracking and monitoring system" {
             # Airport Anywhere Container and Components
-            airportAnywhere = container "Airport Anywhere" "Airport information lookup service" "Rust/Axum" {
+            airportAnywhere = container "🏢 Airport Anywhere" "Airport information lookup service" "Rust/Axum" {
                 component "Airport Service" "Manages airport data and search" "Rust"
                 component "Airport API" "REST API for airport lookups" "Rust/Axum"
                 component "Airport UI" "Airport search interface" "Rust/Yew SSR"
             }
 
             # Flight Controller Container and Components
-            flightController = container "Flight Controller" "Flight management and tracking" "Rust/Axum" {
+            flightController = container "🎮 Flight Controller" "Flight management and tracking" "Rust/Axum" {
                 component "Flight Service" "Manages flight data" "Rust"
                 component "Flight API" "REST API for flight operations" "Rust/Axum"
                 component "Flight UI" "Flight management interface" "Rust/Yew SSR"
@@ -29,7 +29,7 @@ workspace {
             }
 
             # Orbital Beacon Container and Components
-            orbitalBeacon = container "Orbital Beacon" "Satellite tracking and positioning system" "Rust/Axum" {
+            orbitalBeacon = container "🛰️ Orbital Beacon" "Satellite tracking and positioning system" "Rust/Axum" {
                 component "Satellite Service" "Manages satellites and positions" "Rust"
                 component "Position API" "REST API for position calculations" "Rust/Axum"
                 component "Satellite UI" "Satellite management interface" "Rust/Yew SSR"
@@ -37,25 +37,25 @@ workspace {
             }
 
             # Tower of Babel Container and Components
-            towerOfBabel = container "Tower of Babel" "Flight aggregation and position service" "Rust/Axum" {
+            towerOfBabel = container "🗼 Tower of Babel" "Flight aggregation and position service" "Rust/Axum" {
                 component "Flight Aggregator" "Aggregates flight information" "Rust"
                 component "Position API" "REST API for flight positions" "Rust/Axum"
             }
 
             # Delay-O-Rama Container and Components
-            delayORama = container "Delay-O-Rama" "Flight delay monitoring service" "Rust/Axum" {
+            delayORama = container "⏰ Delay-O-Rama" "Flight delay monitoring service" "Rust/Axum" {
                 component "Delay Monitor" "Monitors flight delays" "Rust"
                 component "Delay UI" "Public delay visualization interface" "Rust/Yew SSR"
             }
 
             # Web Frontends
-            cockpit = container "Cockpit" "Staff flight monitoring dashboard" "Rust/Yew/WebAssembly" {
+            cockpit = container "🎯 Cockpit" "Staff flight monitoring dashboard" "Rust/Yew/WebAssembly" {
                 component "Flight Map" "Interactive flight map" "Rust/Yew"
                 component "Flight List" "Real-time flight list" "Rust/Yew"
                 component "Status Panel" "Flight status display" "Rust/Yew"
             }
 
-            flightmareTracker = container "Flightmare Tracker" "Public delay simulation viewer" "Rust/Yew/WebAssembly" {
+            flightmareTracker = container "😱 Flightmare Tracker" "Public delay simulation viewer" "Rust/Yew/WebAssembly" {
                 component "Delay Simulator" "Simulates flight delays" "Rust/Yew"
                 component "Delay Display" "Visualizes delay patterns" "Rust/Yew"
             }
