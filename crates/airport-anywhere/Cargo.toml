@@ -2,6 +2,13 @@
 name = "airport-anywhere"
 version = "0.1.0"
 edition = "2021"
+description = "A service providing worldwide airport information and search capabilities"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/chriamue/sky-tracer-demo"
+keywords = ["airports", "aviation", "search", "database", "web-service"]
+categories = ["web-programming", "aerospace"]
 
 [[bin]]
 name = "airport-anywhere"

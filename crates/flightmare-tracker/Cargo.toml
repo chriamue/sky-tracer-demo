@@ -2,6 +2,13 @@
 name = "flightmare-tracker"
 version = "0.1.0"
 edition = "2021"
+description = "Flight delay simulation and visualization tool with realistic delay patterns"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/chriamue/sky-tracer-demo"
+keywords = ["flight-delays", "simulation", "visualization", "wasm", "aviation"]
+categories = ["wasm", "web-programming", "simulation", "visualization"]
 
 [dependencies]
 yew = { version = "0.21", features = ["csr"] }

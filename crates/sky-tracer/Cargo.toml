@@ -2,6 +2,19 @@
 name = "sky-tracer"
 version = "0.1.0"
 edition = "2021"
+description = "Core library and protocol definitions for the Sky Tracer flight tracking ecosystem"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/chriamue/sky-tracer-demo"
+keywords = [
+    "aviation",
+    "protocol",
+    "flight-tracking",
+    "airport-data",
+    "openapi",
+]
+categories = ["aerospace", "api-bindings", "data-structures"]
 
 [features]
 default = ["protocol"]

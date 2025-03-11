@@ -2,6 +2,13 @@
 name = "delay-orama"
 version = "0.1.0"
 edition = "2021"
+description = "Real-time flight delay monitoring and tracking service with SSR interface"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/chriamue/sky-tracer-demo"
+keywords = ["flight-delays", "aviation", "tracking", "real-time", "ssr"]
+categories = ["web-programming", "aerospace"]
 
 [features]
 default = ["ssr"]

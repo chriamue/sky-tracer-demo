@@ -2,6 +2,19 @@
 name = "orbital-beacon"
 version = "0.1.0"
 edition = "2021"
+description = "Satellite tracking and position calculation service for flight path monitoring"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/chriamue/sky-tracer-demo"
+keywords = [
+    "satellite",
+    "orbital-tracking",
+    "position-calculation",
+    "aviation",
+    "ssr",
+]
+categories = ["aerospace", "science", "web-programming", "simulation"]
 
 [features]
 default = ["ssr"]

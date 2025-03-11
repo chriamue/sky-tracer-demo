@@ -2,6 +2,19 @@
 name = "flight-controller"
 version = "0.1.0"
 edition = "2021"
+description = "Core flight management and tracking service with position calculation capabilities"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/chriamue/sky-tracer-demo"
+keywords = [
+    "flight-management",
+    "aviation",
+    "tracking",
+    "position-calculation",
+    "ssr",
+]
+categories = ["web-programming", "aerospace", "science"]
 
 [features]
 default = ["ssr"]

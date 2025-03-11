@@ -2,6 +2,13 @@
 name = "cockpit"
 version = "0.1.0"
 edition = "2021"
+description = "Interactive web-based flight tracking and visualization dashboard"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/chriamue/sky-tracer-demo"
+keywords = ["flight-tracking", "aviation", "visualization", "wasm", "web-app"]
+categories = ["wasm", "web-programming", "visualization"]
 
 [dependencies]
 yew = { version = "0.21", features = ["csr"] }
