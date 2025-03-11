@@ -11,7 +11,7 @@ use tracing::{debug, error, info, instrument, warn};
 /// Retrieves a list of flights departing from the specified airport with future arrivals.
 #[utoipa::path(
     get,
-    path = "/api/flights/{airport_code}",
+    path = "/api/babel/{airport_code}",
     params(
         ("airport_code" = String, Path, description = "Airport IATA/ICAO code")
     ),
@@ -102,7 +102,7 @@ pub async fn list_flights_by_airport(
 /// Retrieves the current position of a flight.
 #[utoipa::path(
     get,
-    path = "/api/flights/{flight_number}/position",
+    path = "/api/babel/{flight_number}/position",
     params(
         ("flight_number" = String, Path, description = "Flight number")
     ),

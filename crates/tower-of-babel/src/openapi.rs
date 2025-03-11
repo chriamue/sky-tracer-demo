@@ -19,7 +19,8 @@ use utoipa::OpenApi;
         (name = "flights", description = "Flight lookup operations")
     ),
     servers(
-        (url = "/", description = "Local development server")
+        (url = "/", description = "Local development server"),
+        (url = "/api/babel/", description = "Container server")
     )
 )]
 pub struct ApiDoc;

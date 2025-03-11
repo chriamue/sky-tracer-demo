@@ -63,6 +63,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             get(get_flight_position_handler),
         )
         .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(
+            SwaggerUi::new("/api/babel/docs")
+                .url("/api/babel/api-docs/openapi.json", ApiDoc::openapi()),
+        )
         .layer(OtelInResponseLayer::default())
         .layer(OtelAxumLayer::default())
         .layer(
