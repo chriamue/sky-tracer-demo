@@ -29,9 +29,9 @@ logs:
 open:
     #!/usr/bin/env sh
     if command -v xdg-open > /dev/null; then
-        xdg-open http://localhost:8080
+        xdg-open http://localhost:8000
     elif command -v open > /dev/null; then
-        open http://localhost:8080
+        open http://localhost:8000
     else
         echo "Could not detect the web browser opener"
     fi

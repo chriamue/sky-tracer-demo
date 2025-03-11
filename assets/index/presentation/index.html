@@ -54,61 +54,199 @@
 
                 <section>
                     <h2>Project Overview</h2>
-                    <p>Demonstrating observability, architecture, and more!</p>
+                    <p>A modern flight tracking ecosystem demonstrating:</p>
+                    <ul>
+                        <li>🔄 Microservices Architecture</li>
+                        <li>📊 Distributed Tracing</li>
+                        <li>👥 Role-Based Access</li>
+                        <li>🌐 Real-time Tracking</li>
+                    </ul>
                 </section>
 
                 <section>
-                    <h2>Services Overview</h2>
-                    <p>The system consists of several interacting services.</p>
+                    <h2>User Roles</h2>
+                    <div
+                        class="grid"
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr 1fr;
+                            gap: 20px;
+                        "
+                    >
+                        <div>
+                            <h3>✈️ Flight Staff</h3>
+                            <ul>
+                                <li>Uses Cockpit Dashboard</li>
+                                <li>Accesses Airport Data</li>
+                                <li>Monitors Flight Status</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>🧳 Travelers</h3>
+                            <ul>
+                                <li>Views Delay-O-Rama</li>
+                                <li>Checks Flightmare</li>
+                                <li>Tracks Flight Status</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>🛸 Satellite Operators</h3>
+                            <ul>
+                                <li>Manages Satellites</li>
+                                <li>Controls Launches</li>
+                                <li>Monitors Coverage</li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
 
                 <section>
-                    <h2>Airport Anywhere</h2>
-                    <p>Description: Provides airport information lookup.</p>
-                    <p>Technology: Rust, Axum</p>
-                    <p>URL: <a href="/airports">/airports</a></p>
+                    <section>
+                        <h2>Core Services</h2>
+                        <ul>
+                            <li>🏢 Airport Anywhere</li>
+                            <li>🎮 Flight Controller</li>
+                            <li>🛰️ Orbital Beacon</li>
+                            <li>🗼 Tower of Babel</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>User Interfaces</h2>
+                        <ul>
+                            <li>🎯 Cockpit Dashboard</li>
+                            <li>⏰ Delay-O-Rama</li>
+                            <li>😱 Flightmare Tracker</li>
+                        </ul>
+                    </section>
                 </section>
 
                 <section>
-                    <h2>Flight Controller</h2>
-                    <p>Description: Manages flight schedules and data.</p>
-                    <p>Technology: Rust, Axum</p>
-                    <p>URL: <a href="/flights">/flights</a></p>
+                    <section>
+                        <h2>🏢 Airport Anywhere</h2>
+                        <p>
+                            Description: Comprehensive airport information
+                            lookup service
+                        </p>
+                        <p>Technology: Rust, Axum, Server-Side Rendering</p>
+                        <p>URL: <a href="/airports">/airports</a></p>
+                    </section>
+
+                    <section>
+                        <h2>🗼 Tower of Babel</h2>
+                        <p>
+                            Description: Flight aggregation and position service
+                        </p>
+                        <p>Technology: Rust, Axum</p>
+                        <p>URL: <a href="/babel">/babel</a></p>
+                    </section>
+
+                    <section>
+                        <h2>⏰ Delay-O-Rama</h2>
+                        <p>Description: Real-time flight delay monitoring</p>
+                        <p>Technology: Rust, Axum, Server-Side Rendering</p>
+                        <p>URL: <a href="/delays">/delays</a></p>
+                    </section>
+
+                    <section>
+                        <h2>🎮 Flight Controller</h2>
+                        <p>Description: Manages flight schedules and data.</p>
+                        <p>Technology: Rust, Axum</p>
+                        <p>URL: <a href="/flights">/flights</a></p>
+                    </section>
+
+                    <section>
+                        <h2>🛰️ Orbital Beacon</h2>
+                        <p>Description: Satellite positioning service.</p>
+                        <p>Technology: Rust, Axum</p>
+                        <p>URL: <a href="/satellites">/satellites</a></p>
+                    </section>
+
+                    <section>
+                        <h2>🎯 Cockpit Dashboard</h2>
+                        <p>Description: Flight monitoring dashboard.</p>
+                        <p>Technology: Yew</p>
+                        <p>URL: <a href="/cockpit">/cockpit</a></p>
+                    </section>
+
+                    <section>
+                        <h2>😱 Flightmare Tracker</h2>
+                        <p>Description: Simulated flight delay tracker.</p>
+                        <p>Technology: Yew</p>
+                        <p>URL: <a href="/flightmare">/flightmare</a></p>
+                    </section>
                 </section>
 
                 <section>
-                    <h2>Orbital Beacon</h2>
-                    <p>Description: Satellite positioning service.</p>
-                    <p>Technology: Rust, Axum</p>
-                    <p>URL: <a href="/satellites">/satellites</a></p>
-                </section>
+                    <section>
+                        <h2>🏗️ Service Architecture</h2>
+                        <div class="mermaid">
+                            <pre>
+                graph TD
+                    %% Users
+                    FS[✈️ Flight Staff]:::staff
+                    TR[🧳 Travelers]:::traveler
+                    SO[🛸 Satellite Operator]:::operator
 
-                <section>
-                    <h2>Cockpit Dashboard</h2>
-                    <p>Description: Flight monitoring dashboard.</p>
-                    <p>Technology: Yew</p>
-                    <p>URL: <a href="/cockpit">/cockpit</a></p>
-                </section>
+                    %% User Interfaces
+                    CP[🎯 Cockpit]:::ui
+                    DO[⏰ Delay-O-Rama]:::ui
+                    FM[😱 Flightmare]:::ui
 
-                <section>
-                    <h2>Flightmare Tracker</h2>
-                    <p>Description: Simulated flight delay tracker.</p>
-                    <p>Technology: Yew</p>
-                    <p>URL: <a href="/flightmare">/flightmare</a></p>
-                </section>
+                    %% Core Services
+                    TB[🗼 Tower of Babel]:::service
+                    FC[🎮 Flight Controller]:::service
+                    OB[🛰️ Orbital Beacon]:::service
+                    AA[🏢 Airport Anywhere]:::service
 
-                <section>
-                    <h2>Traefik</h2>
-                    <p>Description: Reverse proxy and load balancer.</p>
-                    <p>Technology: Go</p>
-                    <p>URL: <a href="//localhost:8080">Dashboard</a></p>
-                </section>
+                    %% User Connections
+                    FS --> CP
+                    TR --> DO
+                    TR --> FM
+                    SO --> OB
 
-                <section>
-                    <h2>Structurizr</h2>
-                    <p>Description: Architecture documentation tool.</p>
-                    <p>Technology: Java</p>
-                    <p>URL: <a href="//localhost:8082">Documentation</a></p>
+                    %% Service Dependencies
+                    CP --> FC
+                    DO --> TB
+                    FM --> FC
+
+                    TB --> FC
+                    TB --> OB
+
+                    FC --> AA
+                    FC --> OB
+
+                    OB --> AA
+
+                    %% Styling
+                    classDef staff fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    classDef traveler fill:#d32f2f,stroke:#fff,stroke-width:2px,color:#fff
+                    classDef operator fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                    classDef ui fill:#3f51b5,stroke:#fff,stroke-width:2px,color:#fff
+                    classDef service fill:#1976d2,stroke:#fff,stroke-width:2px,color:#fff
+
+                    %% Subgraphs for organization
+                    subgraph Users
+                        FS
+                        TR
+                        SO
+                    end
+
+                    subgraph Frontends
+                        CP
+                        DO
+                        FM
+                    end
+
+                    subgraph Services
+                        TB
+                        FC
+                        OB
+                        AA
+                    end
+                            </pre>
+                        </div>
+                    </section>
                 </section>
 
                 <section>
@@ -212,22 +350,6 @@
                             <li>Stores in Jaeger backend</li>
                             <li>Visualizes in Jaeger UI</li>
                         </ul>
-                    </section>
-
-                    <section>
-                        <h2>Sky Tracer Implementation</h2>
-                        <pre><code class="rust">
-                // Initialize tracer
-                let tracer = opentelemetry_jaeger::new_pipeline()
-                    .with_service_name("flight-controller")
-                    .install_simple()?;
-
-                // Create span
-                let span = tracer
-                    .span_builder("process_flight")
-                    .with_attributes(attributes)
-                    .start(&tracer);
-                                        </code></pre>
                     </section>
                 </section>
 

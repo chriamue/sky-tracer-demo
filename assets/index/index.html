@@ -2,52 +2,371 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Sky Tracer Demo Services</title>
+        <title>🛩️ Sky Tracer Demo Services</title>
         <style>
             body {
-                font-family: sans-serif;
-                margin: 20px;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             }
+
+            .container {
+                width: 100%;
+                padding: 2rem;
+            }
+
             h1 {
                 text-align: center;
+                color: #2c3e50;
+                font-size: 2.5rem;
+                margin-bottom: 2rem;
             }
+
+            .services-grid {
+                display: grid;
+                grid-template-columns: 300px 1fr;
+                gap: 2rem;
+                padding: 1rem;
+            }
+
+            .service-categories {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .service-category {
+                margin-bottom: 2rem;
+            }
+
+            .service-category h2 {
+                color: #34495e;
+                margin-top: 0;
+                font-size: 1.2rem;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 0.5rem;
+            }
+
             ul {
                 list-style: none;
                 padding: 0;
                 margin: 0;
+            }
+
+            li {
+                margin: 0.8rem 0;
+            }
+
+            .service-link {
+                display: flex;
+                align-items: center;
+                padding: 0.8rem 1.2rem;
+                background-color: #f8f9fa;
+                color: #2c3e50;
+                text-decoration: none;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+                border: 1px solid #e9ecef;
+                cursor: pointer;
+            }
+
+            .service-link:hover {
+                background-color: #e9ecef;
+                transform: translateY(-2px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .emoji {
+                margin-right: 0.5rem;
+                font-size: 1.2rem;
+            }
+
+            .preview-container {
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                position: relative;
+            }
+
+            .preview-header {
+                padding: 1rem;
+                background: #f8f9fa;
+                border-bottom: 1px solid #e9ecef;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .preview-title {
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .preview-actions {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .preview-button {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .open-external {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .refresh-preview {
+                background-color: #6c757d;
+                color: white;
+            }
+
+            .preview-frame {
+                width: 100%;
+                height: calc(100vh - 200px);
+                border: none;
+                background: white;
+                transition: opacity 0.3s ease;
+            }
+
+            .no-preview {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+                justify-content: center;
+                height: calc(100vh - 200px);
+                color: #6c757d;
+                text-align: center;
+                padding: 2rem;
             }
-            li {
-                margin: 10px 0;
+
+            .no-preview button {
+                margin-top: 1rem;
             }
-            a {
-                display: inline-block;
-                padding: 10px 20px;
-                background-color: #007bff;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
+
+            .no-preview-emoji {
+                font-size: 4rem;
+                margin-bottom: 1rem;
+                animation: pulse 2s infinite;
             }
-            a:hover {
-                background-color: #0056b3;
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                }
             }
         </style>
     </head>
     <body>
-        <h1>Sky Tracer Demo Services</h1>
-        <ul>
-            <li><a href="/presentation/index.html">Presentation</a></li>
-            <li><a href="/airports">Airport Anywhere</a></li>
-            <li><a href="/flights">Flight Controller</a></li>
-            <li><a href="/flightmare/">Flightmare Tracker</a></li>
-            <li><a href="/satellites">Orbital Beacon</a></li>
-            <li><a href="/cockpit/">Cockpit Dashboard</a></li>
-            <li><a href="/delays/FRA">Delay Orama</a></li>
-            <li><a href="//localhost:8080">Traefik Dashboard</a></li>
-            <li><a href="//localhost:8082">Structurizr Documentation</a></li>
-            <li><a href="//localhost:16686">Jaeger Tracing UI</a></li>
-        </ul>
+        <div class="container">
+            <h1>🛩️ Sky Tracer Demo</h1>
+
+            <div class="services-grid">
+                <div class="service-categories">
+                    <div class="service-category">
+                        <h2>📚 Documentation</h2>
+                        <ul>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/presentation/', '🎯 Presentation')"
+                                >
+                                    <span class="emoji">🎯</span>Presentation
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('http://localhost:8082/workspace/diagrams', '🏗️ Architecture')"
+                                >
+                                    <span class="emoji">🏗️</span>Architecture
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="service-category">
+                        <h2>✈️ Core Services</h2>
+                        <ul>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/airports', '🏢 Airport Anywhere')"
+                                >
+                                    <span class="emoji">🏢</span>Airport
+                                    Anywhere
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/flights', '🎮 Flight Controller')"
+                                >
+                                    <span class="emoji">🎮</span>Flight
+                                    Controller
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/satellites', '🛰️ Orbital Beacon')"
+                                >
+                                    <span class="emoji">🛰️</span>Orbital Beacon
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/api/babel/docs', '🗼 Tower of Babel')"
+                                >
+                                    <span class="emoji">🗼</span>Tower of Babel
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="service-category">
+                        <h2>📊 Monitoring</h2>
+                        <ul>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/delays/FRA', '⏰ Delay-O-Rama')"
+                                >
+                                    <span class="emoji">⏰</span>Delay-O-Rama
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/flightmare/', '😱 Flightmare')"
+                                >
+                                    <span class="emoji">😱</span>Flightmare
+                                    Tracker
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/cockpit/', '🎯 Cockpit')"
+                                >
+                                    <span class="emoji">🎯</span>Cockpit
+                                    Dashboard
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="service-category">
+                        <h2>🔧 Infrastructure</h2>
+                        <ul>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('//localhost:8080', '🔄 Traefik')"
+                                >
+                                    <span class="emoji">🔄</span>Traefik
+                                    Dashboard
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('//localhost:16686', '📊 Jaeger')"
+                                >
+                                    <span class="emoji">📊</span>Jaeger Tracing
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="preview-container">
+                    <div class="preview-header">
+                        <div class="preview-title">
+                            <span id="preview-emoji"></span>
+                            <span id="preview-title"
+                                >Select a service to preview</span
+                            >
+                        </div>
+                        <div class="preview-actions">
+                            <button
+                                class="preview-button refresh-preview"
+                                onclick="refreshPreview()"
+                            >
+                                <span class="emoji">🔄</span>Refresh
+                            </button>
+                            <button
+                                class="preview-button open-external"
+                                onclick="openExternal()"
+                            >
+                                <span class="emoji">↗️</span>Open External
+                            </button>
+                        </div>
+                    </div>
+                    <div id="preview-content">
+                        <div class="no-preview">
+                            <div class="no-preview-emoji">👆</div>
+                            <div>Click a service to preview</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let currentUrl = "";
+
+            function showPreview(url, title) {
+                currentUrl = url;
+                document.getElementById("preview-title").textContent = title;
+                document.getElementById("preview-content").innerHTML = `
+                <iframe
+                    src="${url}"
+                    class="preview-frame"
+                    allow="fullscreen"
+                ></iframe>
+            `;
+            }
+
+            function refreshPreview() {
+                if (currentUrl) {
+                    showPreview(
+                        currentUrl,
+                        document.getElementById("preview-title").textContent,
+                    );
+                }
+            }
+
+            function openExternal() {
+                if (currentUrl) {
+                    window.open(currentUrl, "_blank");
+                }
+            }
+        </script>
     </body>
 </html>

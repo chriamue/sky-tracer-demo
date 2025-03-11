@@ -2,6 +2,8 @@
 
 Demo for Rust web services with Yew, Axum, and Traefik
 
+[📽️ View Presentation](assets/index/presentation/index.html)
+
 ## 🚀 Features
 
 - ✈️ **Airport Information**: Complete airport database with search functionality
@@ -14,23 +16,30 @@ Demo for Rust web services with Yew, Axum, and Traefik
 - 🎯 **C4 Architecture**: Visualized system architecture using Structurizr
 - 🐳 **Docker Deployment**: Complete containerization of all components
 
-## Services
+## 🌐 Service Access
 
-### Core Services
-- 🏢 **Airport Anywhere**: Airport information lookup service
-- 🎮 **Flight Controller**: Flight management and tracking
-- 🛰️ **Orbital Beacon**: Satellite positioning system
-- 🗼 **Tower of Babel**: Flight aggregation and position service
+### Main Entry Point
+- 📍 **Landing Page**: [http://localhost:8000](http://localhost:8000)
+- 🎭 **Presentation**: [http://localhost:8000/presentation/](http://localhost:8000/presentation/)
 
 ### User Interfaces
-- 🎯 **Cockpit**: Staff flight monitoring dashboard
-- ⏰ **Delay-O-Rama**: Real-time delay monitoring
-- 😱 **Flightmare Tracker**: Delay simulation and visualization
+- 🎯 **Cockpit Dashboard**: [http://localhost:8000/cockpit/](http://localhost:8000/cockpit/) (Flight Staff)
+- ⏰ **Delay-O-Rama**: [http://localhost:8000/delays/](http://localhost:8000/delays/) (Travelers)
+- 😱 **Flightmare**: [http://localhost:8000/flightmare/](http://localhost:8000/flightmare/) (Travelers)
 
-### Infrastructure
-- 🔄 **Traefik**: Routes traffic between services
-- 📊 **Jaeger**: Distributed tracing
-- 🏗️ **Structurizr**: Architecture visualization
+### Core Services
+- 🏢 **Airport Anywhere**: [http://localhost:8000/airports](http://localhost:8000/airports)
+- 🎮 **Flight Controller**: [http://localhost:8000/flights](http://localhost:8000/flights)
+- 🛰️ **Orbital Beacon**: [http://localhost:8000/satellites](http://localhost:8000/satellites)
+- 🗼 **Tower of Babel**: [http://localhost:8000/babel](http://localhost:8000/babel)
+
+### API Documentation
+- 📚 **API Docs**: [http://localhost:8000/flights/api/docs](http://localhost:8000/flights/api/docs)
+
+### Infrastructure & Monitoring
+- 🔄 **Traefik Dashboard**: [http://localhost:8080](http://localhost:8080)
+- 📊 **Jaeger Tracing**: [http://localhost:16686](http://localhost:16686)
+- 🏗️ **Architecture Docs**: [http://localhost:8082](http://localhost:8082)
 
 ## User Roles
 
