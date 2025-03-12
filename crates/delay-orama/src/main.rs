@@ -14,7 +14,7 @@ use reqwest_middleware::ClientWithMiddleware;
 use sky_tracer::protocol::flights::FlightPositionResponse;
 use sky_tracer::protocol::flights::FlightResponse;
 use tower_http::cors::{Any, CorsLayer};
-use tracing::{error, info, instrument, warn};
+use tracing::{info, instrument};
 
 #[derive(Clone)]
 struct AppState {

@@ -37,7 +37,7 @@ impl From<DbGrund> for Grund {
             DbGrund::WeichenStoerung => Grund::WeichenStoerung,
             DbGrund::AenderungImFahrtverlauf => Grund::AenderungImFahrtverlauf,
             DbGrund::Unwetter => Grund::Unwetter,
-            _ => Grund::VerzoegerungenImBetriebsablauf, // fallback for non_exhaustive
+            _ => Grund::VerzoegerungenImBetriebsablauf,
         }
     }
 }

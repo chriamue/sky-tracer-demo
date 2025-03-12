@@ -1,3 +1,10 @@
+[serve]
+port = 8085
+
+[[proxy]]
+backend = "http://localhost:8000/api/flights"
+rewrite = "/api/flights"
+
 [build]
 target = "index.html"
 dist = "dist"
