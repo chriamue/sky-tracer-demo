@@ -127,6 +127,55 @@ main {
     }
 }
 
+.loading-sequence {
+    font-size: 3rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.loading-sequence span {
+    animation: slideIn 2s ease infinite;
+}
+
+.loading-sequence span:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.loading-sequence span:nth-child(3) {
+    animation-delay: 0.6s;
+}
+.loading-subtext {
+    font-style: italic;
+    color: #666;
+    margin-top: 1rem;
+}
+
+@keyframes bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+}
+
 .error-container {
     text-align: center;
     padding: 20px;
@@ -343,72 +392,6 @@ body {
     transform: rotate(15deg);
 }
 
-.hell-ad {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 200px;
-    z-index: 1000;
-    perspective: 1000px;
-}
-
-.hell-ad-left {
-    left: 20px;
-    transform: translateY(-50%) rotate(-5deg);
-}
-
-.hell-ad-right {
-    right: 20px;
-    transform: translateY(-50%) rotate(5deg);
-}
-
-/* Add some smokey effect */
-.fun-hell-content::before {
-    content: "";
-    position: absolute;
-    top: -20px;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: linear-gradient(rgba(0, 0, 0, 0.2), transparent);
-    filter: blur(5px);
-    animation: smoke 3s infinite;
-}
-
-@keyframes smoke {
-    0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.5;
-    }
-    50% {
-        transform: translateY(-10px) scale(1.2);
-        opacity: 0.3;
-    }
-    100% {
-        transform: translateY(-20px) scale(1.4);
-        opacity: 0;
-    }
-}
-
-.fun-hell-content {
-    background: linear-gradient(135deg, #ff0000, #800000);
-    border: 3px solid #ff6666;
-    border-radius: 15px;
-    padding: 20px;
-    color: #fff;
-    text-align: center;
-    box-shadow:
-        0 0 20px rgba(255, 0, 0, 0.3),
-        inset 0 0 30px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    animation: hell-glow 2s infinite;
-}
-
-.fun-hell-content:hover {
-    transform: scale(1.05) rotate(2deg);
-}
-
 .fun-title {
     font-size: 1.4em;
     font-weight: bold;
@@ -532,21 +515,4 @@ body {
     75% {
         transform: rotate(5deg);
     }
-}
-
-.hell-ad {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1000;
-}
-
-.hell-ad-left {
-    left: 20px;
-    transform: translateY(-50%) rotate(-3deg);
-}
-
-.hell-ad-right {
-    right: 20px;
-    transform: translateY(-50%) rotate(3deg);
 }
