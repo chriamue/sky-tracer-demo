@@ -362,146 +362,8 @@ body {
     transform: translateY(-50%) rotate(5deg);
 }
 
-.hell-content {
-    background: linear-gradient(135deg, #ff0000, #800000);
-    border: 3px solid #ff6666;
-    border-radius: 15px;
-    padding: 20px;
-    color: #fff;
-    text-align: center;
-    box-shadow:
-        0 0 20px rgba(255, 0, 0, 0.3),
-        inset 0 0 30px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    animation: hell-glow 2s infinite;
-}
-
-.hell-content:hover {
-    transform: scale(1.05);
-    box-shadow:
-        0 0 30px rgba(255, 0, 0, 0.5),
-        inset 0 0 50px rgba(0, 0, 0, 0.7);
-}
-
-.hell-emojis {
-    font-size: 3em;
-    margin-bottom: 10px;
-    position: relative;
-}
-
-.floating-emojis {
-    position: absolute;
-    top: -20px;
-    left: 0;
-    right: 0;
-    font-size: 0.5em;
-    display: flex;
-    justify-content: space-around;
-    animation: float-fire 2s infinite;
-}
-
-.hell-title {
-    font-family: "Creepster", cursive;
-    font-size: 1.5em;
-    margin: 10px 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.hell-slogan {
-    font-style: italic;
-    margin-bottom: 15px;
-    font-size: 0.9em;
-    color: #ffcccc;
-}
-
-.hell-features {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 10px;
-    border-radius: 8px;
-    margin: 15px 0;
-    font-size: 0.9em;
-}
-
-.hell-features div {
-    margin: 5px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-
-.hell-price {
-    margin: 15px 0;
-}
-
-.price-tag {
-    font-size: 2em;
-    font-weight: bold;
-    color: #ffff00;
-    text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
-    animation: price-pulse 1s infinite;
-}
-
-.soul-disclaimer {
-    font-size: 0.7em;
-    color: #ff9999;
-    font-style: italic;
-    margin-top: 5px;
-}
-
-.hell-button {
-    background: #ff3333;
-    padding: 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-top: 15px;
-    animation: button-pulse 2s infinite;
-}
-
-@keyframes hell-glow {
-    0%,
-    100% {
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
-    }
-}
-
-@keyframes float-fire {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-@keyframes price-pulse {
-    0%,
-    100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
-}
-
-@keyframes button-pulse {
-    0%,
-    100% {
-        background: #ff3333;
-    }
-    50% {
-        background: #cc0000;
-    }
-}
-
 /* Add some smokey effect */
-.hell-content::before {
+.fun-hell-content::before {
     content: "";
     position: absolute;
     top: -20px;
@@ -526,4 +388,165 @@ body {
         transform: translateY(-20px) scale(1.4);
         opacity: 0;
     }
+}
+
+.fun-hell-content {
+    background: linear-gradient(135deg, #ff0000, #800000);
+    border: 3px solid #ff6666;
+    border-radius: 15px;
+    padding: 20px;
+    color: #fff;
+    text-align: center;
+    box-shadow:
+        0 0 20px rgba(255, 0, 0, 0.3),
+        inset 0 0 30px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: hell-glow 2s infinite;
+}
+
+.fun-hell-content:hover {
+    transform: scale(1.05) rotate(2deg);
+}
+
+.fun-title {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #2f3542;
+    margin-bottom: 10px;
+}
+
+.fun-subtitle {
+    font-size: 0.7em;
+    color: #ff4757;
+    font-style: italic;
+}
+
+.mascot {
+    font-size: 3em;
+    margin: 10px 0;
+    position: relative;
+    animation: bounce 2s infinite;
+}
+
+.mascot-accessories {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.4em;
+    display: flex;
+    gap: 5px;
+}
+
+.fun-slogan {
+    font-style: italic;
+    color: #2f3542;
+    margin: 15px 0;
+    font-size: 0.9em;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.perks-list {
+    background: rgba(255, 255, 255, 0.4);
+    padding: 10px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-size: 0.9em;
+}
+
+.perks-list div {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.fun-price {
+    margin: 15px 0;
+}
+
+.price-value {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2f3542;
+    animation: wiggle 2s infinite;
+}
+
+.price-terms {
+    font-size: 0.7em;
+    color: #ff4757;
+    font-style: italic;
+}
+
+.fun-button {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.fun-button:hover {
+    background: #ff6b6b;
+    transform: scale(1.1);
+}
+
+.fun-footer {
+    margin-top: 15px;
+    font-size: 0.8em;
+    color: #2f3542;
+}
+
+.tiny-text {
+    font-size: 0.8em;
+    color: #ff4757;
+    font-style: italic;
+}
+
+@keyframes bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes wiggle {
+    0%,
+    100% {
+        transform: rotate(0);
+    }
+    25% {
+        transform: rotate(-5deg);
+    }
+    75% {
+        transform: rotate(5deg);
+    }
+}
+
+.hell-ad {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+}
+
+.hell-ad-left {
+    left: 20px;
+    transform: translateY(-50%) rotate(-3deg);
+}
+
+.hell-ad-right {
+    right: 20px;
+    transform: translateY(-50%) rotate(3deg);
 }
