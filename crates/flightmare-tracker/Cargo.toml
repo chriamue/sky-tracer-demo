@@ -11,17 +11,26 @@ keywords = ["flight-delays", "simulation", "visualization", "wasm", "aviation"]
 categories = ["wasm", "web-programming", "simulation", "visualization"]
 
 [dependencies]
-yew = { version = "0.21", features = ["csr"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+# Workspace dependencies
+yew = { workspace = true, features = ["csr"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true, features = ["wasmbind"] }
+uuid = { workspace = true, features = ["js"] }
+
+# Local dependencies
+sky-tracer = { path = "../sky-tracer" }
+
+# WASM-specific dependencies
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
+gloo-net = "0.4"
+
+# Logging
 log = "0.4"
 console_log = "0.2"
+
+# Additional specific dependencies
 deutsche-bahn-delay-reasons = "0.3.0"
-chrono = { version = "0.4", features = ["serde", "wasmbind"] }
-gloo-net = "0.4"
-sky-tracer = { path = "../sky-tracer" }
 rand = "0.8"
 getrandom = { version = "0.3", features = ["wasm_js"] }
-uuid = { version = "1.15", features = ["v4", "serde", "js"] }

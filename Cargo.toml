@@ -15,6 +15,30 @@ members = [
     "crates/delay-orama",
 ]
 
+[workspace.dependencies]
+# Common dependencies with fixed versions
+axum = { version = "0.8", features = ["macros"] }
+tokio = { version = "1.43.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.15", features = ["v4", "serde"] }
+yew = { version = "0.21" }
+tower-http = { version = "0.6", features = ["cors"] }
+reqwest = { version = "0.11", features = ["json"] }
+tracing = "0.1"
+utoipa = { version = "5.3", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "9.0", features = ["axum"] }
+
+# Tracing related
+axum-tracing-opentelemetry = "0.26.1"
+init-tracing-opentelemetry = { version = "0.27.1", features = [
+    "otlp",
+    "tracing_subscriber_ext",
+] }
+reqwest-tracing = { version = "0.4", features = ["opentelemetry_0_20"] }
+reqwest-middleware = "0.2"
+
 [dependencies]
 sky-tracer = { path = "crates/sky-tracer" }
 airport-anywhere = { path = "crates/airport-anywhere" }
