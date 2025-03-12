@@ -38,6 +38,7 @@ fn render_html(title: &str, body: String) -> Html<String> {
                 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                 <style>
                     {}
+                    {}
                 </style>
             </head>
             <body>
@@ -47,6 +48,7 @@ fn render_html(title: &str, body: String) -> Html<String> {
             </body>
         </html>"#,
         include_str!("../assets/styles.css"),
+        include_str!("../assets/orbital.css"),
         include_str!("../assets/map.js"),
     ))
 }

@@ -1,0 +1,293 @@
+.orbital-view {
+    position: relative;
+    width: 800px;
+    height: 800px;
+    margin: 2rem auto;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    padding: 100px;
+    background: linear-gradient(135deg, #1a1f3c 0%, #2c3e50 100%);
+    border-radius: 16px;
+}
+
+/* Earth */
+.earth {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 30% 30%,
+        var(--orbital-earth-color-start) 0%,
+        var(--orbital-earth-color-mid1) 40%,
+        var(--orbital-earth-color-mid2) 60%,
+        var(--orbital-earth-color-end) 100%
+    );
+    box-shadow:
+        inset -30px -30px 50px rgba(0, 0, 0, 0.4),
+        0 0 50px rgba(75, 156, 211, 0.3);
+    animation: rotate var(--orbit-duration) linear infinite;
+}
+
+/* Orbital Ring */
+.orbital-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotateX(60deg);
+    width: 700px;
+    height: 700px;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+/* Satellite Container */
+.satellite-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+    z-index: 1;
+    transform-style: preserve-3d;
+}
+
+/* Orbit Positions */
+.orbit-position-0 {
+    transform: rotate(0deg) translateX(var(--orbital-radius)) rotate(0deg);
+    animation: orbit var(--orbit-duration) linear infinite;
+    animation-delay: 0s;
+}
+
+.orbit-position-1 {
+    transform: rotate(72deg) translateX(var(--orbital-radius)) rotate(-72deg);
+    animation: orbit var(--orbit-duration) linear infinite;
+    animation-delay: -12s;
+}
+
+.orbit-position-2 {
+    transform: rotate(144deg) translateX(var(--orbital-radius)) rotate(-144deg);
+    animation: orbit var(--orbit-duration) linear infinite;
+    animation-delay: -24s;
+}
+
+.orbit-position-3 {
+    transform: rotate(216deg) translateX(var(--orbital-radius)) rotate(-216deg);
+    animation: orbit var(--orbit-duration) linear infinite;
+    animation-delay: -36s;
+}
+
+.orbit-position-4 {
+    transform: rotate(288deg) translateX(var(--orbital-radius)) rotate(-288deg);
+    animation: orbit var(--orbit-duration) linear infinite;
+    animation-delay: -48s;
+}
+
+/* Satellite */
+.satellite {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+    z-index: 1;
+    transform-style: preserve-3d;
+}
+
+.satellite-ui-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    /* Remove the animation since we're handling rotation in orbit positions */
+}
+
+/* Satellite Body */
+.satellite-body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transform-style: preserve-3d;
+}
+
+.satellite-core {
+    font-size: 2em;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+    animation: counter-orbit var(--orbit-duration) linear infinite;
+}
+
+.satellite-panel {
+    width: 30px;
+    height: 10px;
+    background: linear-gradient(to bottom, #4d4d4d 0%, #1a1a1a 100%);
+    border: 1px solid #666;
+}
+
+.satellite-panel.left {
+    transform-origin: right;
+}
+
+.satellite-panel.right {
+    transform-origin: left;
+}
+
+/* UI Elements */
+.control-panel,
+.satellite-name-tag,
+.satellite-status-tag {
+    position: absolute;
+    transform-origin: center;
+}
+
+.control-panel {
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 10px;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3;
+    width: max-content;
+    min-width: 150px;
+}
+
+.satellite:hover .control-panel {
+    opacity: 1;
+}
+
+.satellite-name-tag {
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-size: 0.9em;
+    z-index: 2;
+}
+
+.satellite-status-tag {
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+    font-size: 0.8em;
+    z-index: 2;
+}
+
+/* Status Colors */
+.status-active .satellite-name-tag {
+    background: rgba(76, 175, 80, 0.8);
+}
+
+.status-inactive .satellite-name-tag {
+    background: rgba(244, 67, 54, 0.8);
+}
+
+.status-maintenance .satellite-name-tag {
+    background: rgba(255, 152, 0, 0.8);
+}
+
+/* Controls */
+.status-select {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    padding: 5px;
+    margin-right: 5px;
+    width: 100px;
+    cursor: pointer;
+}
+
+.control-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.control-button:hover {
+    background: var(--primary-color-light);
+}
+
+/* Animations */
+@keyframes orbit {
+    from {
+        transform: rotate(0deg) translateX(var(--orbital-radius)) rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg) translateX(var(--orbital-radius))
+            rotate(-360deg);
+    }
+}
+
+@keyframes counter-orbit {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+@keyframes counter-orbit-ui {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    .orbital-view {
+        width: 600px;
+        height: 600px;
+        transform: scale(0.8);
+    }
+
+    .orbital-ring {
+        width: 500px;
+        height: 500px;
+    }
+}
+
+@media (max-width: 600px) {
+    .orbital-view {
+        width: 400px;
+        height: 400px;
+        transform: scale(0.6);
+    }
+
+    .orbital-ring {
+        width: 300px;
+        height: 300px;
+    }
+}
