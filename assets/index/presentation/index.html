@@ -49,18 +49,55 @@
             <div class="slides">
                 <section>
                     <h1>Sky Tracer Demo</h1>
+                    <p>Tracing on</p>
                     <p>A Rust Microservices Demo</p>
                 </section>
 
                 <section>
-                    <h2>Project Overview</h2>
-                    <p>A modern flight tracking ecosystem demonstrating:</p>
-                    <ul>
-                        <li>🔄 Microservices Architecture</li>
-                        <li>📊 Distributed Tracing</li>
-                        <li>👥 Role-Based Access</li>
-                        <li>🌐 Real-time Tracking</li>
-                    </ul>
+                    <section>
+                        <h2>Project Overview</h2>
+                        <p>A modern flight tracking ecosystem demonstrating:</p>
+                        <ul>
+                            <li>🔄 Microservices Architecture</li>
+                            <li>
+                                📊 Observability
+                                <ul>
+                                    <li>🔍 Distributed Tracing</li>
+                                    <li>📈 Performance Monitoring</li>
+                                    <li>🚨 Error Tracking</li>
+                                </ul>
+                            </li>
+                            <li>🌐 Frontend Applications</li>
+                            <li>
+                                🔧 Core Components
+                                <ul>
+                                    <li>
+                                        📦 <code>sky-tracer</code>: Shared core
+                                        library and protocols
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Project Overview</h2>
+                        <p>A modern flight tracking ecosystem demonstrating:</p>
+                        <ul>
+                            <li>
+                                🚀 Modern Web Features
+                                <ul>
+                                    <li>
+                                        🖥️ Server-Side Rendering (SSR) for
+                                        better SEO
+                                    </li>
+                                    <li>
+                                        ⚡ Client-Side Rendering (CSR) for
+                                        interactive features
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
                 </section>
 
                 <section>
@@ -94,7 +131,6 @@
                             <ul>
                                 <li>Manages Satellites</li>
                                 <li>Controls Launches</li>
-                                <li>Monitors Coverage</li>
                             </ul>
                         </div>
                     </div>
@@ -260,75 +296,13 @@
                 </section>
 
                 <section>
-                    <section>
-                        <h2>OpenTelemetry Components</h2>
-                        <ul>
-                            <li>Traces: End-to-end request flows</li>
-                            <li>Spans: Individual operations</li>
-                            <li>Context: Metadata and relationships</li>
-                            <li>Attributes: Key-value pairs</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2>Span Structure</h2>
-                        <pre><code class="rust">
-                // Example span in Sky Tracer
-                tracer.span_builder("flight_position_update")
-                    .with_attributes(vec![
-                        KeyValue::new("flight_number", flight_number),
-                        KeyValue::new("latitude", latitude),
-                        KeyValue::new("longitude", longitude),
-                    ])
-                    .start_with_context(&cx)
-                                        </code></pre>
-                    </section>
-                </section>
-
-                <section>
-                    <section>
-                        <h2>Trace vs Span vs Context</h2>
-                        <div class="mermaid">
-                            <pre>
-                sequenceDiagram
-                    participant Cockpit
-                    participant FlightController
-                    participant OrbitalBeacon
-
-                    Note over Cockpit,OrbitalBeacon: Trace: t.4bf9...4736
-                    Note over Cockpit,OrbitalBeacon: Span: s.6c96...f990
-
-                    Cockpit->>+FlightController: Get Flight Position
-                    Note right of FlightController: Span Context
-                    Note right of FlightController: Trace: t.4bf9...4736
-                    Note right of FlightController: Span: s.7859...5d4f
-                    Note right of FlightController: Parent: s.6c96...f990
-
-                    FlightController->>+OrbitalBeacon: Calculate Position
-                    Note right of OrbitalBeacon: Span Context
-                    Note right of OrbitalBeacon: Trace: t.4bf9...4736
-                    Note right of OrbitalBeacon: Span: s.9c79...c2f8
-                    Note right of OrbitalBeacon: Parent: s.7859...5d4f
-
-                    OrbitalBeacon-->>-FlightController: Position Data
-                    FlightController-->>-Cockpit: Updated Position
-                            </pre>
-                        </div>
-                        <ul>
-                            <li>
-                                <b>Trace ID:</b> <code>t.</code> + shortened
-                                128-bit identifier
-                            </li>
-                            <li>
-                                <b>Span ID:</b> <code>s.</code> + shortened
-                                unique identifier
-                            </li>
-                            <li>
-                                <b>Span Context:</b> Carries identifiers and
-                                metadata
-                            </li>
-                        </ul>
-                    </section>
+                    <h2>OpenTelemetry Components</h2>
+                    <ul>
+                        <li>Traces: End-to-end request flows</li>
+                        <li>Spans: Individual operations</li>
+                        <li>Context: Metadata and relationships</li>
+                        <li>Attributes: Key-value pairs</li>
+                    </ul>
                 </section>
 
                 <section>
@@ -342,15 +316,13 @@
                 </section>
 
                 <section>
-                    <section>
-                        <h2>Jaeger Integration</h2>
-                        <ul>
-                            <li>OTEL collector receives traces</li>
-                            <li>Processes and enriches data</li>
-                            <li>Stores in Jaeger backend</li>
-                            <li>Visualizes in Jaeger UI</li>
-                        </ul>
-                    </section>
+                    <h2>Jaeger Integration</h2>
+                    <ul>
+                        <li>OTEL collector receives traces</li>
+                        <li>Processes and enriches data</li>
+                        <li>Stores in Jaeger backend</li>
+                        <li>Visualizes in Jaeger UI</li>
+                    </ul>
                 </section>
 
                 <section>
@@ -442,29 +414,90 @@ sequenceDiagram
                     </section>
 
                     <section>
+                        <h2>Trace vs Span vs Context</h2>
+                        <div class="mermaid">
+                            <pre>
+                    sequenceDiagram
+                        participant C as Cockpit Dashboard
+                        participant TB as Tower of Babel
+                        participant FC as Flight Controller
+                        participant OB as Orbital Beacon
+                        participant AA as Airport Anywhere
+
+                        Note over C,AA: Trace: t.4bf9...4736 (Flight Position Request)
+                        Note over C,AA: Root Span: s.6c96...f990
+
+                        C->>+TB: Get Flight Position
+                        Note right of TB: Span Context
+                        Note right of TB: Trace: t.4bf9...4736
+                        Note right of TB: Span: s.7859...5d4f
+                        Note right of TB: Parent: s.6c96...f990
+
+                        TB->>+FC: Fetch Flight Details
+                        Note right of FC: Span Context
+                        Note right of FC: Trace: t.4bf9...4736
+                        Note right of FC: Span: s.9c79...c2f8
+                        Note right of FC: Parent: s.7859...5d4f
+
+                        FC->>AA: Get Airport Data
+                        AA-->>FC: Airport Coordinates
+
+                        FC->>+OB: Calculate Position
+                        Note right of OB: Span Context
+                        Note right of OB: Trace: t.4bf9...4736
+                        Note right of OB: Span: s.3e45...a1b2
+                        Note right of OB: Parent: s.9c79...c2f8
+
+                        OB-->>-FC: Satellite Position
+                        FC-->>-TB: Flight Position
+                        TB-->>-C: Current Location
+                            </pre>
+                        </div>
+                    </section>
+                    <section>
+                        <ul>
+                            <li>
+                                <b>Trace:</b> Complete flight position request
+                                across all services
+                            </li>
+                            <li>
+                                <b>Spans:</b> Individual operations (API calls,
+                                calculations)
+                            </li>
+                            <li>
+                                <b>Context:</b> Carries trace and span IDs plus
+                                metadata
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
                         <h2>Span Context Example</h2>
                         <pre><code class="json">
                     {
                       "trace_id": "t.4bf9...4736",
-                      "span_id": "s.7859...5d4f",
+                      "span_id": "s.9c79...c2f8",
                       "trace_flags": "01",
-                      "trace_state": "acme_geo=lat:50.033,lon:8.571"
+                      "trace_state": {
+                        "flight_number": "FRA123",
+                        "departure": "FRA",
+                        "arrival": "LIS",
+                        "satellite_id": "sat-789"
+                      }
                     }
-                    </code></pre>
+                        </code></pre>
                         <ul>
                             <li>
-                                <b>trace_id:</b> Identifies the entire trace
-                                path.
+                                <b>trace_id:</b> Identifies entire flight
+                                position request flow
                             </li>
                             <li>
-                                <b>span_id:</b> Unique ID for this specific
-                                operation.
+                                <b>span_id:</b> Unique ID for flight controller
+                                operation
                             </li>
                             <li>
-                                <b>trace_flags:</b> Carries tracing options
-                                (e.g., sampling).
+                                <b>trace_state:</b> Flight-specific context data
                             </li>
-                            <li><b>trace_state:</b> Vendor-specific data.</li>
                         </ul>
                     </section>
 
