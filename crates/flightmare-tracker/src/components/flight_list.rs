@@ -19,7 +19,7 @@ pub fn flight_list() -> Html {
         let loading = loading.clone();
         let error = error.clone();
 
-        use_effect_with(flights.clone(), move |_| {
+        use_effect_with((), move |_| {
             spawn_local(async move {
                 sleep(Duration::from_secs(2)).await;
                 loading.set(true);

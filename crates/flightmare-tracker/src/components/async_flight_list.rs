@@ -55,15 +55,20 @@ fn flight_list_content() -> HtmlResult {
     }
 }
 
+#[function_component(LoadingFallback)]
+fn loading_fallback() -> Html {
+    html! {
+        <div class="loading">
+            <div class="spinner">{"🌪️"}</div>
+            <p>{"Finding excuses..."}</p>
+        </div>
+    }
+}
+
 #[function_component(AsyncFlightList)]
 pub fn async_flight_list() -> Html {
     html! {
-        <Suspense fallback={html! {
-            <div class="loading">
-                <div class="spinner">{"🌪️"}</div>
-                <p>{"Finding excuses..."}</p>
-            </div>
-        }}>
+        <Suspense fallback={html! { <LoadingFallback /> }}>
             <FlightListContent />
         </Suspense>
     }
