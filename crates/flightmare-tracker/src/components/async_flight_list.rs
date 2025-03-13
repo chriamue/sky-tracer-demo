@@ -1,18 +1,12 @@
+use crate::components::FlightWithDelayComponent;
+use crate::grund::get_random_grund;
+use crate::FlightWithDelay;
 use gloo_net::http::Request;
 use gloo_timers::future::sleep;
 use sky_tracer::protocol::flights::FlightResponse;
 use std::time::Duration;
 use yew::prelude::*;
 use yew::suspense::use_future;
-
-use crate::components::GrundDisplay;
-use crate::grund::{get_random_grund, Grund};
-
-#[derive(Clone, PartialEq)]
-struct FlightWithDelay {
-    flight: FlightResponse,
-    grund: Option<Grund>,
-}
 
 async fn fetch_flights() -> Result<Vec<FlightWithDelay>, String> {
     sleep(Duration::from_secs(5)).await;
@@ -27,17 +21,18 @@ async fn fetch_flights() -> Result<Vec<FlightWithDelay>, String> {
         .await
         .map_err(|e| format!("Failed to parse flight data: {}", e))?;
 
-    Ok(flights
+    let flights_with_delay: Vec<FlightWithDelay> = flights
         .into_iter()
-        .map(|flight| FlightWithDelay {
-            flight,
-            grund: if rand::random::<f32>() < 0.5 {
-                Some(get_random_grund())
+        .map(|flight| {
+            if rand::random::<f32>() < 0.5 {
+                FlightWithDelay::with_grund(flight, get_random_grund())
             } else {
-                None
-            },
+                flight.into()
+            }
         })
-        .collect())
+        .collect();
+
+    Ok(flights_with_delay)
 }
 
 #[function_component(FlightListContent)]
@@ -47,31 +42,9 @@ fn flight_list_content() -> HtmlResult {
     match &*flights {
         Ok(flights) => Ok(html! {
             <div class="flight-list">
-                {flights.iter().map(|flight_with_delay| {
-                    html! {
-                        <div class="flight-item">
-                            <div class="flight-info">
-                                <h3>{&flight_with_delay.flight.flight_number}</h3>
-                                <p class="route">
-                                    {&flight_with_delay.flight.departure}
-                                    {" → "}
-                                    {&flight_with_delay.flight.arrival}
-                                </p>
-                                <p class="time">
-                                    {"Departure: "}
-                                    {flight_with_delay.flight.departure_time.format("%Y-%m-%d %H:%M")}
-                                </p>
-                                if let Some(arrival_time) = flight_with_delay.flight.arrival_time {
-                                    <p class="time">
-                                        {"Arrival: "}
-                                        {arrival_time.format("%Y-%m-%d %H:%M")}
-                                    </p>
-                                }
-                            </div>
-                            <GrundDisplay grund={flight_with_delay.grund.clone()} />
-                        </div>
-                    }
-                }).collect::<Html>()}
+                {for flights.iter().map(|flight_with_delay| html! {
+                    <FlightWithDelayComponent flight_with_delay={flight_with_delay.clone()} />
+                })}
             </div>
         }),
         Err(error) => Ok(html! {
