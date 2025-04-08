@@ -5,5 +5,5 @@ target/
 .env
 Dockerfile
 **/Dockerfile
-docker-compose.yml
+compose.yml
 README.md

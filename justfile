@@ -7,15 +7,14 @@ default:
 
 # Build and start all services
 up:
-    docker compose up --build -d
+    docker compose up -d
     @echo "Services are starting..."
     @echo "Access the applications at:"
     @echo "- Cockpit Dashboard: http://localhost:8080"
     @echo "- Airport Anywhere: http://localhost:3000"
     @echo "- Flight Controller: http://localhost:3001"
     @echo "- Orbital Beacon: http://localhost:3002"
-    @echo "- Flightmare Tracker: http://localhost:3003"
-    @echo "- Structurizr: http://localhost:8081"
+    @echo "- Structurizr: http://localhost:8082"
 
 # Stop all services
 down:
