@@ -1,6 +1,18 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
+
+/// Generates an example departure time string (1 minute from now)
+pub fn example_departure_time() -> String {
+    let future_time = Utc::now() + Duration::minutes(1);
+    future_time.to_rfc3339()
+}
+
+/// Generates an example arrival time string (10 minutes from now)
+pub fn example_arrival_time() -> String {
+    let future_time = Utc::now() + Duration::minutes(10);
+    future_time.to_rfc3339()
+}
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CreateFlightRequest {
@@ -10,11 +22,11 @@ pub struct CreateFlightRequest {
     pub departure: String,
     /// Arrival airport code
     pub arrival: String,
-    /// Scheduled departure time (ISO 8601)
-    #[schema(value_type = String, format = "date-time", example = "2025-03-01T10:00:00Z")]
+    /// Scheduled departure time (ISO 8601) - should be set to current time + 1 minute
+    #[schema(value_type = String, format = "date-time", example = example_departure_time)]
     pub departure_time: DateTime<Utc>,
-    /// Scheduled arrival time (ISO 8601)
-    #[schema(value_type = String, format = "date-time", example = "2025-03-01T11:30:00Z")]
+    /// Scheduled arrival time (ISO 8601) - should be set to departure time + 90 minutes
+    #[schema(value_type = String, format = "date-time", example = example_arrival_time)]
     pub arrival_time: Option<DateTime<Utc>>,
 }
 

@@ -17,6 +17,8 @@ use sky_tracer::protocol::flights::FlightResponse;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, instrument};
 use utoipa::OpenApi;
+use utoipa_rapidoc::RapiDoc;
+use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Debug, Deserialize)]
@@ -83,10 +85,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers()?;
 
     let flight_service = FlightService::new();
+    let api_doc = ApiDoc::openapi();
 
     let app = Router::new()
         .route("/", get(render_page))
-        .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", api_doc.clone()))
+        .merge(
+            RapiDoc::with_openapi("/api-docs/rapidoc/openapi.json", api_doc.clone())
+                .path("/api/rapidoc"),
+        )
+        .merge(Redoc::with_url("/api/redoc", api_doc))
         .route("/api/flights", post(create_flight))
         .route("/api/flights", get(list_flights))
         .route(

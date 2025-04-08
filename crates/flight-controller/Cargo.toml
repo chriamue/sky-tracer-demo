@@ -33,6 +33,8 @@ serde_json = { workspace = true }
 tower-http = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
+utoipa-rapidoc = { version = "6.0.0", features = ["axum"] }
+utoipa-redoc = { version = "6", features = ["axum"] }
 reqwest = { workspace = true }
 uuid = { workspace = true }
 yew = { workspace = true, optional = true, features = ["ssr"] }
