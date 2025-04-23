@@ -45,3 +45,6 @@ init-tracing-opentelemetry = { workspace = true }
 tracing = { workspace = true }
 reqwest-tracing = { workspace = true }
 reqwest-middleware = { workspace = true }
+
+[dev-dependencies]
+axum-test = "17.3.0"
