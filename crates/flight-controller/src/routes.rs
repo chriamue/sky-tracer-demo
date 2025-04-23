@@ -38,7 +38,7 @@ impl IntoResponse for ApiError {
 /// Creates a new flight with the provided details and returns the flight information.
 #[utoipa::path(
     post,
-    path = "/api/flights",
+    path = "/api/flights/",
     request_body = CreateFlightRequest,
     responses(
         (status = 200, description = "Flight created successfully", body = FlightResponse),
@@ -85,7 +85,7 @@ pub async fn create_flight(
 /// Retrieves a list of flights, optionally filtered by departure, arrival, and date.
 #[utoipa::path(
     get,
-    path = "/api/flights",
+    path = "/api/flights/",
     params(
         ListFlightsRequest
     ),

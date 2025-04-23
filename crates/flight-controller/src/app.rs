@@ -92,8 +92,8 @@ pub fn app() -> Router<()> {
                 .path("/api/rapidoc/"),
         )
         .merge(Redoc::with_url("/api/redoc/", api_doc))
-        .route("/api/flights", post(create_flight))
-        .route("/api/flights", get(list_flights))
+        .route("/api/flights/", post(create_flight))
+        .route("/api/flights/", get(list_flights))
         .route(
             "/api/flights/{flight_number}/position",
             get(get_flight_position),

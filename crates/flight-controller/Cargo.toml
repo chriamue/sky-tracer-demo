@@ -48,3 +48,4 @@ reqwest-middleware = { workspace = true }
 
 [dev-dependencies]
 axum-test = "17.3.0"
+serde-json-assert = "0.2.1"
