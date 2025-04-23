@@ -1,7 +1,7 @@
 use crate::{
     flight_service::FlightService,
     openapi::ApiDoc,
-    service::{create_flight, get_flight_position, list_flights},
+    routes::{create_flight, get_flight_position, list_flights},
     ui::pages::{Home, HomeProps},
 };
 use axum::{
@@ -86,12 +86,12 @@ pub fn app() -> Router<()> {
 
     let app = Router::new()
         .route("/", get(render_page))
-        .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", api_doc.clone()))
+        .merge(SwaggerUi::new("/api/docs/").url("/api-docs/openapi.json", api_doc.clone()))
         .merge(
             RapiDoc::with_openapi("/api-docs/rapidoc/openapi.json", api_doc.clone())
-                .path("/api/rapidoc"),
+                .path("/api/rapidoc/"),
         )
-        .merge(Redoc::with_url("/api/redoc", api_doc))
+        .merge(Redoc::with_url("/api/redoc/", api_doc))
         .route("/api/flights", post(create_flight))
         .route("/api/flights", get(list_flights))
         .route(

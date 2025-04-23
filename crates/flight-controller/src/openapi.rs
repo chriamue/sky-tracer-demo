@@ -1,12 +1,12 @@
-use crate::service;
+use crate::routes;
 use sky_tracer::protocol::flights;
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        service::create_flight,
-        service::list_flights,
+        routes::create_flight,
+        routes::list_flights,
     ),
     components(
         schemas(
