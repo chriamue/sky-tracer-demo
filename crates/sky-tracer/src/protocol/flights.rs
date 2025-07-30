@@ -22,10 +22,10 @@ pub struct CreateFlightRequest {
     pub departure: String,
     /// Arrival airport code
     pub arrival: String,
-    /// Scheduled departure time (ISO 8601) - should be set to current time + 1 minute
+    /// Scheduled departure time
     #[schema(value_type = String, format = "date-time", example = example_departure_time)]
     pub departure_time: DateTime<Utc>,
-    /// Scheduled arrival time (ISO 8601) - should be set to departure time + 90 minutes
+    /// Scheduled arrival time
     #[schema(value_type = String, format = "date-time", example = example_arrival_time)]
     pub arrival_time: Option<DateTime<Utc>>,
 }
@@ -34,7 +34,7 @@ pub struct CreateFlightRequest {
 pub struct FlightResponse {
     /// Flight number
     pub flight_number: String,
-    /// Aircraft registration number
+    /// Aircraft number
     pub aircraft_number: String,
     /// Departure airport code
     pub departure: String,

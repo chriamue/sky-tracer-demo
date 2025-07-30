@@ -15,6 +15,7 @@ members = [
     "crates/orbital-beacon",
     "crates/tower-of-babel",
     "crates/delay-orama",
+    "crates/sky-nexus",
 ]
 
 [workspace.dependencies]
