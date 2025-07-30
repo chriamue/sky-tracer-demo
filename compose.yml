@@ -227,6 +227,37 @@ services:
     networks:
       - sky-tracer
 
+  sky-nexus:
+    build:
+      context: .
+      dockerfile: crates/sky-nexus/Dockerfile
+    depends_on:
+      - airport-anywhere
+      - tower-of-babel
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nexus.entrypoints=web"
+      - "traefik.http.routers.nexus.rule=PathPrefix(`/nexus`)"
+      - "traefik.http.services.nexus.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.nexus-strip.stripprefix.prefixes=/nexus"
+      - "traefik.http.routers.nexus.middlewares=nexus-strip@docker"
+      - "traefik.http.routers.nexus-api.entrypoints=web"
+      - "traefik.http.routers.nexus-api.rule=PathPrefix(`/api/nexus`)"
+      - "traefik.http.routers.nexus-api.service=nexus"
+      - "traefik.http.routers.nexus-swagger.entrypoints=web"
+      - "traefik.http.routers.nexus-swagger.rule=PathPrefix(`/swagger-ui`)"
+      - "traefik.http.routers.nexus-swagger.service=nexus"
+    environment:
+      - RUST_LOG=info,tower_http=debug
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=always_on
+      - SERVICE_NAME=sky-nexus
+    ports:
+      - 8083:8080
+    networks:
+      - sky-tracer
+
 networks:
   sky-tracer:
     name: sky-tracer
