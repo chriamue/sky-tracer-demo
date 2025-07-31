@@ -12,9 +12,22 @@ uuid = { workspace = true }
 chrono = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
-rmcp = "0.3.1"
+rmcp = { version = "0.3.2", features = [
+    "macros",
+    "server",
+    "transport-sse-server",
+    "transport-streamable-http-server",
+    "schemars",
+] }
 sky-tracer = { path = "../sky-tracer" }
 reqwest = { workspace = true }
 tracing = { workspace = true }
 axum-tracing-opentelemetry = { workspace = true }
 init-tracing-opentelemetry = { workspace = true }
+
+schemars = { version = "1.0", features = ["derive"] }
+hyper = "1.0"
+hyper-util = "0.1"
+anyhow = "1.0"
+tower = "0.5"
+http-body-util = "0.1.3"

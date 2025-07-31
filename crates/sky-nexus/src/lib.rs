@@ -1,3 +1,4 @@
+pub mod mcp;
 pub mod openapi;
 pub mod routes;
 pub mod services;
