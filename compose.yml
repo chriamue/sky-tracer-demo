@@ -248,11 +248,20 @@ services:
       - "traefik.http.routers.nexus-swagger.rule=PathPrefix(`/swagger-ui`)"
       - "traefik.http.routers.nexus-swagger.service=nexus"
     environment:
-      - RUST_LOG=info,tower_http=debug
+      # Logging and Observability
+      - RUST_LOG=info,tower_http=debug,sky_nexus=debug,rmcp=debug
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
       - SERVICE_NAME=sky-nexus
+
+      # External Service URLs (using internal Docker network)
+      - AIRPORT_SERVICE_URL=http://airport-anywhere:3000
+      - FLIGHT_SERVICE_URL=http://tower-of-babel:3003/api/v1/flights
+
+      # Application Configuration
+      - BIND_ADDRESS=0.0.0.0:8080
+      - PATH_PREFIX=/nexus
     ports:
       - 8083:8080
     networks:
