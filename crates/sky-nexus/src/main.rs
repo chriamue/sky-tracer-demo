@@ -1,4 +1,3 @@
-use std::net::SocketAddr;
 use tracing::info;
 
 #[tokio::main]
@@ -10,7 +9,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     let app = sky_nexus::app();
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let addr = format!("0.0.0.0:{}", port);
+    let listener = tokio::net::TcpListener::bind(&addr).await?;
     info!("Sky Nexus listening on http://localhost:8080");
     info!("API documentation available at http://localhost:8080/swagger-ui");
 

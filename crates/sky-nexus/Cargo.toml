@@ -8,7 +8,7 @@ axum = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-uuid = { workspace = true }
+uuid.workspace = true
 chrono = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
@@ -25,7 +25,7 @@ tracing = { workspace = true }
 axum-tracing-opentelemetry = { workspace = true }
 init-tracing-opentelemetry = { workspace = true }
 
-schemars = { version = "1.0", features = ["derive"] }
+schemars = { version = "1.0", features = ["derive", "uuid1"] }
 hyper = "1.0"
 hyper-util = "0.1"
 anyhow = "1.0"
