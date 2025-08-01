@@ -5,7 +5,7 @@ use std::env;
 use tracing::{info, instrument};
 
 fn get_airport_service_url() -> String {
-    env::var("AIRPORT_SERVICE_URL").unwrap_or_else(|_| "http://localhost:3000".to_string())
+    env::var("AIRPORT_SERVICE_URL").unwrap_or_else(|_| "http://localhost:3000/api".to_string())
 }
 
 #[instrument]
@@ -13,7 +13,7 @@ pub async fn fetch_airports() -> Result<Vec<Airport>, reqwest::Error> {
     info!("Fetching all airports");
     let client = Client::new();
     let base_url = get_airport_service_url();
-    let url = format!("{}/api/airports", base_url);
+    let url = format!("{}/airports", base_url);
 
     info!(url = %url, "Making request to fetch airports");
     let resp = client.get(&url).send().await?;
@@ -45,7 +45,7 @@ pub async fn fetch_airport_by_code(code: &str) -> Result<Airport, reqwest::Error
     info!(code = %code, "Fetching airport by code");
     let client = Client::new();
     let base_url = get_airport_service_url();
-    let url = format!("{}/api/airports/search?code={}", base_url, code);
+    let url = format!("{}/airports/search?code={}", base_url, code);
 
     info!(url = %url, "Making request to search airport");
     let resp = client.get(&url).send().await?;

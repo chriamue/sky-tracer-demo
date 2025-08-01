@@ -1,7 +1,7 @@
 export PORT := "9093"
+export AIRPORT_SERVICE_URL := "http://localhost:3000/api"
+export FLIGHT_SERVICE_URL := "http://localhost:3001/api"
 export SATELLITE_SERVICE_URL := "http://localhost:3002/api"
-export AIRPORT_SERVICE_URL := "http://localhost:3000"
-export FLIGHT_SERVICE_URL := "http://localhost:3003/api/v1/flights"
 export RUST_LOG := "info,tower_http=debug,sky_nexus=debug"
 
 default:

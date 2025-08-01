@@ -1,3 +1,3 @@
 pub mod tools;
 
-pub use tools::{AirportTools, SatelliteTools};
+pub use tools::{AirportTools, FlightTools, SatelliteTools};
