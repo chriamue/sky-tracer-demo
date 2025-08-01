@@ -234,6 +234,7 @@ services:
     depends_on:
       - airport-anywhere
       - tower-of-babel
+      - orbital-beacon
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nexus.entrypoints=web"
@@ -258,6 +259,7 @@ services:
       # External Service URLs (using internal Docker network)
       - AIRPORT_SERVICE_URL=http://airport-anywhere:3000
       - FLIGHT_SERVICE_URL=http://tower-of-babel:3003/api/v1/flights
+      - SATELLITE_SERVICE_URL=http://orbital-beacon:3002/api/v1/satellites
 
       # Application Configuration
       - BIND_ADDRESS=0.0.0.0:8080
