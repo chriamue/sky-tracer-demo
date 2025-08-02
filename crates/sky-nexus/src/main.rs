@@ -24,10 +24,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let satellite_service_base_url = env::var("SATELLITE_SERVICE_BASE_URL")
         .unwrap_or_else(|_| "http://localhost:3002".to_string());
 
+    let babel_service_base_url =
+        env::var("BABEL_SERVICE_BASE_URL").unwrap_or_else(|_| "http://localhost:3003".to_string());
+
     info!("Starting {} service on port {}", service_name, service_port);
     info!(airport_service_base_url = %airport_service_base_url, "Configured Airport Service base URL");
     info!(flight_service_base_url = %flight_service_base_url, "Configured Flight Service base URL");
     info!(satellite_service_base_url = %satellite_service_base_url, "Configured Satellite Service base URL");
+    info!(babel_service_base_url = %babel_service_base_url, "Configured Babel Service base URL");
 
     let app = app::app();
 
@@ -35,6 +39,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     info!("Sky Nexus listening on http://localhost:{}", service_port);
     info!(
         "API documentation available at http://localhost:{}/swagger-ui",
+        service_port
+    );
+    info!("MCP endpoints available at:");
+    info!(
+        "  - Airports: http://localhost:{}/mcp/airports",
+        service_port
+    );
+    info!("  - Flights: http://localhost:{}/mcp/flights", service_port);
+    info!(
+        "  - Satellites: http://localhost:{}/mcp/satellites",
+        service_port
+    );
+    info!(
+        "  - DateTime: http://localhost:{}/mcp/datetime",
+        service_port
+    );
+    info!(
+        "  - Babel (Flight Tracking): http://localhost:{}/mcp/babel",
         service_port
     );
 

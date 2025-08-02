@@ -30,7 +30,6 @@ pub async fn get_flights_by_airport(
     Path(airport_code): Path<String>,
     State(service): State<BabelService>,
 ) -> impl IntoResponse {
-    // ... implementation stays the same
     match service.list_flights_by_airport(&airport_code).await {
         Ok(flights) => (StatusCode::OK, Json(flights)).into_response(),
         Err(BabelServiceError::NotFound(msg)) => (

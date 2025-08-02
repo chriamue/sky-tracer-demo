@@ -3,7 +3,7 @@ use crate::grund::get_random_grund;
 use crate::FlightWithDelay;
 use gloo_net::http::Request;
 use gloo_timers::future::sleep;
-use sky_tracer::protocol::flights::FlightResponse;
+use sky_tracer::protocol::{flights::FlightResponse, FLIGHTS_API_PATH};
 use std::time::Duration;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
@@ -24,7 +24,7 @@ pub fn flight_list() -> Html {
                 sleep(Duration::from_secs(2)).await;
                 loading.set(true);
                 sleep(Duration::from_secs(2)).await;
-                match Request::get("/api/flights").send().await {
+                match Request::get(FLIGHTS_API_PATH).send().await {
                     Ok(response) => match response.json::<Vec<FlightResponse>>().await {
                         Ok(flight_data) => {
                             let flights_with_delay: Vec<FlightWithDelay> = flight_data

@@ -4,6 +4,7 @@ export RUST_LOG := "info,tower_http=debug,sky_nexus=debug,rmcp=debug"
 export AIRPORT_SERVICE_BASE_URL := "http://localhost:3000"
 export FLIGHT_SERVICE_BASE_URL := "http://localhost:3001"
 export SATELLITE_SERVICE_BASE_URL := "http://localhost:3002"
+export BABEL_SERVICE_BASE_URL := "http://localhost:3003"
 
 default:
     @just --list

@@ -23,6 +23,6 @@ COPY --from=builder /usr/src/app/crates/flightmare-tracker/dist /usr/share/nginx
 # Copy nginx configuration
 COPY crates/flightmare-tracker/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

@@ -4,7 +4,7 @@ use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_tracing::TracingMiddleware;
 use sky_tracer::protocol::flights::CreateFlightRequest;
 use sky_tracer::protocol::satellite::{CalculatePositionRequest, CalculatePositionResponse};
-use sky_tracer::protocol::ORBITAL_BEACON_POSITION_API_PATH;
+use sky_tracer::protocol::SATELLITES_POSITION_API_PATH;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -108,7 +108,8 @@ impl FlightService {
         &self,
         flight: &Flight,
     ) -> Result<(f64, f64, DateTime<Utc>), String> {
-        let orbital_beacon_url = std::env::var("ORBITAL_BEACON_URL")
+        // Use the correct environment variable name matching the compose file
+        let orbital_beacon_url = std::env::var("ORBITAL_BEACON_BASE_URL")
             .unwrap_or_else(|_| "http://orbital-beacon:3002".to_string());
 
         debug!(url = %orbital_beacon_url, "Using orbital beacon URL");
@@ -126,6 +127,9 @@ impl FlightService {
         debug!(
             departure = %position_request.departure,
             arrival = %position_request.arrival,
+            departure_time = %position_request.departure_time,
+            arrival_time = %position_request.arrival_time,
+            current_time = ?position_request.current_time,
             "Sending position calculation request"
         );
 
@@ -139,9 +143,9 @@ impl FlightService {
         };
 
         // Use the orbital beacon position API path constant
-        let full_url = format!("{}{}", orbital_beacon_url, ORBITAL_BEACON_POSITION_API_PATH);
+        let full_url = format!("{}{}", orbital_beacon_url, SATELLITES_POSITION_API_PATH);
 
-        debug!(url = %full_url, "Sending position request");
+        info!(url = %full_url, "Sending position request to orbital beacon");
 
         match self
             .http_client
@@ -153,16 +157,23 @@ impl FlightService {
         {
             Ok(response) => {
                 let status = response.status();
-                debug!(status = %status, "Received response from orbital beacon");
+                info!(status = %status, "Received response from orbital beacon");
 
                 if response.status().is_success() {
                     match response.json::<CalculatePositionResponse>().await {
                         Ok(position_data) => {
+                            info!(
+                                positions_count = position_data.positions.len(),
+                                "Received position data from orbital beacon"
+                            );
+
                             if let Some(position) = position_data.positions.first() {
                                 info!(
                                     flight_number = %flight.flight_number,
                                     latitude = position.latitude,
                                     longitude = position.longitude,
+                                    altitude = position.altitude,
+                                    satellite_id = %position.satellite_id,
                                     "Successfully calculated flight position"
                                 );
 
@@ -187,11 +198,11 @@ impl FlightService {
                         error = %error_text,
                         "Orbital beacon returned error"
                     );
-                    Err(format!("Orbital beacon error: {}", error_text))
+                    Err(format!("Orbital beacon error ({}): {}", status, error_text))
                 }
             }
             Err(e) => {
-                error!(error = %e, "Failed to connect to orbital beacon");
+                error!(error = %e, url = %full_url, "Failed to connect to orbital beacon");
                 Err(format!("Failed to connect to orbital beacon: {}", e))
             }
         }
@@ -297,7 +308,7 @@ mod tests {
     #[test]
     fn test_api_path_constants() {
         // Verify we're using the correct API paths
-        use sky_tracer::protocol::ORBITAL_BEACON_POSITION_API_PATH;
-        assert_eq!(ORBITAL_BEACON_POSITION_API_PATH, "/api/v1/position");
+        use sky_tracer::protocol::SATELLITES_POSITION_API_PATH;
+        assert_eq!(SATELLITES_POSITION_API_PATH, "/api/v1/satellites/position");
     }
 }

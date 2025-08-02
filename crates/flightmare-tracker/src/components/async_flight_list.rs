@@ -3,7 +3,7 @@ use crate::grund::get_random_grund;
 use crate::FlightWithDelay;
 use gloo_net::http::Request;
 use gloo_timers::future::sleep;
-use sky_tracer::protocol::flights::FlightResponse;
+use sky_tracer::protocol::{flights::FlightResponse, FLIGHTS_API_PATH};
 use std::time::Duration;
 use yew::prelude::*;
 use yew::suspense::use_future;
@@ -11,7 +11,7 @@ use yew::suspense::use_future;
 async fn fetch_flights() -> Result<Vec<FlightWithDelay>, String> {
     sleep(Duration::from_secs(5)).await;
 
-    let response = Request::get("/api/flights")
+    let response = Request::get(FLIGHTS_API_PATH)
         .send()
         .await
         .map_err(|e| format!("Failed to fetch flights: {}", e))?;

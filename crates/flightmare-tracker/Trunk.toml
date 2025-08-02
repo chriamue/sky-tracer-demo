@@ -2,8 +2,9 @@
 port = 8085
 
 [[proxy]]
-backend = "http://localhost:8000/api/flights"
-rewrite = "/api/flights"
+# Use the protocol path for flights API
+backend = "http://localhost:3001/api/v1/flights"
+rewrite = "/api/v1/flights"
 
 [build]
 target = "index.html"
