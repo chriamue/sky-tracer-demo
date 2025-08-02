@@ -1,0 +1,12 @@
+export PORT := "3004"
+export SERVICE_NAME := "delay-orama"
+export RUST_LOG := "info,tower_http=debug,delay_orama=debug"
+export TOWER_BABEL_BASE_URL := "http://localhost:3003"
+export AIRPORT_SERVICE_BASE_URL := "http://localhost:3000"
+
+default:
+    @just --list
+
+run:
+    echo "Running delay-orama service..."
+    cargo run
