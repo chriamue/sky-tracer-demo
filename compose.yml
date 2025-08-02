@@ -102,28 +102,23 @@ services:
       context: .
       dockerfile: crates/flightmare-tracker/Dockerfile
     depends_on:
-      - airport-anywhere
       - flight-controller
     labels:
       - "traefik.enable=true"
-      # Docs route: /flightmare/docs (high priority)
-      - "traefik.http.routers.flightmare-docs.entrypoints=web"
-      - "traefik.http.routers.flightmare-docs.rule=PathPrefix(`/flightmare/docs`)"
-      - "traefik.http.routers.flightmare-docs.priority=90"
-      - "traefik.http.routers.flightmare-docs.service=flightmare"
-
       # Main service route (lowest priority) - handles all /flightmare requests
       - "traefik.http.routers.flightmare.entrypoints=web"
       - "traefik.http.routers.flightmare.rule=PathPrefix(`/flightmare`)"
       - "traefik.http.routers.flightmare.priority=10"
-      - "traefik.http.services.flightmare.loadbalancer.server.port=80"
+      - "traefik.http.services.flightmare.loadbalancer.server.port=8080"
       - "traefik.http.middlewares.flightmare-strip.stripprefix.prefixes=/flightmare"
       - "traefik.http.routers.flightmare.middlewares=flightmare-strip@docker"
     environment:
       - RUST_LOG=info,flightmare_tracker=debug
-      - PORT=80
+      - PORT=8080
       - SERVICE_NAME=flightmare
       - PATH_PREFIX=/flightmare
+      # Configure flight controller URL for nginx proxy
+      - FLIGHT_CONTROLLER_BASE_URL=http://flight-controller:3001
     networks:
       - sky-tracer
 
