@@ -1,0 +1,8 @@
+export PORT := "3000"
+export RUST_LOG := "info,tower_http=debug,airport_anywhere=debug"
+
+default:
+    @just --list
+
+run:
+    cargo run

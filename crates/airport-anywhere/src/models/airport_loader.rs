@@ -1,6 +1,5 @@
 use csv::ReaderBuilder;
-use sky_tracer::model::airport::Airport;
-use sky_tracer::model::airport::AirportError;
+use sky_tracer::model::airport::{Airport, AirportError};
 use std::sync::Arc;
 
 pub fn load_airports_from_csv(data: &str) -> Result<Vec<Arc<Airport>>, AirportError> {
@@ -27,7 +26,7 @@ pub fn load_airports_from_csv(data: &str) -> Result<Vec<Arc<Airport>>, AirportEr
         airports.push(Arc::new(airport));
     }
 
-    println!("Parsed {} airports", airports.len());
+    tracing::info!("Parsed {} airports", airports.len());
     Ok(airports)
 }
 

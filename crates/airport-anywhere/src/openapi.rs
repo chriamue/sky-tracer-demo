@@ -1,4 +1,4 @@
-use crate::service;
+use crate::routes;
 use sky_tracer::protocol::airports::{
     AirportResponse, Position, SearchAirportsRequest, SearchAirportsResponse,
 };
@@ -7,8 +7,8 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        service::list_airports,
-        service::search_airports
+        routes::list_airports,
+        routes::search_airports
     ),
     components(
         schemas(AirportResponse, Position, SearchAirportsRequest, SearchAirportsResponse)

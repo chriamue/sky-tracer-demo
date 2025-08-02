@@ -1,16 +1,11 @@
 use airport_anywhere::{
-    openapi::ApiDoc,
-    service::{list_airports, search_airports},
+    services::AirportService,
     ui::pages::{Home, HomeProps},
 };
-use axum::{extract::Query, response::Html, routing::get, Json, Router};
-use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
+use axum::{extract::Query, response::Html, routing::get, Router};
 use serde::Deserialize;
-use sky_tracer::protocol::airports::{AirportResponse, SearchAirportsRequest};
-use tower_http::cors::{Any, CorsLayer};
-use tracing::{info, instrument};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use sky_tracer::protocol::airports::AirportResponse;
+use tracing::{error, info, instrument};
 
 #[derive(Debug, Deserialize)]
 struct SearchParams {
@@ -23,42 +18,30 @@ async fn render_page(Query(params): Query<SearchParams>) -> Html<String> {
 
     let airports: Vec<AirportResponse> = if let Some(query) = &params.q {
         info!(?query, "Searching for airports");
-        // First try as IATA code
-        let iata_request = SearchAirportsRequest {
-            name: None,
-            code: Some(query.clone()),
-        };
-        let Json(iata_response) = search_airports(Query(iata_request)).await;
 
-        if !iata_response.airports.is_empty() {
-            info!("Found airports by IATA code");
-            iata_response.airports
+        // Try searching by code first, then by name
+        let code_results = AirportService::search_by_code(query)
+            .await
+            .unwrap_or_default();
+
+        if !code_results.is_empty() {
+            info!("Found airports by code");
+            code_results
         } else {
-            // Then try as ICAO code
-            let icao_request = SearchAirportsRequest {
-                name: None,
-                code: Some(query.clone()),
-            };
-            let Json(icao_response) = search_airports(Query(icao_request)).await;
-
-            if !icao_response.airports.is_empty() {
-                info!("Found airports by ICAO code");
-                icao_response.airports
-            } else {
-                // Finally, search by name
-                info!("Searching airports by name");
-                let name_request = SearchAirportsRequest {
-                    name: Some(query.clone()),
-                    code: None,
-                };
-                let Json(name_response) = search_airports(Query(name_request)).await;
-                name_response.airports
-            }
+            info!("Searching airports by name");
+            AirportService::search_by_name(query)
+                .await
+                .unwrap_or_default()
         }
     } else {
         info!("Listing all airports");
-        let Json(response) = list_airports().await;
-        response.airports
+        match AirportService::get_all_airports().await {
+            Ok(airports) => airports,
+            Err(e) => {
+                error!(error = %e, "Failed to load airports");
+                vec![]
+            }
+        }
     };
 
     info!(airports_found = airports.len(), "Found airports");
@@ -94,28 +77,27 @@ async fn render_page(Query(params): Query<SearchParams>) -> Html<String> {
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers()?;
 
-    info!("Starting Airport Anywhere service");
+    // Get service configuration
+    let service_port = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .unwrap_or(3000);
 
-    let api_router = Router::new()
-        .route("/api/airports", get(list_airports))
-        .route("/api/airports/search", get(search_airports))
-        .layer(OtelInResponseLayer::default())
-        .layer(OtelAxumLayer::default())
-        .layer(
-            CorsLayer::new()
-                .allow_origin(Any)
-                .allow_methods(Any)
-                .allow_headers(Any),
-        );
+    let service_name =
+        std::env::var("SERVICE_NAME").unwrap_or_else(|_| "airport-anywhere".to_string());
+
+    info!("Starting {} service on port {}", service_name, service_port);
 
     let app = Router::new()
         .route("/", get(render_page))
-        .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
-        .merge(api_router);
+        .merge(airport_anywhere::app());
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
-    info!("Server running on http://localhost:3000");
-    info!("API documentation available at http://localhost:3000/api/docs");
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", service_port)).await?;
+    info!("Server running on http://localhost:{}", service_port);
+    info!(
+        "API documentation available at http://localhost:{}/api/docs",
+        service_port
+    );
 
     // Run the server
     let server = axum::serve(listener, app);

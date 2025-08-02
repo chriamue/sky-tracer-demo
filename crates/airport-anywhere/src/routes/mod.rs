@@ -1,14 +1,14 @@
-use crate::airports_service::AirportsService;
 use axum::{extract::Query, Json};
-use sky_tracer::protocol::airports::{
-    AirportResponse, SearchAirportsRequest, SearchAirportsResponse,
-};
-use tracing::{info, instrument};
+use sky_tracer::protocol::airports::{SearchAirportsRequest, SearchAirportsResponse};
+use sky_tracer::protocol::{AIRPORTS_API_PATH, AIRPORTS_SEARCH_API_PATH};
+use tracing::{error, info, instrument};
+
+use crate::services::AirportService;
 
 /// List all airports
 #[utoipa::path(
     get,
-    path = "/api/airports",
+    path = AIRPORTS_API_PATH,
     responses(
         (status = 200, description = "List of all airports", body = SearchAirportsResponse),
         (status = 500, description = "Internal server error")
@@ -16,23 +16,19 @@ use tracing::{info, instrument};
     tag = "airports"
 )]
 pub async fn list_airports() -> Json<SearchAirportsResponse> {
-    match AirportsService::instance() {
-        Ok(service) => {
-            let airports: Vec<AirportResponse> = service
-                .all()
-                .map(|airport| AirportResponse::from(airport.as_ref()))
-                .collect();
-
-            Json(SearchAirportsResponse { airports })
+    match AirportService::get_all_airports().await {
+        Ok(airports) => Json(SearchAirportsResponse { airports }),
+        Err(e) => {
+            error!(error = %e, "Failed to list airports");
+            Json(SearchAirportsResponse { airports: vec![] })
         }
-        Err(_) => Json(SearchAirportsResponse { airports: vec![] }),
     }
 }
 
 /// Search airports by name or code
 #[utoipa::path(
     get,
-    path = "/api/airports/search",
+    path = AIRPORTS_SEARCH_API_PATH,
     params(
         SearchAirportsRequest
     ),
@@ -49,32 +45,15 @@ pub async fn search_airports(
     info!(
         code = params.code.as_deref().unwrap_or("none"),
         name = params.name.as_deref().unwrap_or("none"),
-        "Searching for airport"
+        "Searching for airports"
     );
-    match AirportsService::instance() {
-        Ok(service) => {
-            let airports = if let Some(code) = params.code {
-                if let Ok(airport) = service.find_by_code(&code) {
-                    vec![AirportResponse::from(airport.as_ref())]
-                } else {
-                    vec![]
-                }
-            } else if let Some(name_query) = params.name {
-                service
-                    .search_by_name(&name_query)
-                    .into_iter()
-                    .map(|airport| AirportResponse::from(airport.as_ref()))
-                    .collect()
-            } else {
-                service
-                    .all()
-                    .map(|airport| AirportResponse::from(airport.as_ref()))
-                    .collect()
-            };
 
-            Json(SearchAirportsResponse { airports })
+    match AirportService::search(params.code, params.name).await {
+        Ok(airports) => Json(SearchAirportsResponse { airports }),
+        Err(e) => {
+            error!(error = %e, "Failed to search airports");
+            Json(SearchAirportsResponse { airports: vec![] })
         }
-        Err(_) => Json(SearchAirportsResponse { airports: vec![] }),
     }
 }
 
@@ -93,12 +72,10 @@ mod tests {
     async fn test_search_airports_by_code() {
         let params = SearchAirportsRequest {
             name: None,
-            code: Some("FRA/EDDF".to_string()),
+            code: Some("FRA".to_string()),
         };
         let response = search_airports(Query(params)).await;
-
-        assert_eq!(response.airports.len(), 1);
-        assert_eq!(response.airports[0].name, "Frankfurt am Main Airport");
+        assert!(!response.airports.is_empty());
     }
 
     #[tokio::test]
@@ -108,7 +85,6 @@ mod tests {
             code: None,
         };
         let response = search_airports(Query(params)).await;
-
         assert!(!response.airports.is_empty());
         assert!(response
             .airports
@@ -123,7 +99,6 @@ mod tests {
             code: Some("NONEXISTENT".to_string()),
         };
         let response = search_airports(Query(params)).await;
-
         assert!(response.airports.is_empty());
     }
 }

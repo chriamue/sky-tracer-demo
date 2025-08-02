@@ -1,8 +1,9 @@
+use super::airport_loader::load_airports_from_csv;
 use sky_tracer::model::airport::{Airport, AirportError};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-const AIRPORTS_DATA: &str = include_str!("../../../assets/airports.dat");
+const AIRPORTS_DATA: &str = include_str!("../../../../assets/airports.dat");
 
 /// Service for looking up airports
 #[derive(Debug, Clone)]
@@ -13,7 +14,7 @@ pub struct AirportsService {
 impl AirportsService {
     /// Creates a new AirportsService by parsing CSV data
     pub fn from_csv_str(data: &str) -> Result<Self, AirportError> {
-        let airports = crate::data_loader::load_airports_from_csv(data)?;
+        let airports = load_airports_from_csv(data)?;
         let mut airports_by_code = HashMap::new();
 
         for airport in airports {
@@ -32,7 +33,7 @@ impl AirportsService {
 
     /// Find an airport by its code (IATA or combined IATA/ICAO)
     pub fn find_by_code(&self, code: &str) -> Result<Arc<Airport>, AirportError> {
-        println!("Searching for airport with code: {}", code); // Debug log
+        tracing::debug!("Searching for airport with code: {}", code);
 
         // First try exact match
         if let Some(airport) = self.airports_by_code.get(code) {
@@ -45,7 +46,7 @@ impl AirportsService {
             .find(|airport| airport.code.starts_with(code))
             .cloned()
             .ok_or_else(|| {
-                println!("Airport not found with code: {}", code); // Debug log
+                tracing::debug!("Airport not found with code: {}", code);
                 AirportError::NotFound(code.to_string())
             })
     }
@@ -75,9 +76,9 @@ mod tests {
         let data = r#"1,"Test Airport","Test City","Test Country","TST","TTST",12.345,-67.890,1234,2,"E","Europe/Test","airport","Test Source""#;
         let service = AirportsService::from_csv_str(data).unwrap();
 
-        let airport = service.find_by_code("TST/TTST").unwrap();
+        let airport = service.find_by_code("TST").unwrap();
         assert_eq!(airport.name, "Test Airport");
-        assert_eq!(airport.code, "TST/TTST");
+        assert_eq!(airport.code, "TST");
     }
 
     #[test]
@@ -89,8 +90,8 @@ mod tests {
         let results = service.search_by_name("frankfurt");
 
         assert_eq!(results.len(), 2);
-        assert!(results.iter().any(|a| a.code == "FRA/EDDF"));
-        assert!(results.iter().any(|a| a.code == "HHN/EDFH"));
+        assert!(results.iter().any(|a| a.code == "FRA"));
+        assert!(results.iter().any(|a| a.code == "HHN"));
     }
 
     #[test]
@@ -110,7 +111,7 @@ mod tests {
         let airports: Vec<_> = service.all().collect();
 
         assert_eq!(airports.len(), 2);
-        assert!(airports.iter().any(|a| a.code == "AA1/AAA1"));
-        assert!(airports.iter().any(|a| a.code == "AA2/AAA2"));
+        assert!(airports.iter().any(|a| a.code == "AA1"));
+        assert!(airports.iter().any(|a| a.code == "AA2"));
     }
 }
