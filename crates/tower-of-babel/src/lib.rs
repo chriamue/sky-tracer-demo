@@ -1,8 +1,10 @@
+pub mod app;
 pub mod client;
-pub mod error;
 pub mod openapi;
-pub mod service;
+pub mod routes;
+pub mod services;
 
 pub use client::create_client;
-pub use error::ApiError;
-pub use service::list_flights_by_airport;
+
+// Re-export for backward compatibility
+pub use services::BabelService;

@@ -1,0 +1,11 @@
+export PORT := "3003"
+export SERVICE_NAME := "tower-of-babel"
+export RUST_LOG := "info,tower_http=debug,tower_of_babel=debug"
+export FLIGHT_CONTROLLER_BASE_URL := "http://localhost:3001"
+
+default:
+    @just --list
+
+run:
+    echo "Running tower-of-babel service..."
+    cargo run
