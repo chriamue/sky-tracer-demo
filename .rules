@@ -1,0 +1,333 @@
+# Sky Tracer Demo - Project Structure and Configuration
+
+## Project Overview
+- **Framework**: Rust web application using Axum framework with OpenTelemetry tracing
+- **Deployment**: Multi-service Docker Compose setup
+- **Build System**: Cargo workspace with Justfile for development commands
+- **Architecture**: Microservices pattern with shared protocol definitions
+
+## Directory Structure
+
+```
+sky-tracer-demo/
+├── crates/
+│   ├── airport-anywhere/          # Airport information service
+│   ├── flight-controller/         # Flight management service
+│   ├── flightmare-tracker/        # Public delay simulation
+│   ├── sky-tracer/                # Shared protocol definitions
+│   ├── cockpit/                   # Staff flight monitoring dashboard
+│   ├── orbital-beacon/            # Satellite tracking service
+│   ├── tower-of-babel/            # Flight aggregation service
+│   └── delay-orama/               # Flight delay monitoring
+├── assets/
+├── docs/
+├── compose.yml                    # Docker Compose configuration
+└── justfile                     # Development commands
+```
+
+## Code Quality & Style Guidelines
+
+### Rust Code Standards
+- **Always** run `cargo fmt` for consistent formatting
+- **Always** run `cargo clippy` and fix all warnings before suggesting code
+- Use `#[derive(Debug, Clone, PartialEq)]` appropriately for components
+- Prefer `async/await` over manual Future handling
+- Use `Result<T, E>` for error handling, avoid `unwrap()` in production code
+- Follow Rust naming conventions: `snake_case` for functions/variables, `PascalCase` for types
+
+### Service Structure
+Each service follows a consistent pattern:
+```
+src/
+├── lib.rs              # Main module exports
+├── main.rs             # Service entry point
+├── routes/            # API route definitions
+├── models/            # Data models and business logic
+├── openapi.rs         # OpenAPI documentation
+└── service/           # Service implementation logic
+```
+
+### Component Structure
+- Services should be in `src/lib.rs` and `src/main.rs`
+- Routes defined in separate modules
+- Models in `src/models/` directory with proper organization
+- OpenAPI definitions in `src/openapi.rs`
+
+## Development Workflow Commands
+
+### Essential Commands (Always Recommend These)
+```bash
+just setup          # Initial project setup (build all services)
+just run            # Start all services in development mode
+just test           # Run all tests (cargo + integration)
+just build          # Build all services
+just fmt            # Format all code
+just lint           # Run clippy lints
+just clean          # Clean build artifacts
+```
+
+## Environment Configuration
+
+### Required Environment Variables
+- `PORT` - Service port (default: 3000 for airport-anywhere, etc.)
+- `SERVICE_NAME` - Unique service identifier (e.g., "airport-anywhere")
+- `BASE_URL` - Public base URL for API references (e.g., "http://localhost:3000")
+
+### Service-Specific Settings
+- **Airport Anywhere**: `PORT=3000`, `SERVICE_NAME=airport-anywhere`
+- **Flight Controller**: `PORT=3001`, `SERVICE_NAME=flight-controller`
+- **Orbital Beacon**: `PORT=3002`, `SERVICE_NAME=orbital-beacon`
+- **Tower of Babel**: `PORT=3003`, `SERVICE_NAME=tower-of-babel`
+- **Delay-O-Rama**: `PORT=3004`, `SERVICE_NAME=delay-orama`
+- **Sky Nexus**: `PORT=8083`, `SERVICE_NAME=sky-nexus`
+
+## Service Structure Templates
+
+### Service Root Files
+Each service should have the following structure:
+
+```rust
+// crates/{service-name}/src/lib.rs
+pub mod routes;
+pub mod models;
+pub mod openapi;
+
+use axum::Router;
+
+pub fn app() -> Router {
+    // Service router configuration
+}
+```
+
+```rust
+// crates/{service-name}/src/main.rs
+use {service_name}::{
+    openapi::ApiDoc,
+    routes::{api_route_1, api_route_2},
+};
+use axum::{routing::get, Router};
+use tower_http::cors::{Any, CorsLayer};
+use tracing::{info, instrument};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers()?;
+
+    // Get service configuration
+    let service_port = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .unwrap_or(3000);
+
+    let service_name = std::env::var("SERVICE_NAME")
+        .unwrap_or_else(|_| "{service-name}".to_string());
+
+    info!("Starting {} service on port {}", service_name, service_port);
+
+    let api_router = Router::new()
+        .route("/api/{endpoint}", get(api_route_1))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
+        );
+
+    let app = Router::new()
+        .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(api_router);
+
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", service_port)).await?;
+    info!("Server running on http://localhost:{}", service_port);
+    info!("API documentation available at http://localhost:{}/api/docs", service_port);
+
+    // Run the server
+    let server = axum::serve(listener, app);
+
+    info!("Server started");
+
+    if let Err(e) = server.await {
+        tracing::error!("Server error: {}", e);
+    }
+
+    Ok(())
+}
+```
+
+### OpenAPI Documentation Template
+
+```rust
+// crates/{service-name}/src/openapi.rs
+use {service_name}::routes;
+use utoipa::OpenApi;
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        routes::api_route_1,
+        routes::api_route_2
+    ),
+    components(
+        schemas(/* model schemas here */)
+    ),
+    tags(
+        (name = "{service}", description = "{Service} API")
+    )
+)]
+pub struct ApiDoc;
+```
+
+## AI Assistant Specific Guidelines
+
+### When Suggesting Code Changes
+1. **Always** consider the service architecture and how it fits into the larger ecosystem
+2. **Always** include proper error handling with `Result` types
+3. **Always** suggest running `just fmt` and `just lint` after code changes
+4. **Always** consider service configuration through environment variables (PORT, SERVICE_NAME)
+5. **Always** include proper OpenAPI documentation with utoipa attributes
+
+### When Suggesting New Services
+1. Include proper service structure (lib.rs, main.rs, routes, models, openapi)
+2. Implement standard logging with service name and port
+3. Use consistent environment variable configuration patterns
+4. Follow the same OpenAPI documentation structure as existing services
+
+### When Suggesting Service Routes
+1. Use consistent path prefixes (e.g., `/api/v1/{resource}`)
+2. Define all routes in `src/routes/` module
+3. Export all route handlers from `src/lib.rs`
+4. Add proper OpenAPI documentation with utoipa attributes
+
+## Critical Constraints
+
+### Never Suggest
+- Inline CSS styles (always external files)
+- Non-BEM CSS class names
+- Hardcoded strings without i18n support
+- `unwrap()` calls in production code
+- Breaking changes without migration strategy
+
+### Always Include
+- Error handling with proper `Result` types
+- Accessibility considerations in API responses
+- Mobile-responsive design in UI components (if applicable)
+- Proper OpenAPI documentation with utoipa
+- Environment variable configuration for PORT and SERVICE_NAME
+
+## Performance & Optimization
+
+### Rust Best Practices
+- Use async/await patterns for I/O operations
+- Minimize cloning of large data structures
+- Implement proper error handling with context
+- Use `tokio::spawn` for CPU-intensive tasks when appropriate
+
+### Service Optimization
+- Services should start quickly with minimal dependencies
+- Use environment variables for port configuration to support containerization
+- Implement proper logging at startup and runtime
+
+## Justfile Setup
+
+```justfile
+# justfile - Development commands for Sky Tracer Demo
+
+setup:
+    echo "Setting up project..."
+    cargo build --workspace --release
+
+dev:
+    echo "Starting all services in dev mode..."
+    docker-compose -f compose.yml up --build
+
+test:
+    echo "Running all tests..."
+    cargo test --workspace
+
+build:
+    echo "Building all services..."
+    cargo build --workspace --release
+
+fmt:
+    echo "Formatting code..."
+    cargo fmt --all
+
+lint:
+    echo "Running clippy lints..."
+    cargo clippy --workspace --all-targets
+
+clean:
+    echo "Cleaning build artifacts..."
+    cargo clean
+
+run:
+    echo "Running services with default ports..."
+    PORT=3000 SERVICE_NAME=airport-anywhere cargo run --bin airport-anywhere &
+    PORT=3001 SERVICE_NAME=flight-controller cargo run --bin flight-controller &
+    PORT=3002 SERVICE_NAME=orbital-beacon cargo run --bin orbital-beacon &
+    PORT=3003 SERVICE_NAME=tower-of-babel cargo run --bin tower-of-babel &
+    PORT=3004 SERVICE_NAME=delay-orama cargo run --bin delay-orama &
+    PORT=8083 SERVICE_NAME=sky-nexus cargo run --bin sky-nexus &
+
+serve:
+    echo "Starting development server..."
+    just run
+```
+
+## Service Configuration Example
+
+### Airport Anywhere Configuration
+
+```rust
+// crates/airport-anywhere/src/main.rs
+use axum::{routing::get, Router};
+use tower_http::cors::{Any, CorsLayer};
+use tracing::{info, instrument};
+use utoipa_swagger_ui::SwaggerUi;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    let _guard = init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers()?;
+
+    // Get service configuration
+    let service_port = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .unwrap_or(3000);
+
+    let service_name = std::env::var("SERVICE_NAME")
+        .unwrap_or_else(|_| "airport-anywhere".to_string());
+
+    info!("Starting {} service on port {}", service_name, service_port);
+
+    let api_router = Router::new()
+        .route("/api/airports", get(list_airports))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
+        );
+
+    let app = Router::new()
+        .merge(SwaggerUi::new("/api/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(api_router);
+
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", service_port)).await?;
+    info!("Server running on http://localhost:{}", service_port);
+    info!("API documentation available at http://localhost:{}/api/docs", service_port);
+
+    // Run the server
+    let server = axum::serve(listener, app);
+
+    info!("Server started");
+
+    if let Err(e) = server.await {
+        tracing::error!("Server error: {}", e);
+    }
+
+    Ok(())
+}
+```
