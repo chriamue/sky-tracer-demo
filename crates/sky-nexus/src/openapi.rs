@@ -1,3 +1,4 @@
+use crate::models::datetime::*;
 use axum::{Router, response::Redirect, routing::get};
 use sky_tracer::protocol::{
     airports::AirportResponse,
@@ -22,6 +23,9 @@ use utoipa_swagger_ui::SwaggerUi;
         crate::routes::v1::satellites::post_satellite,
         crate::routes::v1::satellites::put_satellite_status,
         crate::routes::v1::satellites::post_calculate_position,
+        crate::routes::v1::datetime::get_current_datetime_route,
+        crate::routes::v1::datetime::get_aviation_times_route,
+        crate::routes::v1::datetime::compare_timezones_route,
     ),
     components(
         schemas(
@@ -33,12 +37,20 @@ use utoipa_swagger_ui::SwaggerUi;
             UpdateSatelliteStatusRequest,
             CalculatePositionRequest,
             CalculatePositionResponse,
+            DateTimeResponse,
+            AviationTimesResponse,
+            AviationTimeZone,
+            GetDateTimeQuery,
+            TimezoneComparisonRequest,
+            TimezoneComparisonResponse,
+            TimezoneInfo,
         )
     ),
     tags(
         (name = "Airports", description = "Airport lookup endpoints"),
         (name = "Flights", description = "Flight management endpoints"),
         (name = "Satellites", description = "Satellite endpoints"),
+        (name = "DateTime", description = "Date and time utilities for aviation operations"),
     ),
     servers(
         (url = "/", description = "Local development server"),

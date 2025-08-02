@@ -4,10 +4,11 @@ Sky Nexus is a Model Context Protocol (MCP) server that provides comprehensive a
 
 ## Features
 
-- **Multi-Service MCP Server**: Provides separate MCP endpoints for airports, flights, and satellites
+- **Multi-Service MCP Server**: Provides separate MCP endpoints for airports, flights, satellites, and datetime utilities
 - **REST API**: Traditional HTTP endpoints for all aviation data
 - **OpenAPI Documentation**: Interactive Swagger UI for API exploration
 - **Microservice Integration**: Connects to Airport Anywhere, Flight Controller, and Orbital Beacon services
+- **DateTime Service**: Comprehensive timezone and datetime utilities for aviation operations
 - **Observability**: Built-in tracing and OpenTelemetry support
 
 ## Architecture
@@ -29,6 +30,7 @@ Sky Nexus is a Model Context Protocol (MCP) server that provides comprehensive a
                     │  │   /api/v1/airports      ││
                     │  │   /api/v1/flights       ││
                     │  │   /api/v1/satellites    ││
+                    │  │   /api/v1/datetime      ││
                     │  └─────────────────────────┘│
                     │                             │
                     │  ┌─────────────────────────┐│
@@ -36,6 +38,7 @@ Sky Nexus is a Model Context Protocol (MCP) server that provides comprehensive a
                     │  │   /mcp/airports         ││
                     │  │   /mcp/flights          ││
                     │  │   /mcp/satellites       ││
+                    │  │   /mcp/datetime         ││
                     │  └─────────────────────────┘│
                     │                             │
                     │  ┌─────────────────────────┐│
@@ -124,19 +127,76 @@ Once the server is running, you can access:
 ### REST Endpoints
 
 #### Airports
-- `GET /api/v1/airports` - List all airports
-- `GET /api/v1/airports/{code}` - Get airport by code
+- `GET /api/v1/nexus/airports` - List all airports
+- `GET /api/v1/nexus/airports/{code}` - Get airport by code
 
 #### Flights
-- `GET /api/v1/flights` - List all flights
-- `POST /api/v1/flights` - Create a new flight
-- `GET /api/v1/flights/{flight_number}` - Get flight by number
+- `GET /api/v1/nexus/flights` - List all flights
+- `POST /api/v1/nexus/flights` - Create a new flight
+- `GET /api/v1/nexus/flights/{flight_number}` - Get flight by number
 
 #### Satellites
-- `GET /api/v1/satellites` - List all satellites
-- `POST /api/v1/satellites` - Create a new satellite
-- `PUT /api/v1/satellites/{id}/status` - Update satellite status
-- `POST /api/v1/satellites/position` - Calculate flight position
+- `GET /api/v1/nexus/satellites` - List all satellites
+- `POST /api/v1/nexus/satellites` - Create a new satellite
+- `PUT /api/v1/nexus/satellites/{id}/status` - Update satellite status
+- `POST /api/v1/nexus/satellites/position` - Calculate flight position
+
+#### DateTime
+- `GET /api/v1/nexus/datetime/current` - Get current date and time
+- `GET /api/v1/nexus/datetime/aviation-times` - Get time in major aviation hubs
+- `POST /api/v1/nexus/datetime/compare` - Compare two timezones
+
+## DateTime Service
+
+The DateTime service provides comprehensive timezone and time utilities specifically designed for aviation operations.
+
+### REST API Examples
+
+#### Get Current Time
+```bash
+# Get current UTC time
+curl "http://localhost:9093/api/v1/nexus/datetime/current"
+
+# Get current time in specific timezone
+curl "http://localhost:9093/api/v1/nexus/datetime/current?timezone=America/New_York&format=%Y-%m-%d %H:%M:%S %Z"
+
+# Get current time in aviation format
+curl "http://localhost:9093/api/v1/nexus/datetime/current?timezone=UTC&format=%d%H%MZ"
+```
+
+#### Get Aviation Hub Times
+```bash
+# Get current time in all major aviation hubs
+curl "http://localhost:9093/api/v1/nexus/datetime/aviation-times"
+```
+
+#### Compare Timezones
+```bash
+# Compare two timezones
+curl -X POST "http://localhost:9093/api/v1/nexus/datetime/compare" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from_timezone": "America/New_York",
+    "to_timezone": "Europe/London"
+  }'
+```
+
+### Supported Timezones
+
+The service supports all IANA timezone identifiers. Common aviation timezones include:
+
+- **UTC**: Coordinated Universal Time
+- **America/New_York**: Eastern Time (JFK, LGA, EWR)
+- **America/Los_Angeles**: Pacific Time (LAX)
+- **America/Chicago**: Central Time (ORD, MDW)
+- **America/Denver**: Mountain Time (DEN)
+- **Europe/London**: GMT/BST (LHR, LGW)
+- **Europe/Paris**: CET/CEST (CDG, ORY)
+- **Europe/Berlin**: CET/CEST (FRA)
+- **Asia/Tokyo**: JST (NRT, HND)
+- **Australia/Sydney**: AEST/AEDT (SYD)
+- **Asia/Dubai**: GST (DXB)
+- **Asia/Singapore**: SGT (SIN)
 
 ## MCP Integration
 
@@ -160,6 +220,11 @@ Sky Nexus provides separate MCP endpoints for different aviation data categories
   - `update_satellite_status`: Update satellite status
   - `calculate_position`: Calculate flight position using satellites
 
+- **DateTime Tools**: `/mcp/datetime`
+  - `get_current_datetime`: Get current date and time with optional timezone and formatting
+  - `get_aviation_times`: Get current time in major aviation hubs around the world
+  - `get_timezone_difference`: Calculate time difference between two timezones
+
 ### Using with Claude Desktop
 
 Add these configurations to your Claude Desktop config file:
@@ -175,6 +240,9 @@ Add these configurations to your Claude Desktop config file:
     },
     "sky-nexus-satellites": {
       "url": "http://127.0.0.1:9093/mcp/satellites"
+    },
+    "sky-nexus-datetime": {
+      "url": "http://127.0.0.1:9093/mcp/datetime"
     }
   }
 }
@@ -193,7 +261,64 @@ npx @modelcontextprotocol/inspector http://localhost:9093/mcp/flights
 
 # Test satellites
 npx @modelcontextprotocol/inspector http://localhost:9093/mcp/satellites
+
+# Test datetime tools
+npx @modelcontextprotocol/inspector http://localhost:9093/mcp/datetime
 ```
+
+## DateTime Tools Usage Examples
+
+The datetime tools are particularly useful for aviation operations that span multiple time zones:
+
+### MCP Tool Examples
+
+#### Get Current Time
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_current_datetime",
+    "arguments": {
+      "timezone": "America/New_York",
+      "format": "%Y-%m-%d %H:%M:%S %Z"
+    }
+  }
+}
+```
+
+#### Aviation Hub Times
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_aviation_times",
+    "arguments": {}
+  }
+}
+```
+
+#### Compare Timezones
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_timezone_difference",
+    "arguments": {
+      "from_timezone": "America/New_York",
+      "to_timezone": "Europe/London"
+    }
+  }
+}
+```
+
+### Use Cases
+
+- **Flight Planning**: Coordinate departures and arrivals across time zones
+- **Crew Scheduling**: Manage crew schedules across different airports
+- **Operations Coordination**: Real-time coordination of aviation operations
+- **Passenger Information**: Display accurate local times for connections
+- **Cargo Operations**: Schedule cargo handling across time zones
+- **Air Traffic Control**: Coordinate with international ATC centers
 
 ## Development
 
@@ -208,6 +333,7 @@ src/
 │   └── tools/          # MCP tools
 │       ├── mod.rs      # Tools module exports
 │       ├── airports.rs # Airport-related MCP tools
+│       ├── datetime.rs # DateTime utility MCP tools
 │       ├── flights.rs  # Flight-related MCP tools
 │       └── satellites.rs # Satellite-related MCP tools
 ├── openapi.rs          # OpenAPI documentation setup
@@ -216,11 +342,13 @@ src/
 │   └── v1/             # API v1 routes
 │       ├── mod.rs      # V1 routes module
 │       ├── airports.rs # Airport endpoints
+│       ├── datetime.rs # DateTime endpoints
 │       ├── flights.rs  # Flight endpoints
 │       └── satellites.rs # Satellite endpoints
-└── services/           # External service clients
+└── services/           # Service logic
     ├── mod.rs          # Services module
     ├── airports.rs     # Airport service client
+    ├── datetime.rs     # DateTime service logic
     ├── flights.rs      # Flight service client
     └── satellites.rs   # Satellite service client
 ```
@@ -267,6 +395,8 @@ PORT=8080 just run
 - **reqwest**: HTTP client for external services
 - **serde**: Serialization/deserialization
 - **utoipa**: OpenAPI documentation generation
+- **chrono**: Date and time handling
+- **chrono-tz**: Timezone support
 
 ### Observability
 - **tracing**: Structured logging

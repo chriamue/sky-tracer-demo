@@ -27,6 +27,7 @@ reqwest = { workspace = true }
 tracing = { workspace = true }
 axum-tracing-opentelemetry = { workspace = true }
 init-tracing-opentelemetry = { workspace = true }
+thiserror = { workspace = true }
 
 # Additional dependencies
 rmcp = { version = "0.3.2", features = [
@@ -42,4 +43,4 @@ hyper-util = "0.1"
 anyhow = "1.0"
 tower = "0.5"
 http-body-util = "0.1.3"
-thiserror = "1.0"
+chrono-tz = "0.10"
