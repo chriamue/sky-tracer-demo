@@ -1,7 +1,7 @@
 [package]
 name = "orbital-beacon"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = "Satellite tracking and position calculation service for flight path monitoring"
 authors = ["Sky Tracer Team"]
 license = "MIT"

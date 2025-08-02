@@ -1,10 +1,6 @@
 use sky_tracer::protocol::satellite::SatelliteResponse;
 use yew::prelude::*;
 
-fn get_path_prefix() -> String {
-    std::env::var("PATH_PREFIX").unwrap_or_else(|_| "".to_string())
-}
-
 #[derive(Properties, PartialEq)]
 pub struct SatelliteListProps {
     pub satellites: Vec<SatelliteResponse>,
@@ -12,6 +8,8 @@ pub struct SatelliteListProps {
 
 #[function_component(SatelliteList)]
 pub fn satellite_list(props: &SatelliteListProps) -> Html {
+    let path_prefix = crate::utils::get_path_prefix();
+
     html! {
         <div class="satellite-list">
             <h2>{"Satellite Control Center"}</h2>
@@ -28,13 +26,13 @@ pub fn satellite_list(props: &SatelliteListProps) -> Html {
 
                     html! {
                         <div class={classes!("satellite-container", orbit_position)}>
-                            <div class={classes!("satellite", status_class)}> // Added status_class here
+                            <div class={classes!("satellite", status_class)}>
                                 <div class="satellite-ui-wrapper">
                                     <div class="satellite-name-tag">
                                         {&satellite.name}
                                     </div>
                                     <div class="control-panel">
-                                        <form action={format!("{}/update_status/{}", get_path_prefix(), satellite.id)} method="POST">
+                                        <form action={format!("{}/update_status/{}", path_prefix.clone(), satellite.id)} method="POST">
                                             <select name="status" class="status-select">
                                                 <option value="Active">{"Active"}</option>
                                                 <option value="Inactive">{"Inactive"}</option>

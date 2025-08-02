@@ -1,10 +1,6 @@
 use chrono::{DateTime, Duration, Utc};
 use yew::prelude::*;
 
-fn get_path_prefix() -> String {
-    std::env::var("PATH_PREFIX").unwrap_or_else(|_| "".to_string())
-}
-
 fn calculate_default_times(current_time: DateTime<Utc>) -> (DateTime<Utc>, DateTime<Utc>) {
     let departure_time = current_time - Duration::minutes(1);
     let arrival_time = current_time + Duration::minutes(4);
@@ -15,12 +11,13 @@ fn calculate_default_times(current_time: DateTime<Utc>) -> (DateTime<Utc>, DateT
 pub fn position_form() -> Html {
     let now = Utc::now();
     let (departure_time, arrival_time) = calculate_default_times(now);
+    let path_prefix = crate::utils::get_path_prefix();
 
     html! {
         <div class="position-form">
             <h2>{"Calculate Flight Position"}</h2>
             <form
-                action={format!("{}/flight_position", get_path_prefix())}
+                action={format!("{}/flight_position", path_prefix)}
                 method="GET"
                 class="position-form"
             >

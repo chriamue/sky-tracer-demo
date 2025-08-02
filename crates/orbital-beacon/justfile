@@ -1,11 +1,11 @@
 export PORT := "3002"
 export SERVICE_NAME := "orbital-beacon"
 export RUST_LOG := "info,tower_http=debug,orbital_beacon=debug"
-export AIRPORTS_SERVICE_URL := "http://localhost:3000"
+export AIRPORTS_SERVICE_BASE_URL := "http://localhost:3000"
+export PATH_PREFIX := "/satellites"
 
 default:
     @just --list
-
 
 run:
     echo "Running orbital-beacon service..."

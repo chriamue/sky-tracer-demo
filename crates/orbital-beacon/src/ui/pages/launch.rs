@@ -8,6 +8,8 @@ pub struct LaunchProps {
 
 #[function_component(Launch)]
 pub fn launch(props: &LaunchProps) -> Html {
+    let path_prefix = crate::utils::get_path_prefix();
+
     html! {
         <div class="container">
             <header>
@@ -26,7 +28,7 @@ pub fn launch(props: &LaunchProps) -> Html {
 
             <main>
                 <LaunchSatellite />
-                <a href={format!("{}/", crate::utils::get_path_prefix())} class="back-link">{"Back to Home"}</a>
+                <a href={path_prefix} class="back-link">{"Back to Home"}</a>
             </main>
         </div>
     }

@@ -15,8 +15,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let service_name =
         std::env::var("SERVICE_NAME").unwrap_or_else(|_| "orbital-beacon".to_string());
 
-    let airport_service_url =
-        env::var("AIRPORTS_SERVICE_URL").unwrap_or_else(|_| "http://localhost:3000".to_string());
+    // Fixed: Use AIRPORTS_SERVICE_BASE_URL to match other services
+    let airport_service_url = env::var("AIRPORTS_SERVICE_BASE_URL")
+        .unwrap_or_else(|_| "http://localhost:3000".to_string());
 
     info!("Starting {} service on port {}", service_name, service_port);
     info!(airport_service_url = %airport_service_url, "Configured airport service");

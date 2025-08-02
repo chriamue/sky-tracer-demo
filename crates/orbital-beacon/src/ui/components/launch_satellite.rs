@@ -2,11 +2,13 @@ use yew::prelude::*;
 
 #[function_component(LaunchSatellite)]
 pub fn launch_satellite() -> Html {
+    let path_prefix = crate::utils::get_path_prefix();
+
     html! {
         <div class="launch-satellite">
             <h2>{"🚀 Launch New Satellite"}</h2>
             <div class="launch-container">
-                <form action={format!("{}/launch", crate::utils::get_path_prefix())} method="POST" class="launch-form">
+                <form action={format!("{}/launch", path_prefix)} method="POST" class="launch-form">
                     <div class="rocket">
                         <div class="rocket-body">
                             <div class="body"></div>
