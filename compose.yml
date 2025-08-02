@@ -21,21 +21,33 @@ services:
       dockerfile: crates/airport-anywhere/Dockerfile
     labels:
       - "traefik.enable=true"
+      # v1 API route (highest priority)
+      - "traefik.http.routers.airports-api.entrypoints=web"
+      - "traefik.http.routers.airports-api.rule=PathPrefix(`/api/v1/airports`)"
+      - "traefik.http.routers.airports-api.priority=100"
+      - "traefik.http.routers.airports-api.service=airports"
+
+      # Docs route: /airports/docs (high priority)
+      - "traefik.http.routers.airports-docs.entrypoints=web"
+      - "traefik.http.routers.airports-docs.rule=PathPrefix(`/airports/docs`)"
+      - "traefik.http.routers.airports-docs.priority=90"
+      - "traefik.http.routers.airports-docs.service=airports"
+
+      # Main service route (lowest priority) - handles all /airports requests
       - "traefik.http.routers.airports.entrypoints=web"
       - "traefik.http.routers.airports.rule=PathPrefix(`/airports`)"
+      - "traefik.http.routers.airports.priority=10"
       - "traefik.http.services.airports.loadbalancer.server.port=3000"
       - "traefik.http.middlewares.airports-strip.stripprefix.prefixes=/airports"
       - "traefik.http.routers.airports.middlewares=airports-strip@docker"
-      # Additional route for /api/airports
-      - "traefik.http.routers.airports-api.entrypoints=web"
-      - "traefik.http.routers.airports-api.rule=PathPrefix(`/api/airports`)"
-      - "traefik.http.routers.airports-api.service=airports"
     environment:
-      - RUST_LOG=info,tower_http=debug
+      - RUST_LOG=info,tower_http=debug,airport_anywhere=debug
+      - PORT=3000
+      - SERVICE_NAME=airports
+      - PATH_PREFIX=/airports
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
-      - SERVICE_NAME=airport-anywhere
     volumes:
       - ./assets:/usr/local/bin/assets
     ports:
@@ -52,22 +64,34 @@ services:
       - orbital-beacon
     labels:
       - "traefik.enable=true"
+      # v1 API route (highest priority)
+      - "traefik.http.routers.flights-api.entrypoints=web"
+      - "traefik.http.routers.flights-api.rule=PathPrefix(`/api/v1/flights`)"
+      - "traefik.http.routers.flights-api.priority=100"
+      - "traefik.http.routers.flights-api.service=flights"
+
+      # Docs route: /flights/docs (high priority)
+      - "traefik.http.routers.flights-docs.entrypoints=web"
+      - "traefik.http.routers.flights-docs.rule=PathPrefix(`/flights/docs`)"
+      - "traefik.http.routers.flights-docs.priority=90"
+      - "traefik.http.routers.flights-docs.service=flights"
+
+      # Main service route (lowest priority) - handles all /flights requests
       - "traefik.http.routers.flights.entrypoints=web"
       - "traefik.http.routers.flights.rule=PathPrefix(`/flights`)"
+      - "traefik.http.routers.flights.priority=10"
       - "traefik.http.services.flights.loadbalancer.server.port=3001"
       - "traefik.http.middlewares.flights-strip.stripprefix.prefixes=/flights"
       - "traefik.http.routers.flights.middlewares=flights-strip@docker"
-      # Additional route for /api/flights
-      - "traefik.http.routers.flights-api.entrypoints=web"
-      - "traefik.http.routers.flights-api.rule=PathPrefix(`/api/flights`)"
-      - "traefik.http.routers.flights-api.service=flights"
     environment:
-      - RUST_LOG=info,tower_http=debug
+      - RUST_LOG=info,tower_http=debug,flight_controller=debug
+      - PORT=3001
+      - SERVICE_NAME=flights
+      - PATH_PREFIX=/flights
+      - ORBITAL_BEACON_BASE_URL=http://orbital-beacon:3002
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
-      - ORBITAL_BEACON_URL=http://orbital-beacon:3002
-      - SERVICE_NAME=flight-controller
     ports:
       - 3001:3001
     networks:
@@ -82,10 +106,24 @@ services:
       - flight-controller
     labels:
       - "traefik.enable=true"
+      # Docs route: /flightmare/docs (high priority)
+      - "traefik.http.routers.flightmare-docs.entrypoints=web"
+      - "traefik.http.routers.flightmare-docs.rule=PathPrefix(`/flightmare/docs`)"
+      - "traefik.http.routers.flightmare-docs.priority=90"
+      - "traefik.http.routers.flightmare-docs.service=flightmare"
+
+      # Main service route (lowest priority) - handles all /flightmare requests
+      - "traefik.http.routers.flightmare.entrypoints=web"
       - "traefik.http.routers.flightmare.rule=PathPrefix(`/flightmare`)"
+      - "traefik.http.routers.flightmare.priority=10"
       - "traefik.http.services.flightmare.loadbalancer.server.port=80"
       - "traefik.http.middlewares.flightmare-strip.stripprefix.prefixes=/flightmare"
       - "traefik.http.routers.flightmare.middlewares=flightmare-strip@docker"
+    environment:
+      - RUST_LOG=info,flightmare_tracker=debug
+      - PORT=80
+      - SERVICE_NAME=flightmare
+      - PATH_PREFIX=/flightmare
     networks:
       - sky-tracer
 
@@ -98,11 +136,26 @@ services:
       - flight-controller
     labels:
       - "traefik.enable=true"
+      # Docs route: /cockpit/docs (high priority)
+      - "traefik.http.routers.cockpit-docs.entrypoints=web"
+      - "traefik.http.routers.cockpit-docs.rule=PathPrefix(`/cockpit/docs`)"
+      - "traefik.http.routers.cockpit-docs.priority=90"
+      - "traefik.http.routers.cockpit-docs.service=cockpit"
+
+      # Main service route (lowest priority) - handles all /cockpit requests
       - "traefik.http.routers.cockpit.entrypoints=web"
       - "traefik.http.routers.cockpit.rule=PathPrefix(`/cockpit`)"
-      - "traefik.http.services.cockpit.loadbalancer.server.port=80"
+      - "traefik.http.routers.cockpit.priority=10"
+      - "traefik.http.services.cockpit.loadbalancer.server.port=8080"
       - "traefik.http.middlewares.cockpit-strip.stripprefix.prefixes=/cockpit"
       - "traefik.http.routers.cockpit.middlewares=cockpit-strip@docker"
+    environment:
+      - RUST_LOG=info,tower_http=debug,cockpit=debug
+      - PORT=8080
+      - SERVICE_NAME=cockpit
+      - PATH_PREFIX=/cockpit
+    ports:
+      - "8081:8080"
     networks:
       - sky-tracer
 
@@ -114,27 +167,34 @@ services:
       - airport-anywhere
     labels:
       - "traefik.enable=true"
+      # v1 API route (highest priority)
+      - "traefik.http.routers.satellites-api.entrypoints=web"
+      - "traefik.http.routers.satellites-api.rule=PathPrefix(`/api/v1/satellites`)"
+      - "traefik.http.routers.satellites-api.priority=100"
+      - "traefik.http.routers.satellites-api.service=satellites"
+
+      # Docs route: /satellites/docs (high priority)
+      - "traefik.http.routers.satellites-docs.entrypoints=web"
+      - "traefik.http.routers.satellites-docs.rule=PathPrefix(`/satellites/docs`)"
+      - "traefik.http.routers.satellites-docs.priority=90"
+      - "traefik.http.routers.satellites-docs.service=satellites"
+
+      # Main service route (lowest priority) - handles all /satellites requests
       - "traefik.http.routers.satellites.entrypoints=web"
       - "traefik.http.routers.satellites.rule=PathPrefix(`/satellites`)"
+      - "traefik.http.routers.satellites.priority=10"
       - "traefik.http.services.satellites.loadbalancer.server.port=3002"
       - "traefik.http.middlewares.satellites-strip.stripprefix.prefixes=/satellites"
       - "traefik.http.routers.satellites.middlewares=satellites-strip@docker"
-      # Additional route for /api/satellites
-      - "traefik.http.routers.satellites-api.entrypoints=web"
-      - "traefik.http.routers.satellites-api.rule=PathPrefix(`/api/satellites`)"
-      - "traefik.http.routers.satellites-api.service=satellites"
-      # Additional route for /api/position
-      - "traefik.http.routers.position-api.entrypoints=web"
-      - "traefik.http.routers.position-api.rule=PathPrefix(`/api/position`)"
-      - "traefik.http.routers.position-api.service=satellites"
     environment:
       - RUST_LOG=info,tower_http=debug,orbital_beacon=debug
+      - PORT=3002
+      - SERVICE_NAME=satellites
+      - AIRPORTS_SERVICE_BASE_URL=http://airport-anywhere:3000
+      - PATH_PREFIX=/satellites
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
-      - SERVICE_NAME=orbital-beacon
-      - AIRPORTS_SERVICE_URL=http://airport-anywhere:3000
-      - PATH_PREFIX=/satellites
     ports:
       - 3002:3002
     networks:
@@ -148,22 +208,36 @@ services:
       - flight-controller
     labels:
       - "traefik.enable=true"
+      # v1 API route (highest priority)
+      - "traefik.http.routers.babel-api.entrypoints=web"
+      - "traefik.http.routers.babel-api.rule=PathPrefix(`/api/v1/babel`)"
+      - "traefik.http.routers.babel-api.priority=100"
+      - "traefik.http.routers.babel-api.service=babel"
+
+      # Docs route: /babel/docs (high priority)
+      - "traefik.http.routers.babel-docs.entrypoints=web"
+      - "traefik.http.routers.babel-docs.rule=PathPrefix(`/babel/docs`)"
+      - "traefik.http.routers.babel-docs.priority=90"
+      - "traefik.http.routers.babel-docs.service=babel"
+
+      # Main service route (lowest priority) - handles all /babel requests
       - "traefik.http.routers.babel.entrypoints=web"
       - "traefik.http.routers.babel.rule=PathPrefix(`/babel`)"
+      - "traefik.http.routers.babel.priority=10"
       - "traefik.http.services.babel.loadbalancer.server.port=3003"
       - "traefik.http.middlewares.babel-strip.stripprefix.prefixes=/babel"
       - "traefik.http.routers.babel.middlewares=babel-strip@docker"
-      # Additional route for /api/flights
-      - "traefik.http.routers.babel-api.entrypoints=web"
-      - "traefik.http.routers.babel-api.rule=PathPrefix(`/api/babel`)"
-      - "traefik.http.routers.babel-api.service=babel"
     environment:
-      - RUST_LOG=info,tower_http=debug
+      - RUST_LOG=info,tower_http=debug,tower_of_babel=debug
+      - PORT=3003
+      - SERVICE_NAME=babel
+      - PATH_PREFIX=/babel
+      - FLIGHT_CONTROLLER_BASE_URL=http://flight-controller:3001
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
-      - SERVICE_NAME=tower-of-babel
-      - FLIGHT_CONTROLLER_URL=http://flight-controller:3001
+    ports:
+      - 3003:3003
     networks:
       - sky-tracer
 
@@ -173,20 +247,34 @@ services:
       dockerfile: crates/delay-orama/Dockerfile
     depends_on:
       - tower-of-babel
+      - airport-anywhere
     labels:
       - "traefik.enable=true"
+      # Docs route: /delays/docs (high priority)
+      - "traefik.http.routers.delays-docs.entrypoints=web"
+      - "traefik.http.routers.delays-docs.rule=PathPrefix(`/delays/docs`)"
+      - "traefik.http.routers.delays-docs.priority=90"
+      - "traefik.http.routers.delays-docs.service=delays"
+
+      # Main service route (lowest priority) - handles all /delays requests
       - "traefik.http.routers.delays.entrypoints=web"
       - "traefik.http.routers.delays.rule=PathPrefix(`/delays`)"
+      - "traefik.http.routers.delays.priority=10"
       - "traefik.http.services.delays.loadbalancer.server.port=3004"
       - "traefik.http.middlewares.delays-strip.stripprefix.prefixes=/delays"
       - "traefik.http.routers.delays.middlewares=delays-strip@docker"
     environment:
-      - RUST_LOG=info,tower_http=debug
+      - RUST_LOG=info,tower_http=debug,delay_orama=debug
+      - PORT=3004
+      - SERVICE_NAME=delays
+      - PATH_PREFIX=/delays
+      - TOWER_BABEL_BASE_URL=http://tower-of-babel:3003
+      - AIRPORT_SERVICE_BASE_URL=http://airport-anywhere:3000
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
-      - SERVICE_NAME=delay-orama
-      - TOWER_BABEL_URL=http://tower-of-babel:3003
+    ports:
+      - 3004:3004
     networks:
       - sky-tracer
 
@@ -219,9 +307,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.index.entrypoints=web"
-      # Specific paths only
       - "traefik.http.routers.index.rule=Path(`/index.html`) || Path(`/`) || Path(`/presentation/`)"
-      # Lower priority (default is 0, lower numbers = lower priority)
       - "traefik.http.routers.index.priority=1"
       - "traefik.http.services.index.loadbalancer.server.port=80"
     networks:
@@ -237,29 +323,43 @@ services:
       - orbital-beacon
     labels:
       - "traefik.enable=true"
+      # v1 API routes for nexus (highest priority)
+      - "traefik.http.routers.nexus-api.entrypoints=web"
+      - "traefik.http.routers.nexus-api.rule=PathPrefix(`/api/v1/nexus`)"
+      - "traefik.http.routers.nexus-api.priority=100"
+      - "traefik.http.routers.nexus-api.service=nexus"
+      # MCP routes (high priority)
+      - "traefik.http.routers.nexus-mcp.entrypoints=web"
+      - "traefik.http.routers.nexus-mcp.rule=PathPrefix(`/mcp`)"
+      - "traefik.http.routers.nexus-mcp.priority=80"
+      - "traefik.http.routers.nexus-mcp.service=nexus"
+
+      # Docs route: /nexus/docs (high priority)
+      - "traefik.http.routers.nexus-docs.entrypoints=web"
+      - "traefik.http.routers.nexus-docs.rule=PathPrefix(`/nexus/docs`)"
+      - "traefik.http.routers.nexus-docs.priority=90"
+      - "traefik.http.routers.nexus-docs.service=nexus"
+
+      # Main service route (lowest priority) - handles all /nexus requests
       - "traefik.http.routers.nexus.entrypoints=web"
       - "traefik.http.routers.nexus.rule=PathPrefix(`/nexus`)"
+      - "traefik.http.routers.nexus.priority=10"
       - "traefik.http.services.nexus.loadbalancer.server.port=8080"
       - "traefik.http.middlewares.nexus-strip.stripprefix.prefixes=/nexus"
       - "traefik.http.routers.nexus.middlewares=nexus-strip@docker"
-      - "traefik.http.routers.nexus-api.entrypoints=web"
-      - "traefik.http.routers.nexus-api.rule=PathPrefix(`/api/nexus`)"
-      - "traefik.http.routers.nexus-api.service=nexus"
-      - "traefik.http.routers.nexus-swagger.entrypoints=web"
-      - "traefik.http.routers.nexus-swagger.rule=PathPrefix(`/swagger-ui`)"
-      - "traefik.http.routers.nexus-swagger.service=nexus"
     environment:
       # Logging and Observability
       - RUST_LOG=info,tower_http=debug,sky_nexus=debug,rmcp=debug
+      - PORT=8080
+      - SERVICE_NAME=nexus
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on
-      - SERVICE_NAME=sky-nexus
 
-      # External Service URLs (using internal Docker network)
-      - AIRPORT_SERVICE_URL=http://airport-anywhere:3000/api
-      - FLIGHT_SERVICE_URL=http://flight-controller:3001/api
-      - SATELLITE_SERVICE_URL=http://orbital-beacon:3002/api
+      # External Service Base URLs (consistent naming)
+      - AIRPORT_SERVICE_BASE_URL=http://airport-anywhere:3000
+      - FLIGHT_SERVICE_BASE_URL=http://flight-controller:3001
+      - SATELLITE_SERVICE_BASE_URL=http://orbital-beacon:3002
 
       # Application Configuration
       - BIND_ADDRESS=0.0.0.0:8080

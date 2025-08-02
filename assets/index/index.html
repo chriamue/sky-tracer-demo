@@ -179,6 +179,26 @@
                     transform: scale(1);
                 }
             }
+
+            .api-links {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .api-sub-link {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.8rem;
+                background-color: rgba(0, 123, 255, 0.1);
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+
+            .api-sub-link:hover {
+                background-color: rgba(0, 123, 255, 0.2);
+            }
         </style>
     </head>
     <body>
@@ -220,6 +240,14 @@
                                     <span class="emoji">🏢</span>Airport
                                     Anywhere
                                 </div>
+                                <div class="api-links">
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/airports/docs', '🏢 Airport API Docs')"
+                                    >
+                                        📖 API Documentation
+                                    </div>
+                                </div>
                             </li>
                             <li>
                                 <div
@@ -229,6 +257,14 @@
                                     <span class="emoji">🎮</span>Flight
                                     Controller
                                 </div>
+                                <div class="api-links">
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/flights/docs', '🎮 Flight API Docs')"
+                                    >
+                                        📖 API Documentation
+                                    </div>
+                                </div>
                             </li>
                             <li>
                                 <div
@@ -237,13 +273,29 @@
                                 >
                                     <span class="emoji">🛰️</span>Orbital Beacon
                                 </div>
+                                <div class="api-links">
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/satellites/docs', '🛰️ Satellite API Docs')"
+                                    >
+                                        📖 API Documentation
+                                    </div>
+                                </div>
                             </li>
                             <li>
                                 <div
                                     class="service-link"
-                                    onclick="showPreview('/api/babel/docs', '🗼 Tower of Babel')"
+                                    onclick="showPreview('/babel/docs', '🗼 Tower of Babel API')"
                                 >
                                     <span class="emoji">🗼</span>Tower of Babel
+                                </div>
+                                <div class="api-links">
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/babel/docs', '🗼 Alternative Docs')"
+                                    >
+                                        📖 Alternative Docs
+                                    </div>
                                 </div>
                             </li>
                         </ul>
@@ -258,6 +310,20 @@
                                     onclick="showPreview('/delays/FRA', '⏰ Delay-O-Rama')"
                                 >
                                     <span class="emoji">⏰</span>Delay-O-Rama
+                                </div>
+                                <div class="api-links">
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/delays/CDG', '⏰ Paris CDG Delays')"
+                                    >
+                                        🇫🇷 Paris CDG
+                                    </div>
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/delays/LAX', '⏰ Los Angeles Delays')"
+                                    >
+                                        🇺🇸 Los Angeles
+                                    </div>
                                 </div>
                             </li>
                             <li>
@@ -303,6 +369,87 @@
                             </li>
                         </ul>
                     </div>
+
+                    <div class="service-category">
+                        <h2>🌐 Integration Hub</h2>
+                        <ul>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/swagger-ui', '🌟 Sky Nexus API')"
+                                >
+                                    <span class="emoji">🌟</span>Sky Nexus API
+                                </div>
+                                <div class="api-links">
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/api/v1/nexus/airports', '🏢 Nexus Airports API')"
+                                    >
+                                        🏢 Airports Endpoint
+                                    </div>
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/api/v1/nexus/flights', '✈️ Nexus Flights API')"
+                                    >
+                                        ✈️ Flights Endpoint
+                                    </div>
+                                    <div
+                                        class="api-sub-link"
+                                        onclick="showPreview('/api/v1/nexus/satellites', '🛰️ Nexus Satellites API')"
+                                    >
+                                        🛰️ Satellites Endpoint
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showMCPInfo('🏢 MCP Airports')"
+                                >
+                                    <span class="emoji">🏢</span>MCP Airports
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showMCPInfo('✈️ MCP Flights')"
+                                >
+                                    <span class="emoji">✈️</span>MCP Flights
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showMCPInfo('🛰️ MCP Satellites')"
+                                >
+                                    <span class="emoji">🛰️</span>MCP Satellites
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="service-category">
+                        <h2>🧪 Testing & Examples</h2>
+                        <ul>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/api/v1/babel/FRA', '🗼 Babel API Test')"
+                                >
+                                    <span class="emoji">🗼</span>Babel API (FRA)
+                                </div>
+                            </li>
+                            <li>
+                                <div
+                                    class="service-link"
+                                    onclick="showPreview('/api/v1/airports/search?code=CDG', '🏢 Airport Search Test')"
+                                >
+                                    <span class="emoji">🏢</span>Airport Search
+                                    (CDG)
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div class="preview-container">
@@ -332,6 +479,17 @@
                         <div class="no-preview">
                             <div class="no-preview-emoji">👆</div>
                             <div>Click a service to preview</div>
+                            <p
+                                style="
+                                    font-size: 0.9rem;
+                                    margin-top: 1rem;
+                                    opacity: 0.7;
+                                "
+                            >
+                                Services with API endpoints will show live
+                                data.<br />
+                                MCP endpoints require special clients to access.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -353,6 +511,38 @@
             `;
             }
 
+            function showMCPInfo(title) {
+                document.getElementById("preview-title").textContent = title;
+                document.getElementById("preview-content").innerHTML = `
+                <div class="no-preview">
+                    <div class="no-preview-emoji">🤖</div>
+                    <div style="max-width: 600px; text-align: left;">
+                        <h3>Model Context Protocol (MCP) Endpoint</h3>
+                        <p>This is an MCP server endpoint that provides tools for AI assistants like Claude Desktop.</p>
+
+                        <h4>Available endpoints:</h4>
+                        <ul style="text-align: left; margin: 1rem 0;">
+                            <li><strong>Airports:</strong> http://localhost:8083/mcp/airports</li>
+                            <li><strong>Flights:</strong> http://localhost:8083/mcp/flights</li>
+                            <li><strong>Satellites:</strong> http://localhost:8083/mcp/satellites</li>
+                        </ul>
+
+                        <h4>To test with MCP Inspector:</h4>
+                        <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; font-size: 0.9rem; overflow-x: auto;">npx @modelcontextprotocol/inspector http://localhost:8083/mcp/airports</pre>
+
+                        <h4>Claude Desktop Configuration:</h4>
+                        <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; font-size: 0.9rem; overflow-x: auto;">{
+  "mcpServers": {
+    "sky-nexus-airports": {
+      "url": "http://127.0.0.1:8083/mcp/airports"
+    }
+  }
+}</pre>
+                    </div>
+                </div>
+            `;
+            }
+
             function refreshPreview() {
                 if (currentUrl) {
                     showPreview(
@@ -365,6 +555,9 @@
             function openExternal() {
                 if (currentUrl) {
                     window.open(currentUrl, "_blank");
+                } else {
+                    // For MCP info, open the main Sky Nexus page
+                    window.open("/swagger-ui", "_blank");
                 }
             }
         </script>
