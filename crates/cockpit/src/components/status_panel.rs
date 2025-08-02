@@ -1,9 +1,8 @@
-use gloo_net::http::Request;
-use sky_tracer::protocol::flights::FlightResponse;
+use crate::services::{DataService, FlightService};
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 enum ConnectionStatus {
     Connected,
     Disconnected,
@@ -29,21 +28,22 @@ pub fn status_panel() -> Html {
                 let last_update = last_update.clone();
 
                 spawn_local(async move {
-                    match Request::get("/api/flights").send().await {
-                        Ok(response) => {
-                            if response.ok() {
-                                connection_status.set(ConnectionStatus::Connected);
-                                if let Ok(flights) = response.json::<Vec<FlightResponse>>().await {
-                                    flight_count.set(flights.len());
-                                }
-                            } else {
+                    let is_connected = DataService::check_connection().await;
+
+                    if is_connected {
+                        connection_status.set(ConnectionStatus::Connected);
+                        match FlightService::get_flights().await {
+                            Ok(flights) => {
+                                flight_count.set(flights.len());
+                            }
+                            Err(_) => {
                                 connection_status.set(ConnectionStatus::Disconnected);
                             }
                         }
-                        Err(_) => {
-                            connection_status.set(ConnectionStatus::Disconnected);
-                        }
+                    } else {
+                        connection_status.set(ConnectionStatus::Disconnected);
                     }
+
                     last_update.set(chrono::Local::now());
                 });
             };

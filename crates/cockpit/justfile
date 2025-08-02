@@ -1,0 +1,14 @@
+export PORT := "8080"
+export SERVICE_NAME := "cockpit"
+export RUST_LOG := "info,tower_http=debug,cockpit=debug"
+
+default:
+    @just --list
+
+build:
+    echo "Building cockpit for production..."
+    trunk build --release
+
+run:
+    echo "Running cockpit in development mode..."
+    trunk serve --port {{PORT}}

@@ -2,3 +2,10 @@
 target = "index.html"
 dist = "dist"
 public_url = "."
+
+[serve]
+port = 8080
+open = false
+
+[watch]
+ignore = ["dist"]

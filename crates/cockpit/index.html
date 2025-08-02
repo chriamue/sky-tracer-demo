@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>Sky Tracer Cockpit</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link
             rel="stylesheet"
             href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -10,6 +11,14 @@
         <link data-trunk rel="css" href="styles.css" />
         <link data-trunk rel="copy-file" href="assets/map.js" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            // Set environment variables for the WASM app
+            window.COCKPIT_CONFIG = {
+                port: 8080,
+                serviceName: "cockpit",
+                apiBaseUrl: "/api",
+            };
+        </script>
     </head>
     <body>
         <div id="app"></div>

@@ -23,6 +23,6 @@ COPY --from=builder /usr/src/app/crates/cockpit/dist /usr/share/nginx/html
 # Copy nginx configuration
 COPY crates/cockpit/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

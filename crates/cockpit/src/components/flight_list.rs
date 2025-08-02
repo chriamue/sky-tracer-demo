@@ -1,4 +1,4 @@
-use gloo_net::http::Request;
+use crate::services::FlightService;
 use sky_tracer::protocol::flights::FlightResponse;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
@@ -47,13 +47,13 @@ pub fn flight_list() -> Html {
             let loading = loading.clone();
 
             spawn_local(async move {
-                match Request::get("/api/flights").send().await {
-                    Ok(response) => {
-                        if let Ok(data) = response.json::<Vec<FlightResponse>>().await {
-                            flights.set(data);
-                        }
+                match FlightService::get_flights().await {
+                    Ok(data) => {
+                        flights.set(data);
                     }
-                    Err(err) => log::error!("Error fetching flights: {}", err),
+                    Err(err) => {
+                        log::error!("Error fetching flights: {}", err);
+                    }
                 }
                 loading.set(false);
             });
@@ -101,7 +101,7 @@ pub fn flight_list() -> Html {
                             let progress_class = get_progress_class(progress);
 
                             html! {
-                                <tr>
+                                <tr key={flight.flight_number.clone()}>
                                     <td>{&flight.flight_number}</td>
                                     <td>{&flight.aircraft_number}</td>
                                     <td>{&flight.departure}</td>

@@ -1,4 +1,4 @@
-use crate::types::{Airport, Flight};
+use crate::models::{Airport, Flight};
 use serde_json::json;
 use uuid::Uuid;
 use web_sys::wasm_bindgen::JsCast;

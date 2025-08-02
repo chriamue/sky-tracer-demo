@@ -1,5 +1,7 @@
 pub mod app;
 pub mod components;
-pub mod types;
+pub mod models;
+
+pub mod services;
 
 pub use app::App;

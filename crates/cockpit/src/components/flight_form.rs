@@ -1,4 +1,4 @@
-use gloo_net::http::Request;
+use crate::services::FlightService;
 use sky_tracer::protocol::flights::CreateFlightRequest;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlInputElement;
@@ -33,16 +33,15 @@ pub fn flight_form() -> Html {
                 input.set_value("LIS");
             }
 
-            // Get current UTC time and add 10 minutes
+            // Get current UTC time and add 1 minute for departure
             let utc_now = chrono::Utc::now();
-            let departure_time = utc_now;
+            let departure_time = utc_now + chrono::Duration::minutes(1);
 
             if let Some(input) = departure_time_ref.cast::<HtmlInputElement>() {
-                // Format in UTC time
                 input.set_value(&departure_time.format("%Y-%m-%dT%H:%M:%SZ").to_string());
             }
 
-            // Set arrival time to 2 hours after departure (in UTC time)
+            // Set arrival time to 10 minutes after departure
             let arrival_time = departure_time + chrono::Duration::minutes(10);
             if let Some(input) = arrival_time_ref.cast::<HtmlInputElement>() {
                 input.set_value(&arrival_time.format("%Y-%m-%dT%H:%M:%SZ").to_string());
@@ -74,7 +73,7 @@ pub fn flight_form() -> Html {
                 .value();
             let arrival_time = arrival_time_ref.cast::<HtmlInputElement>().unwrap().value();
 
-            // Use parsed times directly from the input
+            // Parse times
             let parsed_departure_time = match chrono::DateTime::parse_from_rfc3339(&departure_time)
             {
                 Ok(time) => time.with_timezone(&chrono::Utc),
@@ -105,13 +104,8 @@ pub fn flight_form() -> Html {
             };
 
             spawn_local(async move {
-                match Request::post("/api/flights")
-                    .json(&request)
-                    .unwrap()
-                    .send()
-                    .await
-                {
-                    Ok(_) => {
+                match FlightService::create_flight(request).await {
+                    Ok(()) => {
                         status.set(Some("Flight created successfully".to_string()));
                     }
                     Err(err) => status.set(Some(format!("Error: {}", err))),
