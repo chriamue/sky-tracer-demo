@@ -1,5 +1,5 @@
 use crate::{
-    openapi::ApiDoc,
+    openapi,
     routes::{create_flight, get_flight_position, list_flights},
     services::FlightService,
     ui::pages::{Home, HomeProps},
@@ -17,10 +17,6 @@ use sky_tracer::protocol::flights::FlightResponse;
 use sky_tracer::protocol::{FLIGHTS_API_PATH, FLIGHTS_POSITION_API_PATH};
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, instrument};
-use utoipa::OpenApi;
-use utoipa_rapidoc::RapiDoc;
-use utoipa_redoc::{Redoc, Servable};
-use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Debug, Deserialize)]
 struct PageParams {
@@ -83,7 +79,6 @@ async fn render_page(
 
 pub fn app() -> Router {
     let flight_service = FlightService::new();
-    let api_doc = ApiDoc::openapi();
 
     let api_router = Router::new()
         .route(FLIGHTS_API_PATH, post(create_flight).get(list_flights))
@@ -99,12 +94,7 @@ pub fn app() -> Router {
 
     Router::new()
         .route("/", get(render_page))
-        .merge(SwaggerUi::new("/api/docs/").url("/api-docs/openapi.json", api_doc.clone()))
-        .merge(
-            RapiDoc::with_openapi("/api-docs/rapidoc/openapi.json", api_doc.clone())
-                .path("/api/rapidoc/"),
-        )
-        .merge(Redoc::with_url("/api/redoc/", api_doc))
+        .merge(openapi::routes())
         .merge(api_router)
         .with_state(flight_service)
 }

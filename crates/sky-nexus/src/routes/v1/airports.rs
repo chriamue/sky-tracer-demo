@@ -1,6 +1,6 @@
 use crate::services::airports::{AirportServiceError, fetch_airport_by_code, fetch_airports};
 use axum::{Json, Router, extract::Path, http::StatusCode, response::IntoResponse, routing::get};
-use sky_tracer::protocol::{AIRPORTS_API_PATH, airports::AirportResponse};
+use sky_tracer::protocol::{NEXUS_AIRPORTS_API_PATH, airports::AirportResponse};
 use tracing::{error, info, instrument};
 
 pub fn router() -> Router {
@@ -11,7 +11,7 @@ pub fn router() -> Router {
 
 #[utoipa::path(
     get,
-    path = AIRPORTS_API_PATH,
+    path = NEXUS_AIRPORTS_API_PATH,
     responses(
         (status = 200, description = "List all airports", body = [AirportResponse]),
         (status = 500, description = "Internal server error")
@@ -45,7 +45,7 @@ pub async fn list_airports() -> impl IntoResponse {
 
 #[utoipa::path(
     get,
-    path = "/api/v1/airports/{code}",
+    path = "/api/v1/nexus/airports/{code}",
     params(
         ("code" = String, Path, description = "Airport code")
     ),

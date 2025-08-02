@@ -14,7 +14,7 @@ pub fn router() -> Router {
 
 #[utoipa::path(
     get,
-    path = "/api/v1/flights",
+    path = "/api/v1/nexus/flights",
     responses(
         (status = 200, description = "List all flights", body = [FlightResponse])
     ),
@@ -61,7 +61,7 @@ pub async fn list_flights() -> impl IntoResponse {
 
 #[utoipa::path(
     post,
-    path = "/api/v1/flights",
+    path = "/api/v1/nexus/flights",
     request_body = CreateFlightRequest,
     responses(
         (status = 201, description = "Flight created", body = FlightResponse)
@@ -74,9 +74,8 @@ pub async fn post_flight(Json(request): Json<CreateFlightRequest>) -> impl IntoR
         request.departure, request.arrival
     );
 
-    // Convert CreateFlightRequest to Flight model
     let flight = Flight {
-        flight_number: format!("{}0001", request.departure), // Temporary
+        flight_number: format!("{}0001", request.departure),
         aircraft_number: request.aircraft_number,
         departure: request.departure,
         arrival: request.arrival,
@@ -119,7 +118,7 @@ pub async fn post_flight(Json(request): Json<CreateFlightRequest>) -> impl IntoR
 
 #[utoipa::path(
     get,
-    path = "/api/v1/flights/{flight_number}",
+    path = "/api/v1/nexus/flights/{flight_number}",
     params(
         ("flight_number" = String, Path, description = "Flight number")
     ),

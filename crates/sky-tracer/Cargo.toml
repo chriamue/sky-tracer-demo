@@ -33,4 +33,4 @@ utoipa = { workspace = true, optional = true, features = [
 ] }
 
 csv = "1.2"
-thiserror = "1.0"
+thiserror = { workspace = true }

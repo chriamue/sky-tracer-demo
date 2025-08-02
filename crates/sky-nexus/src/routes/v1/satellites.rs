@@ -21,7 +21,7 @@ pub fn router() -> Router {
 
 #[utoipa::path(
     get,
-    path = "/api/v1/satellites",
+    path = "/api/v1/nexus/satellites",
     responses(
         (status = 200, description = "List all satellites", body = [SatelliteResponse])
     ),
@@ -34,7 +34,7 @@ pub async fn list_satellites() -> Json<Vec<SatelliteResponse>> {
 
 #[utoipa::path(
     post,
-    path = "/api/v1/satellites",
+    path = "/api/v1/nexus/satellites",
     request_body = CreateSatelliteRequest,
     responses(
         (status = 201, description = "Satellite created", body = SatelliteResponse)
@@ -42,13 +42,13 @@ pub async fn list_satellites() -> Json<Vec<SatelliteResponse>> {
     tag = "Satellites"
 )]
 pub async fn post_satellite(Json(req): Json<CreateSatelliteRequest>) -> Json<SatelliteResponse> {
-    let satellite = create_satellite(req).await.unwrap(); // TODO: handle errors
+    let satellite = create_satellite(req).await.unwrap();
     Json(satellite)
 }
 
 #[utoipa::path(
     put,
-    path = "/api/v1/satellites/{id}/status",
+    path = "/api/v1/nexus/satellites/{id}/status",
     request_body = UpdateSatelliteStatusRequest,
     params(
         ("id" = Uuid, Path, description = "Satellite ID")
@@ -68,7 +68,7 @@ pub async fn put_satellite_status(
 
 #[utoipa::path(
     post,
-    path = "/api/v1/satellites/position",
+    path = "/api/v1/nexus/satellites/position",
     request_body = CalculatePositionRequest,
     responses(
         (status = 200, description = "Flight positions calculated", body = CalculatePositionResponse)

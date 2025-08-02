@@ -6,7 +6,7 @@ use axum::Router;
 
 pub fn create_router() -> Router {
     Router::new()
-        .nest("/airports", airports::router())
-        .nest("/flights", flights::router())
-        .nest("/satellites", satellites::router())
+        .nest("/nexus/airports", airports::router())
+        .nest("/nexus/flights", flights::router())
+        .nest("/nexus/satellites", satellites::router())
 }
