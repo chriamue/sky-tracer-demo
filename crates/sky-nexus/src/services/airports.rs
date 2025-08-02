@@ -1,19 +1,32 @@
 use reqwest::Client;
 use sky_tracer::model::airport::Airport;
-use sky_tracer::protocol::airports::SearchAirportsResponse;
+use sky_tracer::protocol::{
+    AIRPORTS_API_PATH, AIRPORTS_SEARCH_API_PATH, airports::SearchAirportsResponse,
+};
 use std::env;
-use tracing::{info, instrument};
+use thiserror::Error;
+use tracing::{error, info, instrument};
 
-fn get_airport_service_url() -> String {
-    env::var("AIRPORT_SERVICE_URL").unwrap_or_else(|_| "http://localhost:3000/api".to_string())
+#[derive(Error, Debug)]
+pub enum AirportServiceError {
+    #[error("Network error: {0}")]
+    Network(#[from] reqwest::Error),
+    #[error("Airport not found: {0}")]
+    NotFound(String),
+    #[error("Parse error: {0}")]
+    ParseError(String),
+}
+
+fn get_airport_service_base_url() -> String {
+    env::var("AIRPORT_SERVICE_BASE_URL").unwrap_or_else(|_| "http://localhost:3000".to_string())
 }
 
 #[instrument]
-pub async fn fetch_airports() -> Result<Vec<Airport>, reqwest::Error> {
+pub async fn fetch_airports() -> Result<Vec<Airport>, AirportServiceError> {
     info!("Fetching all airports");
     let client = Client::new();
-    let base_url = get_airport_service_url();
-    let url = format!("{}/airports", base_url);
+    let base_url = get_airport_service_base_url();
+    let url = format!("{}{}", base_url, AIRPORTS_API_PATH);
 
     info!(url = %url, "Making request to fetch airports");
     let resp = client.get(&url).send().await?;
@@ -35,17 +48,19 @@ pub async fn fetch_airports() -> Result<Vec<Airport>, reqwest::Error> {
         info!(count = airports.len(), "Successfully fetched airports");
         Ok(airports)
     } else {
-        info!(status = %resp.status(), "Failed to fetch airports");
-        Err(reqwest::Error::from(resp.error_for_status().unwrap_err()))
+        error!(status = %resp.status(), "Failed to fetch airports");
+        Err(AirportServiceError::Network(
+            resp.error_for_status().unwrap_err(),
+        ))
     }
 }
 
 #[instrument]
-pub async fn fetch_airport_by_code(code: &str) -> Result<Airport, reqwest::Error> {
+pub async fn fetch_airport_by_code(code: &str) -> Result<Airport, AirportServiceError> {
     info!(code = %code, "Fetching airport by code");
     let client = Client::new();
-    let base_url = get_airport_service_url();
-    let url = format!("{}/airports/search?code={}", base_url, code);
+    let base_url = get_airport_service_base_url();
+    let url = format!("{}{}?code={}", base_url, AIRPORTS_SEARCH_API_PATH, code);
 
     info!(url = %url, "Making request to search airport");
     let resp = client.get(&url).send().await?;
@@ -66,18 +81,15 @@ pub async fn fetch_airport_by_code(code: &str) -> Result<Airport, reqwest::Error
             Ok(airport)
         } else {
             info!(code = %code, "Airport not found");
-            Err(reqwest::Error::from(
-                reqwest::Client::new()
-                    .get("http://example.com/not-found")
-                    .send()
-                    .await
-                    .unwrap()
-                    .error_for_status()
-                    .unwrap_err(),
-            ))
+            Err(AirportServiceError::NotFound(format!(
+                "Airport with code {} not found",
+                code
+            )))
         }
     } else {
-        info!(status = %resp.status(), code = %code, "Failed to search airport");
-        Err(reqwest::Error::from(resp.error_for_status().unwrap_err()))
+        error!(status = %resp.status(), code = %code, "Failed to search airport");
+        Err(AirportServiceError::Network(
+            resp.error_for_status().unwrap_err(),
+        ))
     }
 }

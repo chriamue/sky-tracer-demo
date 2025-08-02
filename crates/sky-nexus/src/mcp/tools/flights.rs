@@ -9,6 +9,7 @@ use serde::Deserialize;
 use serde_json::json;
 use sky_tracer::model::flight::Flight;
 use sky_tracer::protocol::flights::CreateFlightRequest;
+use std::future::Future;
 use tracing::{error, info};
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
@@ -41,7 +42,7 @@ pub struct ListFlightsToolRequest {
     pub date: Option<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct FlightTools {
     tool_router: ToolRouter<Self>,
 }
@@ -76,16 +77,17 @@ impl FlightTools {
         let filtered_flights: Vec<_> = flights
             .into_iter()
             .filter(|flight| {
-                let matches_departure = req.departure.as_ref().map_or(true, |dep| {
+                let matches_departure = req.departure.as_ref().is_none_or(|dep| {
                     flight
                         .departure
                         .to_lowercase()
                         .contains(&dep.to_lowercase())
                 });
-                let matches_arrival = req.arrival.as_ref().map_or(true, |arr| {
-                    flight.arrival.to_lowercase().contains(&arr.to_lowercase())
-                });
-                let matches_date = req.date.as_ref().map_or(true, |date| {
+                let matches_arrival = req
+                    .arrival
+                    .as_ref()
+                    .is_none_or(|arr| flight.arrival.to_lowercase().contains(&arr.to_lowercase()));
+                let matches_date = req.date.as_ref().is_none_or(|date| {
                     flight.departure_time.format("%Y-%m-%d").to_string() == *date
                 });
 

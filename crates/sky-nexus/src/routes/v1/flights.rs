@@ -1,12 +1,7 @@
 use crate::services::flights::{
     FlightServiceError, create_flight, fetch_flight_by_number, fetch_flights,
 };
-use axum::{
-    Json, Router,
-    http::StatusCode,
-    response::IntoResponse,
-    routing::{get, post},
-};
+use axum::{Json, Router, http::StatusCode, response::IntoResponse, routing::get};
 use sky_tracer::model::flight::Flight;
 use sky_tracer::protocol::flights::{CreateFlightRequest, FlightResponse};
 use tracing::{error, info};

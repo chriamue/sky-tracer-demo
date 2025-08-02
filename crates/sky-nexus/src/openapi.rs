@@ -1,8 +1,10 @@
-use sky_tracer::protocol::airports::AirportResponse;
-use sky_tracer::protocol::flights::FlightResponse;
-use sky_tracer::protocol::satellite::{
-    CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
-    UpdateSatelliteStatusRequest,
+use sky_tracer::protocol::{
+    airports::AirportResponse,
+    flights::{CreateFlightRequest, FlightResponse},
+    satellite::{
+        CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest,
+        SatelliteResponse, UpdateSatelliteStatusRequest,
+    },
 };
 use utoipa::OpenApi;
 
@@ -23,6 +25,7 @@ use utoipa::OpenApi;
         schemas(
             AirportResponse,
             FlightResponse,
+            CreateFlightRequest,
             SatelliteResponse,
             CreateSatelliteRequest,
             UpdateSatelliteStatusRequest,
@@ -34,6 +37,10 @@ use utoipa::OpenApi;
         (name = "Airports", description = "Airport lookup endpoints"),
         (name = "Flights", description = "Flight management endpoints"),
         (name = "Satellites", description = "Satellite endpoints"),
+    ),
+    servers(
+        (url = "/", description = "Local development server"),
+        (url = "/api/v1/nexus", description = "Sky Nexus API base path")
     )
 )]
 pub struct ApiDoc;

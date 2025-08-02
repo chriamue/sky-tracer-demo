@@ -1,41 +1,32 @@
 use reqwest::Client;
 use sky_tracer::model::flight::Flight;
-use sky_tracer::protocol::flights::FlightResponse;
+use sky_tracer::protocol::{
+    FLIGHTS_API_PATH,
+    flights::{CreateFlightRequest, FlightResponse},
+};
 use std::env;
-use tracing::{debug, error, info};
+use thiserror::Error;
+use tracing::{debug, error, info, instrument};
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum FlightServiceError {
-    Network(reqwest::Error),
+    #[error("Network error: {0}")]
+    Network(#[from] reqwest::Error),
+    #[error("Flight not found: {0}")]
     NotFound(String),
+    #[error("Parse error: {0}")]
     ParseError(String),
 }
 
-impl From<reqwest::Error> for FlightServiceError {
-    fn from(err: reqwest::Error) -> Self {
-        FlightServiceError::Network(err)
-    }
+fn get_flight_service_base_url() -> String {
+    env::var("FLIGHT_SERVICE_BASE_URL").unwrap_or_else(|_| "http://localhost:3001".to_string())
 }
 
-impl std::fmt::Display for FlightServiceError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            FlightServiceError::Network(e) => write!(f, "Network error: {}", e),
-            FlightServiceError::NotFound(msg) => write!(f, "Not found: {}", msg),
-            FlightServiceError::ParseError(msg) => write!(f, "Parse error: {}", msg),
-        }
-    }
-}
-
-impl std::error::Error for FlightServiceError {}
-
-fn get_flight_service_url() -> String {
-    env::var("FLIGHT_SERVICE_URL").unwrap_or_else(|_| "http://localhost:3001/api".to_string())
-}
-
+#[instrument]
 pub async fn fetch_flights() -> Result<Vec<Flight>, FlightServiceError> {
     let client = Client::new();
-    let url = format!("{}/flights/", get_flight_service_url());
+    let base_url = get_flight_service_base_url();
+    let url = format!("{}{}", base_url, FLIGHTS_API_PATH);
 
     info!("Fetching flights from: {}", url);
 
@@ -51,17 +42,14 @@ pub async fn fetch_flights() -> Result<Vec<Flight>, FlightServiceError> {
         ));
     }
 
-    // Get response text first to debug
     let response_text = resp.text().await?;
     debug!("Response body: {}", response_text);
 
-    // If empty response, return empty vec
     if response_text.trim().is_empty() {
         info!("Empty response from flight service, returning empty flight list");
         return Ok(vec![]);
     }
 
-    // Try to parse as JSON
     let flight_responses: Vec<FlightResponse> =
         serde_json::from_str(&response_text).map_err(|e| {
             error!("Failed to parse flight response as JSON: {}", e);
@@ -72,7 +60,6 @@ pub async fn fetch_flights() -> Result<Vec<Flight>, FlightServiceError> {
             ))
         })?;
 
-    // Convert to Flight models
     let flights: Vec<Flight> = flight_responses
         .into_iter()
         .map(|fr| Flight {
@@ -89,11 +76,10 @@ pub async fn fetch_flights() -> Result<Vec<Flight>, FlightServiceError> {
     Ok(flights)
 }
 
+#[instrument]
 pub async fn fetch_flight_by_number(flight_number: &str) -> Result<Flight, FlightServiceError> {
     info!("Fetching flight by number: {}", flight_number);
 
-    // Since Flight Controller doesn't have individual flight lookup,
-    // fetch all flights and filter
     let flights = fetch_flights().await?;
 
     flights
@@ -105,15 +91,14 @@ pub async fn fetch_flight_by_number(flight_number: &str) -> Result<Flight, Fligh
         })
 }
 
+#[instrument]
 pub async fn create_flight(flight: Flight) -> Result<Flight, FlightServiceError> {
-    use sky_tracer::protocol::flights::CreateFlightRequest;
-
     let client = Client::new();
-    let url = format!("{}/flights/", get_flight_service_url());
+    let base_url = get_flight_service_base_url();
+    let url = format!("{}{}", base_url, FLIGHTS_API_PATH);
 
     info!("Creating flight at: {}", url);
 
-    // Convert Flight to CreateFlightRequest
     let create_request = CreateFlightRequest {
         aircraft_number: flight.aircraft_number,
         departure: flight.departure,
@@ -148,7 +133,6 @@ pub async fn create_flight(flight: Flight) -> Result<Flight, FlightServiceError>
         ))
     })?;
 
-    // Convert back to Flight
     let created_flight = Flight {
         flight_number: flight_response.flight_number,
         aircraft_number: flight_response.aircraft_number,

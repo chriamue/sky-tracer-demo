@@ -12,6 +12,7 @@ use serde_json::json;
 use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CreateSatelliteRequest, UpdateSatelliteStatusRequest,
 };
+use std::future::Future;
 use tracing::{error, info};
 use uuid::Uuid;
 
@@ -49,7 +50,7 @@ pub struct CalculatePositionToolRequest {
     pub current_time: Option<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SatelliteTools {
     pub tool_router: ToolRouter<Self>,
 }

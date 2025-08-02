@@ -6,6 +6,7 @@ use rmcp::{
     schemars, tool, tool_handler, tool_router,
 };
 use serde_json::json;
+use std::future::Future;
 use tracing::{error, info};
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
@@ -14,7 +15,7 @@ pub struct GetAirportRequest {
     pub code: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct AirportTools {
     tool_router: ToolRouter<Self>,
 }
