@@ -1,7 +1,10 @@
 pub mod app;
-pub mod flight_service;
+pub mod models;
 pub mod openapi;
 pub mod routes;
+pub mod services;
+
+#[cfg(feature = "ssr")]
 pub mod ui;
 
 #[cfg(test)]

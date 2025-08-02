@@ -1,7 +1,7 @@
 use crate::{
-    flight_service::FlightService,
     openapi::ApiDoc,
     routes::{create_flight, get_flight_position, list_flights},
+    services::FlightService,
     ui::pages::{Home, HomeProps},
 };
 use axum::{
@@ -14,6 +14,7 @@ use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer}
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use sky_tracer::protocol::flights::FlightResponse;
+use sky_tracer::protocol::{FLIGHTS_API_PATH, FLIGHTS_POSITION_API_PATH};
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, instrument};
 use utoipa::OpenApi;
@@ -80,11 +81,23 @@ async fn render_page(
     ))
 }
 
-pub fn app() -> Router<()> {
+pub fn app() -> Router {
     let flight_service = FlightService::new();
     let api_doc = ApiDoc::openapi();
 
-    let app = Router::new()
+    let api_router = Router::new()
+        .route(FLIGHTS_API_PATH, post(create_flight).get(list_flights))
+        .route(FLIGHTS_POSITION_API_PATH, get(get_flight_position))
+        .layer(OtelInResponseLayer)
+        .layer(OtelAxumLayer::default())
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
+        );
+
+    Router::new()
         .route("/", get(render_page))
         .merge(SwaggerUi::new("/api/docs/").url("/api-docs/openapi.json", api_doc.clone()))
         .merge(
@@ -92,20 +105,6 @@ pub fn app() -> Router<()> {
                 .path("/api/rapidoc/"),
         )
         .merge(Redoc::with_url("/api/redoc/", api_doc))
-        .route("/api/flights/", post(create_flight))
-        .route("/api/flights/", get(list_flights))
-        .route(
-            "/api/flights/{flight_number}/position",
-            get(get_flight_position),
-        )
-        .layer(OtelInResponseLayer::default())
-        .layer(OtelAxumLayer::default())
-        .layer(
-            CorsLayer::new()
-                .allow_origin(Any)
-                .allow_methods(Any)
-                .allow_headers(Any),
-        )
-        .with_state(flight_service);
-    app
+        .merge(api_router)
+        .with_state(flight_service)
 }
