@@ -1,9 +1,9 @@
+pub mod app;
+pub mod models;
 pub mod openapi;
-pub mod satellite_service;
-pub mod service;
+pub mod routes;
+pub mod services;
 pub mod utils;
 
 #[cfg(feature = "ssr")]
 pub mod ui;
-
-pub mod routes;

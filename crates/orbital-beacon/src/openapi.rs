@@ -1,4 +1,4 @@
-use crate::service;
+use crate::routes::api;
 use sky_tracer::model::SatelliteStatus;
 use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CalculatePositionResponse, CreateSatelliteRequest, SatelliteResponse,
@@ -9,10 +9,10 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        service::create_satellite,
-        service::update_satellite_status,
-        service::list_satellites,
-        service::calculate_position
+        api::create_satellite,
+        api::update_satellite_status,
+        api::list_satellites,
+        api::calculate_position
     ),
     components(
         schemas(
@@ -28,7 +28,9 @@ use utoipa::OpenApi;
         (name = "satellites", description = "Satellite management API")
     ),
     servers(
-        (url = "/", description = "Local development server")
+        (url = "/", description = "Local development server"),
+        (url = "/api/v1/satellites", description = "Satellites API"),
+        (url = "/api/v1/satellites/position", description = "Position calculation API")
     )
 )]
 pub struct ApiDoc;
