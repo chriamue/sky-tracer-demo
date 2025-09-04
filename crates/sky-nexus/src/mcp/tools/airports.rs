@@ -1,12 +1,11 @@
 use crate::services::airports::{fetch_airport_by_code, fetch_airports};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
-    handler::server::{router::tool::ToolRouter, tool::Parameters},
+    handler::server::{router::tool::ToolRouter, wrapper::Parameters},
     model::*,
     schemars, tool, tool_handler, tool_router,
 };
 use serde_json::json;
-use std::future::Future;
 use tracing::{error, info};
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]

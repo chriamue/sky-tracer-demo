@@ -3,7 +3,7 @@ use crate::services::satellites::{
 };
 use rmcp::{
     ErrorData as McpError, ServerHandler,
-    handler::server::{router::tool::ToolRouter, tool::Parameters},
+    handler::server::{router::tool::ToolRouter, wrapper::Parameters},
     model::*,
     schemars, tool, tool_handler, tool_router,
 };
@@ -12,7 +12,6 @@ use serde_json::json;
 use sky_tracer::protocol::satellite::{
     CalculatePositionRequest, CreateSatelliteRequest, UpdateSatelliteStatusRequest,
 };
-use std::future::Future;
 use tracing::{error, info};
 use uuid::Uuid;
 

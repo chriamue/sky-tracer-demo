@@ -1,7 +1,8 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, JsonSchema)]
 pub struct DateTimeResponse {
     /// Formatted date and time string
     pub formatted_time: String,
@@ -17,7 +18,7 @@ pub struct DateTimeResponse {
     pub utc_offset: i32,
 }
 
-#[derive(Debug, Deserialize, IntoParams, ToSchema)]
+#[derive(Debug, Deserialize, IntoParams, ToSchema, JsonSchema)]
 pub struct GetDateTimeQuery {
     /// Timezone (optional, defaults to UTC)
     #[schema(example = "America/New_York")]
@@ -27,7 +28,7 @@ pub struct GetDateTimeQuery {
     pub format: Option<String>,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, JsonSchema)]
 pub struct AviationTimesResponse {
     /// Current times in major aviation hubs
     pub times: Vec<AviationTimeZone>,
@@ -35,7 +36,7 @@ pub struct AviationTimesResponse {
     pub unix_timestamp: i64,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, JsonSchema)]
 pub struct AviationTimeZone {
     /// Location name
     pub name: String,
@@ -49,7 +50,7 @@ pub struct AviationTimeZone {
     pub utc_offset_hours: f32,
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Deserialize, ToSchema, JsonSchema)]
 pub struct TimezoneComparisonRequest {
     /// Source timezone
     #[schema(example = "America/New_York")]
@@ -59,7 +60,7 @@ pub struct TimezoneComparisonRequest {
     pub to_timezone: String,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, JsonSchema)]
 pub struct TimezoneComparisonResponse {
     /// Source timezone information
     pub from: TimezoneInfo,
@@ -71,7 +72,7 @@ pub struct TimezoneComparisonResponse {
     pub description: String,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, ToSchema, JsonSchema)]
 pub struct TimezoneInfo {
     /// Timezone identifier
     pub timezone: String,

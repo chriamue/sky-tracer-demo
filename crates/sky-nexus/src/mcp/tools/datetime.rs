@@ -2,15 +2,16 @@ use crate::models::datetime::*;
 use crate::services::datetime::{
     DateTimeServiceError, compare_timezones, get_aviation_times, get_current_datetime,
 };
+use chrono::{DateTime, Offset, Utc};
+use chrono_tz::{OffsetName, Tz};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
-    handler::server::{router::tool::ToolRouter, tool::Parameters},
+    handler::server::{router::tool::ToolRouter, wrapper::Parameters},
     model::*,
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
 use serde_json::json;
-use std::future::Future;
 use tracing::{error, info};
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
@@ -130,6 +131,101 @@ impl DateTimeTools {
                 ))
             }
         }
+    }
+
+    /// Compare two timezones and return their time difference as structured content
+    #[tool(
+        name = "compare_timezones",
+        description = "Compare two timezones and show the time difference"
+    )]
+    pub async fn compare_timezones(
+        &self,
+        params: Parameters<TimezoneComparisonRequest>,
+    ) -> Result<CallToolResult, McpError> {
+        let req = &params.0;
+
+        // Parse timezones
+        let from_tz: Tz = req.from_timezone.parse().map_err(|_| {
+            McpError::invalid_params(
+                "Invalid source timezone",
+                Some(json!({"error": "Invalid source timezone"})),
+            )
+        })?;
+        let to_tz: Tz = req.to_timezone.parse().map_err(|_| {
+            McpError::invalid_params(
+                "Invalid target timezone",
+                Some(json!({"error": "Invalid target timezone"})),
+            )
+        })?;
+
+        // Get current UTC time
+        let now: DateTime<Utc> = Utc::now();
+
+        // Convert to local times
+        let from_local = now.with_timezone(&from_tz);
+        let to_local = now.with_timezone(&to_tz);
+
+        // Calculate offsets using the correct method
+        let from_offset_seconds = from_local.offset().fix().local_minus_utc();
+        let to_offset_seconds = to_local.offset().fix().local_minus_utc();
+
+        let from_offset = from_offset_seconds as f32 / 3600.0;
+        let to_offset = to_offset_seconds as f32 / 3600.0;
+
+        let diff_hours = to_offset - from_offset;
+
+        // Format description
+        let description = if diff_hours > 0.0 {
+            format!(
+                "{} is {} hours ahead of {}",
+                req.to_timezone, diff_hours, req.from_timezone
+            )
+        } else if diff_hours < 0.0 {
+            format!(
+                "{} is {} hours behind of {}",
+                req.to_timezone, -diff_hours, req.from_timezone
+            )
+        } else {
+            format!("Both timezones are in sync")
+        };
+
+        // Create response object
+        let resp = TimezoneComparisonResponse {
+            from: TimezoneInfo {
+                timezone: req.from_timezone.clone(),
+                local_time: from_local.to_rfc3339(),
+                utc_offset_hours: from_offset,
+                abbreviation: from_local
+                    .offset()
+                    .abbreviation()
+                    .unwrap_or("UTC")
+                    .to_string(),
+            },
+            to: TimezoneInfo {
+                timezone: req.to_timezone.clone(),
+                local_time: to_local.to_rfc3339(),
+                utc_offset_hours: to_offset,
+                abbreviation: to_local
+                    .offset()
+                    .abbreviation()
+                    .unwrap_or("UTC")
+                    .to_string(),
+            },
+            difference_hours: diff_hours,
+            description,
+        };
+
+        // Convert to JSON for structured content
+        let json_result = serde_json::to_value(&resp).map_err(|e| {
+            error!("Failed to serialize timezone comparison: {}", e);
+            McpError::internal_error(
+                "Failed to process timezone comparison",
+                Some(json!({"error": e.to_string()})),
+            )
+        })?;
+
+        // Return as structured content in CallToolResult
+        Ok(CallToolResult::structured(json_result))
     }
 
     #[tool(description = "Calculate time difference between two timezones")]

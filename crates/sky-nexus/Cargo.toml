@@ -30,7 +30,7 @@ init-tracing-opentelemetry = { workspace = true }
 thiserror = { workspace = true }
 
 # Additional dependencies
-rmcp = { version = "0.3.2", features = [
+rmcp = { version = "0.6", features = [
     "macros",
     "server",
     "transport-sse-server",

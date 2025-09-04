@@ -1,7 +1,7 @@
 use crate::services::flights::{create_flight, fetch_flight_by_number, fetch_flights};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
-    handler::server::{router::tool::ToolRouter, tool::Parameters},
+    handler::server::{router::tool::ToolRouter, wrapper::Parameters},
     model::*,
     schemars, tool, tool_handler, tool_router,
 };
@@ -9,7 +9,6 @@ use serde::Deserialize;
 use serde_json::json;
 use sky_tracer::model::flight::Flight;
 use sky_tracer::protocol::flights::CreateFlightRequest;
-use std::future::Future;
 use tracing::{error, info};
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]

@@ -1,13 +1,12 @@
 use crate::services::babel::{BabelServiceError, fetch_flight_position, fetch_flights_by_airport};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
-    handler::server::{router::tool::ToolRouter, tool::Parameters},
+    handler::server::{router::tool::ToolRouter, wrapper::Parameters},
     model::*,
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
 use serde_json::json;
-use std::future::Future;
 use tracing::{error, info};
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
