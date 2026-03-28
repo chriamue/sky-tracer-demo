@@ -290,6 +290,166 @@
                 margin: 1rem 0;
             }
 
+            .mcp-section {
+                margin: 1.2rem 0;
+            }
+
+            .mcp-section h4 {
+                color: #34495e;
+                margin: 1.2rem 0 0.6rem 0;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            .proto-diagram {
+                background: #1e2d3d;
+                color: #a8d8ea;
+                font-family: monospace;
+                font-size: 0.82rem;
+                padding: 0.8rem 1rem;
+                border-radius: 6px;
+                margin: 0.8rem 0;
+                white-space: pre;
+            }
+
+            .primitives-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.8rem;
+                margin: 0.8rem 0;
+            }
+
+            .primitive-card {
+                border-radius: 8px;
+                padding: 0.9rem;
+                border-top: 3px solid;
+            }
+
+            .primitive-card.tool  { background: #eff6ff; border-color: #3b82f6; }
+            .primitive-card.resource { background: #f0fdf4; border-color: #22c55e; }
+            .primitive-card.prompt { background: #faf5ff; border-color: #a855f7; }
+
+            .primitive-card .prim-title {
+                font-weight: bold;
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .primitive-card.tool .prim-title  { color: #1d4ed8; }
+            .primitive-card.resource .prim-title { color: #15803d; }
+            .primitive-card.prompt .prim-title { color: #7e22ce; }
+
+            .primitive-card p {
+                font-size: 0.8rem;
+                color: #555;
+                margin: 0.3rem 0;
+                line-height: 1.4;
+            }
+
+            .primitive-card .prim-example {
+                font-family: monospace;
+                font-size: 0.78rem;
+                background: rgba(0,0,0,0.06);
+                padding: 0.2rem 0.4rem;
+                border-radius: 3px;
+                display: inline-block;
+                margin-top: 0.4rem;
+            }
+
+            .tag {
+                display: inline-block;
+                padding: 0.15rem 0.5rem;
+                border-radius: 3px;
+                font-size: 0.72rem;
+                font-weight: bold;
+                margin-left: 0.3rem;
+                vertical-align: middle;
+            }
+
+            .tag-tool     { background: #dbeafe; color: #1d4ed8; }
+            .tag-resource { background: #dcfce7; color: #15803d; }
+            .tag-prompt   { background: #f3e8ff; color: #7e22ce; }
+            .tag-count    { background: #f1f5f9; color: #475569; }
+
+            .tool-list {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.3rem 1rem;
+                font-size: 0.82rem;
+                margin: 0.5rem 0;
+            }
+
+            .tool-item {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.2rem 0;
+                color: #334155;
+            }
+
+            .tool-item code {
+                font-size: 0.78rem;
+                color: #1d4ed8;
+                background: #eff6ff;
+                padding: 0.1rem 0.3rem;
+                border-radius: 3px;
+            }
+
+            .resource-uri {
+                font-family: monospace;
+                font-size: 0.85rem;
+                color: #15803d;
+                background: #f0fdf4;
+                border: 1px solid #86efac;
+                padding: 0.4rem 0.8rem;
+                border-radius: 4px;
+                display: inline-block;
+                margin: 0.3rem 0.2rem;
+            }
+
+            .prompt-item {
+                background: #faf5ff;
+                border: 1px solid #d8b4fe;
+                border-radius: 6px;
+                padding: 0.6rem 0.8rem;
+                margin: 0.4rem 0;
+                font-size: 0.85rem;
+            }
+
+            .prompt-item .prompt-name {
+                font-weight: bold;
+                color: #7e22ce;
+                font-family: monospace;
+            }
+
+            .prompt-item .prompt-desc {
+                color: #555;
+                font-size: 0.8rem;
+                margin-top: 0.2rem;
+            }
+
+            .prompt-item .prompt-params {
+                font-size: 0.78rem;
+                color: #6b7280;
+                margin-top: 0.3rem;
+            }
+
+            .prompt-item .prompt-params code {
+                background: #ede9fe;
+                color: #6d28d9;
+                padding: 0.1rem 0.3rem;
+                border-radius: 3px;
+                font-size: 0.76rem;
+            }
+
+            .divider {
+                border: none;
+                border-top: 1px solid #e9ecef;
+                margin: 1rem 0;
+            }
+
             /* Responsive adjustments */
             @media (max-width: 1200px) {
                 .services-grid {
@@ -309,6 +469,14 @@
 
                 .preview-container {
                     height: 600px;
+                }
+
+                .primitives-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .tool-list {
+                    grid-template-columns: 1fr;
                 }
             }
         </style>
@@ -751,78 +919,194 @@
 
                 const toolCategories = [
                     {
-                        name: "🏢 Airports",
-                        tools: ["list_airports", "get_airport"],
-                    },
-                    {
-                        name: "✈️ Flights",
+                        icon: "🏢",
+                        name: "Airports",
                         tools: [
-                            "list_flights",
-                            "get_flight",
-                            "create_flight",
-                            "search_flights_by_route",
+                            { name: "list_airports", desc: "List all airports" },
+                            { name: "get_airport", desc: "Fetch by IATA code" },
                         ],
                     },
                     {
-                        name: "🛰️ Satellites",
+                        icon: "✈️",
+                        name: "Flights",
                         tools: [
-                            "list_satellites",
-                            "create_satellite",
-                            "update_satellite_status",
-                            "calculate_position",
+                            { name: "list_flights", desc: "List with filters" },
+                            { name: "get_flight", desc: "Flight details" },
+                            { name: "create_flight", desc: "Create a flight" },
+                            { name: "search_flights_by_route", desc: "Route search" },
                         ],
                     },
                     {
-                        name: "🕐 DateTime",
+                        icon: "🛰️",
+                        name: "Satellites",
                         tools: [
-                            "get_current_datetime",
-                            "get_aviation_times",
-                            "get_timezone_difference",
-                            "compare_timezones",
+                            { name: "list_satellites", desc: "List satellites" },
+                            { name: "create_satellite", desc: "Add satellite" },
+                            { name: "update_satellite_status", desc: "Update status" },
+                            { name: "calculate_position", desc: "GPS trilateration" },
                         ],
                     },
                     {
-                        name: "🗼 Tracking",
+                        icon: "🕐",
+                        name: "DateTime",
                         tools: [
-                            "get_flights_by_airport",
-                            "get_flight_position",
-                            "search_flights_by_airport_pattern",
+                            { name: "get_current_datetime", desc: "Current UTC time" },
+                            { name: "get_aviation_times", desc: "Multi-timezone view" },
+                            { name: "get_timezone_difference", desc: "Timezone delta" },
+                            { name: "compare_timezones", desc: "Side-by-side compare" },
+                        ],
+                    },
+                    {
+                        icon: "🗼",
+                        name: "Live Tracking",
+                        tools: [
+                            { name: "get_flights_by_airport", desc: "Departures & arrivals" },
+                            { name: "get_flight_position", desc: "Current lat/lon" },
+                            { name: "search_flights_by_airport_pattern", desc: "Pattern search" },
+                        ],
+                    },
+                    {
+                        icon: "🗺️",
+                        name: "Map",
+                        tools: [
+                            { name: "generate_flight_map", desc: "PNG world map with routes" },
                         ],
                     },
                 ];
 
+                const totalTools = toolCategories.reduce((s, c) => s + c.tools.length, 0);
+
                 document.getElementById("preview-title").textContent =
                     "🤖 Sky Nexus MCP";
                 document.getElementById("preview-content").innerHTML = `
-                <div class="no-preview">
-                    <div class="no-preview-emoji">🤖</div>
-                    <div class="mcp-content" style="max-width: 700px;">
-                        <h3>Sky Nexus MCP Server</h3>
-                        <p>Single MCP endpoint exposing all aviation data tools to AI assistants.</p>
+                <div class="no-preview" style="align-items:flex-start; padding: 1.5rem 2rem;">
+                    <div class="mcp-content" style="max-width: 760px; width: 100%;">
+
+                        <h3 style="margin-top:0;">🤖 Sky Nexus — MCP Server</h3>
+                        <p style="color:#555; margin-top:0;">
+                            Aviation data exposed to AI assistants via the
+                            <strong>Model Context Protocol</strong>.
+                            <span class="tag tag-count">HTTP Streamable</span>
+                            <span class="tag tag-count">JSON-RPC 2.0</span>
+                        </p>
 
                         <div class="mcp-endpoint">
                             <div class="mcp-endpoint-url">${mcpUrl}</div>
                             <button class="copy-button" onclick="copyToClipboard('${mcpUrl}')">Copy</button>
+                            <div class="mcp-tools" style="margin-top:0.3rem; font-size:0.8rem;">
+                                ${totalTools} tools &nbsp;·&nbsp; 8 resources &nbsp;·&nbsp; 4 prompts
+                            </div>
                         </div>
 
-                        <h4>Available Tools:</h4>
-                        <ul style="text-align: left; margin: 1rem 0;">
-                            ${toolCategories
-                                .map(
-                                    (cat) => `
-                                <li><strong>${cat.name}:</strong> ${cat.tools.join(", ")}</li>
-                            `,
-                                )
-                                .join("")}
-                        </ul>
+                        <hr class="divider"/>
 
-                        <h4>Test with MCP Inspector:</h4>
+                        <h4 style="margin-top:0;">What is MCP?</h4>
+                        <p style="font-size:0.85rem; color:#444; line-height:1.6; margin:0.4rem 0 0.8rem 0;">
+                            MCP (<a href="https://modelcontextprotocol.io" target="_blank" style="color:#007bff;">Model Context Protocol</a>)
+                            is an open standard that lets AI models communicate with external systems over
+                            <strong>HTTP Streamable</strong> (or stdio). The client connects once, discovers capabilities
+                            via <code>initialize</code>, then calls tools, reads resources, or invokes prompts as needed.
+                        </p>
+                        <div class="proto-diagram">  AI Client  ──── HTTP POST /mcp ────▶  MCP Server
+  (LM Studio,        JSON-RPC 2.0            (Sky Nexus)
+   Claude, …)  ◀─── SSE / response ─────</div>
+
+                        <hr class="divider"/>
+
+                        <h4>Three primitives — what's the difference?</h4>
+                        <div class="primitives-grid">
+                            <div class="primitive-card tool">
+                                <div class="prim-title">🔧 Tools</div>
+                                <p><strong>The model calls them.</strong> Tools are functions — the model decides when to invoke them based on conversation context. They can read data, mutate state, or trigger side effects.</p>
+                                <p>Think: <em>function call</em></p>
+                                <span class="prim-example">list_flights()</span>
+                            </div>
+                            <div class="primitive-card resource">
+                                <div class="prim-title">📦 Resources</div>
+                                <p><strong>The client reads them.</strong> Resources are data addressed by URI. The client injects their content as context. Read-only, identified by a URI scheme — like a typed file system.</p>
+                                <p>Think: <em>GET endpoint</em></p>
+                                <span class="prim-example">airports://FRA</span>
+                            </div>
+                            <div class="primitive-card prompt">
+                                <div class="prim-title">💬 Prompts</div>
+                                <p><strong>The user invokes them.</strong> Prompts are pre-built conversation templates. The server fills them with live data before handing them to the model — great for structured workflows.</p>
+                                <p>Think: <em>workflow starter</em></p>
+                                <span class="prim-example">airport-briefing</span>
+                            </div>
+                        </div>
+
+                        <hr class="divider"/>
+
+                        <h4>🔧 Tools <span class="tag tag-tool">${totalTools} total</span></h4>
+                        ${toolCategories.map(cat => `
+                            <div style="margin-bottom:0.7rem;">
+                                <div style="font-size:0.82rem; font-weight:600; color:#475569; margin-bottom:0.3rem;">
+                                    ${cat.icon} ${cat.name}
+                                </div>
+                                <div class="tool-list">
+                                    ${cat.tools.map(t => `
+                                        <div class="tool-item">
+                                            <code>${t.name}</code>
+                                            <span style="color:#94a3b8;">${t.desc}</span>
+                                        </div>
+                                    `).join("")}
+                                </div>
+                            </div>
+                        `).join("")}
+
+                        <hr class="divider"/>
+
+                        <h4>📦 Resources <span class="tag tag-resource">airports:// scheme</span></h4>
+                        <p style="font-size:0.83rem; color:#444; margin:0.4rem 0;">
+                            Airport data is exposed as URI-addressed resources. Any IATA code works via the template
+                            <code style="background:#f0fdf4; color:#15803d;">airports://{code}</code>.
+                            Featured airports are pre-listed for discovery:
+                        </p>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin:0.5rem 0;">
+                            ${["FRA","LHR","CDG","JFK","DXB","SIN","AMS","HND"].map(c =>
+                                `<span class="resource-uri">airports://${c}</span>`
+                            ).join("")}
+                        </div>
+                        <p style="font-size:0.8rem; color:#6b7280; margin:0.4rem 0 0 0;">
+                            Each resource returns <code>application/json</code> with id, code, name, latitude, longitude.
+                        </p>
+
+                        <hr class="divider"/>
+
+                        <h4>💬 Prompts <span class="tag tag-prompt">4 templates</span></h4>
+                        <div>
+                            <div class="prompt-item">
+                                <div class="prompt-name">airport-briefing</div>
+                                <div class="prompt-desc">Comprehensive airport briefing with geographic context, weather, airlines, and terminals.</div>
+                                <div class="prompt-params">params: <code>airport_code</code> (IATA, e.g. FRA)</div>
+                            </div>
+                            <div class="prompt-item">
+                                <div class="prompt-name">flight-route-analysis</div>
+                                <div class="prompt-desc">Analyse a route: distance, duration, carriers, time zones, overflight countries.</div>
+                                <div class="prompt-params">params: <code>departure</code>, <code>arrival</code>, <code>date?</code></div>
+                            </div>
+                            <div class="prompt-item">
+                                <div class="prompt-name">delay-investigation</div>
+                                <div class="prompt-desc">Investigate delays at an airport — injects live flight data, returns structured Markdown report.</div>
+                                <div class="prompt-params">params: <code>airport_code</code></div>
+                            </div>
+                            <div class="prompt-item">
+                                <div class="prompt-name">aviation-network-overview</div>
+                                <div class="prompt-desc">Full capability overview — lists all tools, resources, and prompts with example queries.</div>
+                                <div class="prompt-params">params: <em>none</em></div>
+                            </div>
+                        </div>
+
+                        <hr class="divider"/>
+
+                        <h4>🔌 Connect</h4>
+                        <div style="font-size:0.82rem; color:#475569; margin-bottom:0.4rem;">MCP Inspector (browser UI):</div>
                         <div class="code-block">
                             ${inspectorCmd}
                             <button class="copy-button" onclick="copyToClipboard('${inspectorCmd}')">Copy</button>
                         </div>
 
-                        <h4>LM Studio / Claude Desktop Configuration:</h4>
+                        <div style="font-size:0.82rem; color:#475569; margin: 0.8rem 0 0.4rem 0;">LM Studio / Claude Desktop (<code>mcp.json</code>):</div>
                         <div class="code-block">
                             <pre style="margin:0;">${clientConfig}</pre>
                             <button class="copy-button" onclick="copyToClipboard(${JSON.stringify(clientConfig)})">Copy</button>

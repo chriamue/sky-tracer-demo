@@ -209,24 +209,154 @@
                     </section>
 
                     <section>
-                        <h2>Server Features</h2>
+                        <h2>Three Primitives</h2>
                         <div class="grid grid-3" style="padding: 0 20px;">
-                            <div>
-                                <h3>📚 Resources</h3>
-                                <p>Context and data for the AI model to use</p>
-                                <p style="font-size: 0.8em;">Files, documents, structured data</p>
+                            <div style="background: rgba(59,130,246,0.15); border-top: 3px solid #3b82f6; border-radius: 8px; padding: 1rem;">
+                                <h3 style="color: #60a5fa;">🔧 Tools</h3>
+                                <p style="font-size: 0.8em;"><b>Model decides</b> when to call them</p>
+                                <p style="font-size: 0.75em; opacity: 0.8;">Execute actions, query data, mutate state — like function calls</p>
+                                <code style="font-size: 0.7em; color: #93c5fd;">list_flights()</code>
                             </div>
-                            <div>
-                                <h3>🛠️ Tools</h3>
-                                <p>Functions the AI can execute</p>
-                                <p style="font-size: 0.8em;">API calls, data queries</p>
+                            <div style="background: rgba(34,197,94,0.15); border-top: 3px solid #22c55e; border-radius: 8px; padding: 1rem;">
+                                <h3 style="color: #4ade80;">📦 Resources</h3>
+                                <p style="font-size: 0.8em;"><b>Client reads</b> them by URI</p>
+                                <p style="font-size: 0.75em; opacity: 0.8;">Read-only data injected as context — like a typed file system for the model</p>
+                                <code style="font-size: 0.7em; color: #86efac;">airports://FRA</code>
                             </div>
-                            <div>
-                                <h3>💬 Prompts</h3>
-                                <p>Templated messages and workflows</p>
-                                <p style="font-size: 0.8em;">Reusable message templates</p>
+                            <div style="background: rgba(168,85,247,0.15); border-top: 3px solid #a855f7; border-radius: 8px; padding: 1rem;">
+                                <h3 style="color: #c084fc;">💬 Prompts</h3>
+                                <p style="font-size: 0.8em;"><b>User invokes</b> them by name</p>
+                                <p style="font-size: 0.75em; opacity: 0.8;">Pre-built conversation templates filled with live data — for structured workflows</p>
+                                <code style="font-size: 0.7em; color: #d8b4fe;">airport-briefing</code>
                             </div>
                         </div>
+                        <p style="margin-top: 1.5rem; font-size: 0.8em; opacity: 0.7;">
+                            Each primitive has a different controller: the <b>model</b>, the <b>client</b>, or the <b>user</b>.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>🔧 Tools — Model-Driven Actions</h2>
+                        <p style="font-size: 0.85em;">The model autonomously decides to call a tool based on the conversation. Tools have a typed JSON Schema input and return structured content.</p>
+                        <div class="grid grid-2" style="padding: 0 20px; font-size: 0.75em; margin-top: 1rem;">
+                            <div>
+                                <p><b>Tool definition (server side)</b></p>
+                                <pre><code class="json">{
+  "name": "list_flights",
+  "description": "List all flights with optional filters",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "departure": {
+        "type": "string",
+        "description": "Filter by departure airport"
+      }
+    }
+  }
+}</code></pre>
+                            </div>
+                            <div>
+                                <p><b>Invocation (JSON-RPC)</b></p>
+                                <pre><code class="json">{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "list_flights",
+    "arguments": {
+      "departure": "FRA"
+    }
+  }
+}</code></pre>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8em; margin-top: 0.5rem;">
+                            💡 The model sees the tool list after <code>initialize</code> and calls tools as needed — no user action required.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>📦 Resources — URI-Addressed Data</h2>
+                        <p style="font-size: 0.85em;">Resources are read-only data identified by a URI. The client fetches them and injects their content as context — the model doesn't call them directly.</p>
+                        <div class="grid grid-2" style="padding: 0 20px; font-size: 0.75em; margin-top: 1rem;">
+                            <div>
+                                <p><b>Resource request</b></p>
+                                <pre><code class="json">{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "resources/read",
+  "params": {
+    "uri": "airports://FRA"
+  }
+}</code></pre>
+                                <p><b>URI template</b></p>
+                                <pre><code class="json">{
+  "uriTemplate": "airports://{code}",
+  "name": "Airport by IATA code",
+  "mimeType": "application/json"
+}</code></pre>
+                            </div>
+                            <div>
+                                <p><b>Resource response</b></p>
+                                <pre><code class="json">{
+  "contents": [{
+    "uri": "airports://FRA",
+    "mimeType": "application/json",
+    "text": "{
+  \"code\": \"FRA\",
+  \"name\": \"Frankfurt Airport\",
+  \"latitude\": 50.033,
+  \"longitude\": 8.570
+}"
+  }]
+}</code></pre>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8em; margin-top: 0.5rem;">
+                            💡 Unlike tools, resources are <b>passive</b> — they are data, not actions.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>💬 Prompts — User-Invoked Templates</h2>
+                        <p style="font-size: 0.85em;">Prompts are pre-built conversation starters with parameters. The server fills them with live data and returns a ready-to-send message sequence.</p>
+                        <div class="grid grid-2" style="padding: 0 20px; font-size: 0.75em; margin-top: 1rem;">
+                            <div>
+                                <p><b>Get prompt request</b></p>
+                                <pre><code class="json">{
+  "method": "prompts/get",
+  "params": {
+    "name": "airport-briefing",
+    "arguments": {
+      "airport_code": "FRA"
+    }
+  }
+}</code></pre>
+                            </div>
+                            <div>
+                                <p><b>Server injects live data and returns</b></p>
+                                <pre><code class="json">{
+  "messages": [
+    {
+      "role": "user",
+      "content": {
+        "type": "text",
+        "text": "Provide a briefing for:\n
+Airport: Frankfurt Airport (FRA)\nLatitude: 50.033\n..."
+      }
+    },
+    {
+      "role": "assistant",
+      "content": { "type": "text",
+        "text": "I'll brief you on FRA..." }
+    }
+  ]
+}</code></pre>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8em; margin-top: 0.5rem;">
+                            💡 Prompts orchestrate complex workflows — they can call internal services to enrich the template before returning it.
+                        </p>
                     </section>
 
                     <section>
@@ -242,41 +372,47 @@
 
                     <section>
                         <h2>The Protocol: JSON-RPC 2.0</h2>
-                        <p>MCP messages are JSON-RPC 2.0 over a transport (HTTP/SSE, stdio):</p>
-                        <div class="grid grid-2" style="padding: 0 20px; font-size: 0.75em;">
+                        <p>MCP uses JSON-RPC 2.0 over HTTP Streamable (POST + SSE) or stdio:</p>
+                        <div class="grid grid-2" style="padding: 0 20px; font-size: 0.75em; margin-top: 1rem;">
                             <div>
-                                <p><b>Request</b></p>
-                                <pre><code class="json">
-{
+                                <p><b>Tool call request</b></p>
+                                <pre><code class="json">{
   "jsonrpc": "2.0",
   "id": 1,
   "method": "tools/call",
   "params": {
     "name": "list_flights",
-    "arguments": {
-      "departure": "FRA"
-    }
+    "arguments": { "departure": "FRA" }
   }
-}
-                                </code></pre>
+}</code></pre>
+                                <p><b>Resource read request</b></p>
+                                <pre><code class="json">{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "resources/read",
+  "params": { "uri": "airports://FRA" }
+}</code></pre>
                             </div>
                             <div>
-                                <p><b>Response</b></p>
-                                <pre><code class="json">
-{
+                                <p><b>Tool call response</b></p>
+                                <pre><code class="json">{
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "[{\"flight\": \"LH100\",
-          \"dest\": \"JFK\"}]"
-      }
-    ]
+    "content": [{
+      "type": "text",
+      "text": "[{\"flight\":\"LH100\",\"dest\":\"JFK\"}]"
+    }]
   }
-}
-                                </code></pre>
+}</code></pre>
+                                <p><b>Image content (map tool)</b></p>
+                                <pre><code class="json">{
+  "content": [{
+    "type": "image",
+    "mimeType": "image/png",
+    "data": "iVBORw0KGgo..."
+  }]
+}</code></pre>
                             </div>
                         </div>
                     </section>
@@ -286,24 +422,25 @@
                         <div class="mermaid">
                             <pre>
 sequenceDiagram
-    participant Host as Host (LM Studio)
+    participant Host as Host (LM Studio / Claude)
     participant Server as MCP Server (Sky Nexus)
 
     Note over Host,Server: 1. Initialization
     Host->>Server: initialize (client capabilities)
-    Server-->>Host: server capabilities + tool list
+    Server-->>Host: capabilities: tools + resources + prompts
     Host->>Server: notifications/initialized
 
     Note over Host,Server: 2. Discovery
-    Host->>Server: tools/list
-    Server-->>Host: [{name, description, inputSchema}]
+    Host->>Server: tools/list, resources/list, prompts/list
+    Server-->>Host: tool schemas, resource URIs, prompt names
 
-    Note over Host,Server: 3. Tool Call
+    Note over Host,Server: 3. Usage
     Host->>Server: tools/call {name, arguments}
-    Server-->>Host: {content: [{type, text}]}
-
-    Note over Host,Server: 4. Shutdown
-    Host->>Server: close connection
+    Server-->>Host: {content: [{type, text|image}]}
+    Host->>Server: resources/read {uri: "airports://FRA"}
+    Server-->>Host: {contents: [{uri, mimeType, text}]}
+    Host->>Server: prompts/get {name, arguments}
+    Server-->>Host: {messages: [{role, content}]}
                             </pre>
                         </div>
                     </section>
@@ -413,24 +550,26 @@ sequenceDiagram
                     </section>
 
                     <section>
-                        <h2>MCP Endpoints Overview</h2>
-                        <ul>
-                            <li>
-                                <b>🏢 /mcp/airports</b> - Airport lookup and information
-                            </li>
-                            <li>
-                                <b>🎮 /mcp/flights</b> - Flight management and search
-                            </li>
-                            <li>
-                                <b>🛰️ /mcp/satellites</b> - Satellite positioning and tracking
-                            </li>
-                            <li>
-                                <b>⏰ /mcp/datetime</b> - Timezone and time utilities
-                            </li>
-                            <li>
-                                <b>🗼 /mcp/babel</b> - Flight tracking and aggregation
-                            </li>
-                        </ul>
+                        <h2>Single MCP Endpoint</h2>
+                        <p style="font-size: 0.9em;">Sky Nexus exposes <b>one</b> MCP endpoint that advertises all capabilities:</p>
+                        <pre><code style="font-size: 1em; text-align: center;">http://localhost:8000/mcp</code></pre>
+                        <div class="grid grid-3" style="padding: 0 20px; margin-top: 1.5rem; font-size: 0.8em;">
+                            <div>
+                                <p style="color: #60a5fa;">🔧 18 Tools</p>
+                                <p style="font-size: 0.85em; opacity: 0.8;">Airports, Flights, Satellites, DateTime, Tracking, Map</p>
+                            </div>
+                            <div>
+                                <p style="color: #4ade80;">📦 8 Resources</p>
+                                <p style="font-size: 0.85em; opacity: 0.8;"><code>airports://FRA</code> and 7 other featured airports + URI template</p>
+                            </div>
+                            <div>
+                                <p style="color: #c084fc;">💬 4 Prompts</p>
+                                <p style="font-size: 0.85em; opacity: 0.8;">airport-briefing, flight-route-analysis, delay-investigation, network-overview</p>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1.5rem; font-size: 0.85em; opacity: 0.7;">
+                            Transport: <b>HTTP Streamable</b> (JSON-RPC 2.0 over POST + SSE)
+                        </p>
                     </section>
 
                     <section>
@@ -503,22 +642,87 @@ sequenceDiagram
                     </section>
 
                     <section>
-                        <h2>Babel Tools</h2>
-                        <p>Flight tracking and aggregation across multiple services</p>
+                        <h2>Live Tracking Tools</h2>
+                        <p style="font-size: 0.85em;">Real-time flight tracking via the Tower of Babel aggregation service</p>
                         <ul style="margin-top: 1.5rem;">
                             <li>
-                                <b>track_flight</b> - Track real-time flight position and status
+                                <b>get_flights_by_airport</b> - Departures &amp; arrivals at an airport
                             </li>
                             <li>
-                                <b>search_flights</b> - Search flights across the network
+                                <b>get_flight_position</b> - Current lat/lon of a specific flight
                             </li>
                             <li>
-                                <b>get_flight_aggregation</b> - Get aggregated flight data
+                                <b>search_flights_by_airport_pattern</b> - Pattern-based airport search
                             </li>
                         </ul>
                     </section>
 
                     <section>
+                        <h2>🗺️ Map Tool</h2>
+                        <p style="font-size: 0.85em;">Generates a world map image showing active routes and airport pins</p>
+                        <ul style="margin-top: 1.5rem;">
+                            <li><b>generate_flight_map</b> — renders a PNG world map</li>
+                        </ul>
+                        <div style="margin-top: 1.5rem; font-size: 0.8em;">
+                            <p>Parameters:</p>
+                            <ul>
+                                <li><code>airport_code</code> (optional) — focus on one airport's routes</li>
+                                <li><code>title</code> (optional) — map title overlay</li>
+                            </ul>
+                            <p style="margin-top: 1rem; opacity: 0.8;">Returns a <b>base64-encoded PNG</b> image via <code>Content::image("image/png")</code></p>
+                            <p style="opacity: 0.8;">Built with: Natural Earth GeoJSON → geo-svg → resvg → PNG</p>
+                        </div>
+                    </section>
+
+                    <section>
+                    <section>
+                        <h2>📦 Resources in Sky Nexus</h2>
+                        <p style="font-size: 0.85em;">Airport data is exposed as URI-addressed resources using the <code>airports://</code> scheme</p>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 1rem 0;">
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://FRA</code>
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://LHR</code>
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://CDG</code>
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://JFK</code>
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://DXB</code>
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://SIN</code>
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://AMS</code>
+                            <code style="background: rgba(34,197,94,0.2); color: #4ade80; padding: 0.3rem 0.7rem; border-radius: 4px;">airports://HND</code>
+                        </div>
+                        <p style="font-size: 0.8em; opacity: 0.8;">URI template: <code>airports://{code}</code> — any IATA code works</p>
+                        <p style="font-size: 0.8em; margin-top: 1rem;">Each resource returns <code>application/json</code> with live data:</p>
+                        <pre><code class="json" style="font-size: 0.75em;">{ "code": "FRA", "name": "Frankfurt Airport", "latitude": 50.033, "longitude": 8.570 }</code></pre>
+                        <p style="font-size: 0.8em; margin-top: 0.8rem; opacity: 0.7;">
+                            Resources let clients <b>pre-load airport context</b> before asking the model to reason about it — without a tool call.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>💬 Prompts in Sky Nexus</h2>
+                        <p style="font-size: 0.85em;">4 workflow templates — each fetches live data and returns a pre-filled conversation</p>
+                        <ul style="margin-top: 1.5rem; font-size: 0.85em;">
+                            <li style="margin-bottom: 0.8rem;">
+                                <b style="color: #c084fc;">airport-briefing</b>
+                                <code style="font-size: 0.85em; opacity: 0.7;"> airport_code</code><br/>
+                                <span style="font-size: 0.8em; opacity: 0.7;">Full airport briefing: location, weather, airlines, terminals, ops notes</span>
+                            </li>
+                            <li style="margin-bottom: 0.8rem;">
+                                <b style="color: #c084fc;">flight-route-analysis</b>
+                                <code style="font-size: 0.85em; opacity: 0.7;"> departure, arrival, date?</code><br/>
+                                <span style="font-size: 0.8em; opacity: 0.7;">Route distance, duration, carriers, time zones, overflight countries</span>
+                            </li>
+                            <li style="margin-bottom: 0.8rem;">
+                                <b style="color: #c084fc;">delay-investigation</b>
+                                <code style="font-size: 0.85em; opacity: 0.7;"> airport_code</code><br/>
+                                <span style="font-size: 0.8em; opacity: 0.7;">Injects live flight data → structured delay report with root-cause analysis</span>
+                            </li>
+                            <li>
+                                <b style="color: #c084fc;">aviation-network-overview</b>
+                                <code style="font-size: 0.85em; opacity: 0.7;"> (no params)</code><br/>
+                                <span style="font-size: 0.8em; opacity: 0.7;">Lists all tools, resources, prompts and suggests example queries</span>
+                            </li>
+                        </ul>
+                    </section>
+
                         <section>
                             <h2>MCP Integration Options</h2>
                             <p>Sky Nexus can integrate with multiple AI frontends:</p>
@@ -537,62 +741,41 @@ sequenceDiagram
                         <section>
                             <h2>Claude Desktop Configuration</h2>
                             <p>Start docker compose, then add to Claude Desktop config:</p>
-                            <pre><code class="json" style="font-size: 0.65em;">
+                            <pre><code class="json" style="font-size: 0.9em;">
 {
   "mcpServers": {
-    "sky-nexus-airports": {
-      "url": "http://localhost:8000/mcp/airports"
-    },
-    "sky-nexus-flights": {
-      "url": "http://localhost:8000/mcp/flights"
-    },
-    "sky-nexus-satellites": {
-      "url": "http://localhost:8000/mcp/satellites"
-    },
-    "sky-nexus-datetime": {
-      "url": "http://localhost:8000/mcp/datetime"
-    },
-    "sky-nexus-babel": {
-      "url": "http://localhost:8000/mcp/babel"
+    "sky-nexus": {
+      "url": "http://localhost:8000/mcp"
     }
   }
 }
                             </code></pre>
                             <p style="margin-top: 1rem; font-size: 0.85em;">
-                                All endpoints are routed through Traefik on port 8000
+                                One server — all 18 tools, 8 resources, and 4 prompts auto-discovered via <code>initialize</code>
                             </p>
                         </section>
 
                         <section>
                             <h2>LM Studio Configuration</h2>
-                            <p>Configure Sky Nexus MCP endpoints via LM Studio:</p>
+                            <p>Configure Sky Nexus via LM Studio:</p>
                             <ol>
                                 <li>Start docker compose: <code>docker compose up -d</code></li>
-                                <li>Open LM Studio</li>
-                                <li>Program tab (right sidebar) → "Install > Edit mcp.json"</li>
-                                <li>Add Sky Nexus servers</li>
+                                <li>Open LM Studio → Program tab (right sidebar)</li>
+                                <li>"Install → Edit mcp.json"</li>
+                                <li>Add Sky Nexus server</li>
                             </ol>
-                            <pre><code class="json" style="font-size: 0.65em; margin-top: 1rem;">
+                            <pre><code class="json" style="font-size: 0.9em; margin-top: 1rem;">
 {
   "mcpServers": {
-    "sky-nexus-airports": {
-      "url": "http://localhost:8000/mcp/airports"
-    },
-    "sky-nexus-flights": {
-      "url": "http://localhost:8000/mcp/flights"
-    },
-    "sky-nexus-satellites": {
-      "url": "http://localhost:8000/mcp/satellites"
-    },
-    "sky-nexus-datetime": {
-      "url": "http://localhost:8000/mcp/datetime"
-    },
-    "sky-nexus-babel": {
-      "url": "http://localhost:8000/mcp/babel"
+    "sky-nexus": {
+      "url": "http://localhost:8000/mcp"
     }
   }
 }
                             </code></pre>
+                            <p style="margin-top: 0.5rem; font-size: 0.8em; opacity: 0.7;">
+                                ⚠️ LM Studio currently exposes tools only — resources and prompts require MCP Inspector or Claude Desktop
+                            </p>
                         </section>
 
                         <section>
@@ -613,28 +796,19 @@ sequenceDiagram
 
                     <section>
                         <h2>Testing with MCP Inspector</h2>
-                        <p>Test each MCP service independently (with docker compose running):</p>
-                        <pre><code style="font-size: 0.8em;">
-# Test airports
-npx @modelcontextprotocol/inspector \
-  http://localhost:8000/mcp/airports
+                        <p>Browser UI to explore tools, resources and prompts interactively:</p>
+                        <pre><code style="font-size: 0.9em;">
+# Start docker compose first
+docker compose up -d
 
-# Test flights
+# Launch MCP Inspector against the single endpoint
 npx @modelcontextprotocol/inspector \
-  http://localhost:8000/mcp/flights
-
-# Test satellites
-npx @modelcontextprotocol/inspector \
-  http://localhost:8000/mcp/satellites
-
-# Test datetime
-npx @modelcontextprotocol/inspector \
-  http://localhost:8000/mcp/datetime
-
-# Test babel (flight tracking)
-npx @modelcontextprotocol/inspector \
-  http://localhost:8000/mcp/babel
+  --transport http \
+  --server-url http://localhost:8000/mcp
                         </code></pre>
+                        <p style="margin-top: 1rem; font-size: 0.85em;">
+                            The Inspector lets you: browse the tool list, call tools with custom args, read resources by URI, and invoke prompts — all without writing any code.
+                        </p>
                     </section>
 
                     <section>
@@ -692,9 +866,9 @@ GET  http://localhost:8000/nexus/docs (Swagger UI)
 docker compose up -d
 
 # Sky Nexus is available at:
-# - REST API: http://localhost:8000/mcp/...
-# - MCP endpoints: http://localhost:8000/mcp/airports, /mcp/flights, etc.
-# - Swagger UI: http://localhost:8000/nexus/docs
+# - REST API:  http://localhost:8000/api/v1/nexus/...
+# - MCP:       http://localhost:8000/mcp
+# - Swagger:   http://localhost:8000/nexus/docs
 
 # View logs
 docker compose logs -f sky-nexus
