@@ -2,7 +2,7 @@ use crate::services::babel::{BabelServiceError, fetch_flight_position, fetch_fli
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::*,
+    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -247,14 +247,9 @@ pub struct SearchFlightsByPatternRequest {
 #[tool_handler]
 impl ServerHandler for BabelTools {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            protocol_version: ProtocolVersion::V_2025_03_26,
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            server_info: Implementation {
-                name: "sky-nexus-mcp-babel".to_string(),
-                version: "0.1.0".to_string(),
-            },
-            instructions: Some(
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::from_build_env())
+            .with_instructions(
                 "Tower of Babel flight tracking tools for Sky Nexus:\n\
                 - get_flights_by_airport: Get future flights departing from or arriving at a specific airport\n\
                 - get_flight_position: Get current position and status of a specific flight in real-time\n\
@@ -270,7 +265,6 @@ impl ServerHandler for BabelTools {
                 \n\
                 Useful for flight tracking, airport operations, and passenger information."
                     .to_string(),
-            ),
-        }
+            )
     }
 }

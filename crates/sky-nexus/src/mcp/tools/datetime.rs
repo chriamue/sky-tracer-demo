@@ -7,7 +7,7 @@ use chrono_tz::{OffsetName, Tz};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::*,
+    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -285,14 +285,9 @@ impl DateTimeTools {
 #[tool_handler]
 impl ServerHandler for DateTimeTools {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            protocol_version: ProtocolVersion::V_2025_03_26,
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            server_info: Implementation {
-                name: "sky-nexus-mcp-datetime".to_string(),
-                version: "0.1.0".to_string(),
-            },
-            instructions: Some(
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::from_build_env())
+            .with_instructions(
                 "DateTime tools for Sky Nexus:\n\
                 - get_current_datetime: Get current date and time with optional timezone and formatting\n\
                 - get_aviation_times: Get current time in major aviation hubs around the world\n\
@@ -300,7 +295,6 @@ impl ServerHandler for DateTimeTools {
                 \n\
                 Useful for flight scheduling, coordination across time zones, and aviation operations."
                     .to_string(),
-            ),
-        }
+            )
     }
 }

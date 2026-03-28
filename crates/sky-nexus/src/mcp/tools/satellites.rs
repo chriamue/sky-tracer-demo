@@ -4,7 +4,7 @@ use crate::services::satellites::{
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::*,
+    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -210,21 +210,15 @@ impl SatelliteTools {
 #[tool_handler]
 impl ServerHandler for SatelliteTools {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            protocol_version: ProtocolVersion::V_2025_03_26,
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            server_info: Implementation {
-                name: "sky-nexus-mcp-satellites".to_string(),
-                version: "0.1.0".to_string(),
-            },
-            instructions: Some(
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::from_build_env())
+            .with_instructions(
                 "Satellite tools for Sky Nexus:\n\
                 - list_satellites: List all satellites\n\
                 - create_satellite: Create a new satellite\n\
                 - update_satellite_status: Update satellite status\n\
                 - calculate_position: Calculate flight position using satellites"
                     .to_string(),
-            ),
-        }
+            )
     }
 }

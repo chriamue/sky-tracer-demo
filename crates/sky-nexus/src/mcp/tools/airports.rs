@@ -2,7 +2,7 @@ use crate::services::airports::{fetch_airport_by_code, fetch_airports};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::*,
+    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
     schemars, tool, tool_handler, tool_router,
 };
 use serde_json::json;
@@ -80,19 +80,13 @@ impl AirportTools {
 #[tool_handler]
 impl ServerHandler for AirportTools {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            protocol_version: ProtocolVersion::V_2025_03_26,
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            server_info: Implementation {
-                name: "sky-nexus-mcp-airports".to_string(),
-                version: "0.1.0".to_string(),
-            },
-            instructions: Some(
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::from_build_env())
+            .with_instructions(
                 "Airport tools for Sky Nexus:\n\
                 - list_airports: List all airports with their codes and coordinates\n\
                 - get_airport: Get detailed information about a specific airport by code"
                     .to_string(),
-            ),
-        }
+            )
     }
 }
