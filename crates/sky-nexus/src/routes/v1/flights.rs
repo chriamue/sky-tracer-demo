@@ -45,6 +45,7 @@ pub async fn list_flights() -> impl IntoResponse {
             let status = match e {
                 FlightServiceError::NotFound(_) => StatusCode::NOT_FOUND,
                 FlightServiceError::Network(_) => StatusCode::BAD_GATEWAY,
+                FlightServiceError::Middleware(_) => StatusCode::BAD_GATEWAY,
                 FlightServiceError::ParseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             };
             (
@@ -102,6 +103,7 @@ pub async fn post_flight(Json(request): Json<CreateFlightRequest>) -> impl IntoR
             let status = match e {
                 FlightServiceError::NotFound(_) => StatusCode::NOT_FOUND,
                 FlightServiceError::Network(_) => StatusCode::BAD_GATEWAY,
+                FlightServiceError::Middleware(_) => StatusCode::BAD_GATEWAY,
                 FlightServiceError::ParseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             };
             (

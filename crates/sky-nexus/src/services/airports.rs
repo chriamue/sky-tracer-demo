@@ -1,4 +1,4 @@
-use reqwest::Client;
+use crate::client::create_client;
 use sky_tracer::model::airport::Airport;
 use sky_tracer::protocol::{
     AIRPORTS_API_PATH, AIRPORTS_SEARCH_API_PATH, airports::SearchAirportsResponse,
@@ -11,6 +11,8 @@ use tracing::{error, info, instrument};
 pub enum AirportServiceError {
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
+    #[error("Middleware error: {0}")]
+    Middleware(#[from] reqwest_middleware::Error),
     #[error("Airport not found: {0}")]
     NotFound(String),
     #[error("Parse error: {0}")]
@@ -24,7 +26,7 @@ fn get_airport_service_base_url() -> String {
 #[instrument]
 pub async fn fetch_airports() -> Result<Vec<Airport>, AirportServiceError> {
     info!("Fetching all airports");
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_airport_service_base_url();
     let url = format!("{}{}", base_url, AIRPORTS_API_PATH);
 
@@ -58,7 +60,7 @@ pub async fn fetch_airports() -> Result<Vec<Airport>, AirportServiceError> {
 #[instrument]
 pub async fn fetch_airport_by_code(code: &str) -> Result<Airport, AirportServiceError> {
     info!(code = %code, "Fetching airport by code");
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_airport_service_base_url();
     let url = format!("{}{}?code={}", base_url, AIRPORTS_SEARCH_API_PATH, code);
 

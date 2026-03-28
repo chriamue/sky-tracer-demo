@@ -24,10 +24,15 @@ chrono = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
 reqwest = { workspace = true }
+reqwest-middleware = { workspace = true }
 tracing = { workspace = true }
 axum-tracing-opentelemetry = { workspace = true }
 init-tracing-opentelemetry = { workspace = true }
 thiserror = { workspace = true }
+opentelemetry = { workspace = true }
+tracing-opentelemetry = { workspace = true }
+async-trait = { workspace = true }
+http = { workspace = true }
 
 # Additional dependencies
 rmcp = { version = "1.0", features = [

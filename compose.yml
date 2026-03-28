@@ -44,6 +44,7 @@ services:
       - RUST_LOG=info,tower_http=debug,airport_anywhere=debug
       - PORT=3000
       - SERVICE_NAME=airports
+      - OTEL_SERVICE_NAME=airports
       - PATH_PREFIX=/airports
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
@@ -87,6 +88,7 @@ services:
       - RUST_LOG=info,tower_http=debug,flight_controller=debug
       - PORT=3001
       - SERVICE_NAME=flights
+      - OTEL_SERVICE_NAME=flights
       - PATH_PREFIX=/flights
       - ORBITAL_BEACON_BASE_URL=http://orbital-beacon:3002
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
@@ -185,6 +187,7 @@ services:
       - RUST_LOG=info,tower_http=debug,orbital_beacon=debug
       - PORT=3002
       - SERVICE_NAME=satellites
+      - OTEL_SERVICE_NAME=satellites
       - AIRPORTS_SERVICE_BASE_URL=http://airport-anywhere:3000
       - PATH_PREFIX=/satellites
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
@@ -226,6 +229,7 @@ services:
       - RUST_LOG=info,tower_http=debug,tower_of_babel=debug
       - PORT=3003
       - SERVICE_NAME=babel
+      - OTEL_SERVICE_NAME=babel
       - PATH_PREFIX=/babel
       - FLIGHT_CONTROLLER_BASE_URL=http://flight-controller:3001
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
@@ -262,6 +266,7 @@ services:
       - RUST_LOG=info,tower_http=debug,delay_orama=debug
       - PORT=3004
       - SERVICE_NAME=delays
+      - OTEL_SERVICE_NAME=delays
       - PATH_PREFIX=/delays
       - TOWER_BABEL_BASE_URL=http://tower-of-babel:3003
       - AIRPORT_SERVICE_BASE_URL=http://airport-anywhere:3000
@@ -347,6 +352,7 @@ services:
       - RUST_LOG=info,tower_http=debug,sky_nexus=debug,rmcp=debug
       - PORT=8080
       - SERVICE_NAME=nexus
+      - OTEL_SERVICE_NAME=nexus
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_TRACES_SAMPLER=always_on

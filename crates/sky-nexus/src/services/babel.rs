@@ -1,4 +1,4 @@
-use reqwest::Client;
+use crate::client::create_client;
 use sky_tracer::protocol::{
     BABEL_AIRPORT_API_PATH, BABEL_POSITION_API_PATH,
     flights::{FlightPositionResponse, FlightResponse},
@@ -11,6 +11,8 @@ use tracing::{error, info, instrument};
 pub enum BabelServiceError {
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
+    #[error("Middleware error: {0}")]
+    Middleware(#[from] reqwest_middleware::Error),
     #[error("Not found: {0}")]
     NotFound(String),
     #[error("No future flights found for airport: {0}")]
@@ -28,7 +30,7 @@ pub async fn fetch_flights_by_airport(
     airport_code: &str,
 ) -> Result<Vec<FlightResponse>, BabelServiceError> {
     info!("Fetching flights for airport: {}", airport_code);
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_babel_service_base_url();
     let url = format!(
         "{}{}",
@@ -80,7 +82,7 @@ pub async fn fetch_flight_position(
     flight_number: &str,
 ) -> Result<FlightPositionResponse, BabelServiceError> {
     info!("Fetching position for flight: {}", flight_number);
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_babel_service_base_url();
     let url = format!(
         "{}{}",

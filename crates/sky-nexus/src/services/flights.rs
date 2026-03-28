@@ -1,4 +1,4 @@
-use reqwest::Client;
+use crate::client::create_client;
 use sky_tracer::model::flight::Flight;
 use sky_tracer::protocol::{
     FLIGHTS_API_PATH,
@@ -12,6 +12,8 @@ use tracing::{debug, error, info, instrument};
 pub enum FlightServiceError {
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
+    #[error("Middleware error: {0}")]
+    Middleware(#[from] reqwest_middleware::Error),
     #[error("Flight not found: {0}")]
     NotFound(String),
     #[error("Parse error: {0}")]
@@ -24,7 +26,7 @@ fn get_flight_service_base_url() -> String {
 
 #[instrument]
 pub async fn fetch_flights() -> Result<Vec<Flight>, FlightServiceError> {
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_flight_service_base_url();
     let url = format!("{}{}", base_url, FLIGHTS_API_PATH);
 
@@ -93,7 +95,7 @@ pub async fn fetch_flight_by_number(flight_number: &str) -> Result<Flight, Fligh
 
 #[instrument]
 pub async fn create_flight(flight: Flight) -> Result<Flight, FlightServiceError> {
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_flight_service_base_url();
     let url = format!("{}{}", base_url, FLIGHTS_API_PATH);
 

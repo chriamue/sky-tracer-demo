@@ -83,8 +83,6 @@ pub fn app() -> Router {
     let api_router = Router::new()
         .route(FLIGHTS_API_PATH, post(create_flight).get(list_flights))
         .route(FLIGHTS_POSITION_API_PATH, get(get_flight_position))
-        .layer(OtelInResponseLayer)
-        .layer(OtelAxumLayer::default())
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -96,5 +94,7 @@ pub fn app() -> Router {
         .route("/", get(render_page))
         .merge(openapi::routes())
         .merge(api_router)
+        .layer(OtelInResponseLayer)
+        .layer(OtelAxumLayer::default())
         .with_state(flight_service)
 }

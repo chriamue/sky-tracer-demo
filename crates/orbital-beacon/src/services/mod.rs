@@ -1,12 +1,18 @@
 use crate::models::{FlightPositionRequest, PositionCalculation};
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_tracing::TracingMiddleware;
+use async_trait::async_trait;
+use http::Extensions;
+use opentelemetry::global;
+use reqwest::{Request, Response};
+use reqwest_middleware::{
+    ClientBuilder, ClientWithMiddleware, Middleware, Next, Result as MiddlewareResult,
+};
 use sky_tracer::model::{Position, Satellite, SatelliteStatus};
 use sky_tracer::protocol::AIRPORTS_SEARCH_API_PATH;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, instrument, warn};
+use tracing_opentelemetry::OpenTelemetrySpanExt;
 use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
@@ -21,6 +27,36 @@ pub enum SatelliteServiceError {
     InvalidSatelliteId(String),
 }
 
+struct HeaderInjector<'a>(&'a mut reqwest::header::HeaderMap);
+
+impl opentelemetry::propagation::Injector for HeaderInjector<'_> {
+    fn set(&mut self, key: &str, value: String) {
+        if let Ok(name) = reqwest::header::HeaderName::from_bytes(key.as_bytes()) {
+            if let Ok(val) = reqwest::header::HeaderValue::from_str(&value) {
+                self.0.insert(name, val);
+            }
+        }
+    }
+}
+
+struct OtelMiddleware;
+
+#[async_trait]
+impl Middleware for OtelMiddleware {
+    async fn handle(
+        &self,
+        mut req: Request,
+        extensions: &mut Extensions,
+        next: Next<'_>,
+    ) -> MiddlewareResult<Response> {
+        let cx = tracing::Span::current().context();
+        global::get_text_map_propagator(|propagator| {
+            propagator.inject_context(&cx, &mut HeaderInjector(req.headers_mut()));
+        });
+        next.run(req, extensions).await
+    }
+}
+
 #[derive(Clone)]
 pub struct SatelliteService {
     satellites: Arc<RwLock<HashMap<Uuid, Satellite>>>,
@@ -31,7 +67,7 @@ pub struct SatelliteService {
 impl SatelliteService {
     pub fn new(airport_service_url: String) -> Self {
         let http_client = ClientBuilder::new(reqwest::Client::new())
-            .with(TracingMiddleware::default())
+            .with(OtelMiddleware)
             .build();
 
         Self {

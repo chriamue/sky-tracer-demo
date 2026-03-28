@@ -1,4 +1,4 @@
-use reqwest::Client;
+use crate::client::create_client;
 use sky_tracer::protocol::{
     SATELLITES_API_PATH, SATELLITES_POSITION_API_PATH, SATELLITES_STATUS_API_PATH,
     satellite::{
@@ -15,6 +15,8 @@ use uuid::Uuid;
 pub enum SatelliteServiceError {
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
+    #[error("Middleware error: {0}")]
+    Middleware(#[from] reqwest_middleware::Error),
     #[error("Satellite not found: {0}")]
     NotFound(String),
     #[error("Parse error: {0}")]
@@ -27,7 +29,7 @@ fn get_satellite_service_base_url() -> String {
 
 #[instrument]
 pub async fn fetch_satellites() -> Result<Vec<SatelliteResponse>, SatelliteServiceError> {
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_satellite_service_base_url();
     let url = format!("{}{}", base_url, SATELLITES_API_PATH);
 
@@ -50,7 +52,7 @@ pub async fn fetch_satellites() -> Result<Vec<SatelliteResponse>, SatelliteServi
 pub async fn create_satellite(
     req: CreateSatelliteRequest,
 ) -> Result<SatelliteResponse, SatelliteServiceError> {
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_satellite_service_base_url();
     let url = format!("{}{}", base_url, SATELLITES_API_PATH);
 
@@ -74,7 +76,7 @@ pub async fn update_satellite_status(
     id: Uuid,
     req: UpdateSatelliteStatusRequest,
 ) -> Result<SatelliteResponse, SatelliteServiceError> {
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_satellite_service_base_url();
     let url = format!(
         "{}{}",
@@ -101,7 +103,7 @@ pub async fn update_satellite_status(
 pub async fn calculate_position(
     req: CalculatePositionRequest,
 ) -> Result<CalculatePositionResponse, SatelliteServiceError> {
-    let client = Client::new();
+    let client = create_client();
     let base_url = get_satellite_service_base_url();
     let url = format!("{}{}", base_url, SATELLITES_POSITION_API_PATH);
 

@@ -43,8 +43,11 @@ yew = { workspace = true, optional = true, features = ["ssr"] }
 axum-tracing-opentelemetry = { workspace = true }
 init-tracing-opentelemetry = { workspace = true }
 tracing = { workspace = true }
-reqwest-tracing = { workspace = true }
 reqwest-middleware = { workspace = true }
+opentelemetry = { workspace = true }
+tracing-opentelemetry = { workspace = true }
+async-trait = { workspace = true }
+http = { workspace = true }
 
 [dev-dependencies]
 axum-test = "17.3.0"

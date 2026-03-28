@@ -3,6 +3,7 @@ use airport_anywhere::{
     ui::pages::{Home, HomeProps},
 };
 use axum::{extract::Query, response::Html, routing::get, Router};
+use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use serde::Deserialize;
 use sky_tracer::protocol::airports::AirportResponse;
 use tracing::{error, info, instrument};
@@ -90,7 +91,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     let app = Router::new()
         .route("/", get(render_page))
-        .merge(airport_anywhere::app());
+        .merge(airport_anywhere::app())
+        .layer(OtelInResponseLayer)
+        .layer(OtelAxumLayer::default());
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", service_port)).await?;
     info!("Server running on http://localhost:{}", service_port);

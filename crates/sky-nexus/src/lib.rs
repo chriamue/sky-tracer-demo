@@ -1,4 +1,5 @@
 pub mod app;
+pub mod client;
 pub mod mcp;
 pub mod models;
 pub mod openapi;

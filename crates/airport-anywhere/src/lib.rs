@@ -15,8 +15,6 @@ pub fn app() -> Router {
     let api_router = Router::new()
         .route(AIRPORTS_API_PATH, get(routes::list_airports))
         .route(AIRPORTS_SEARCH_API_PATH, get(routes::search_airports))
-        .layer(OtelInResponseLayer)
-        .layer(OtelAxumLayer::default())
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -24,5 +22,9 @@ pub fn app() -> Router {
                 .allow_headers(Any),
         );
 
-    Router::new().merge(openapi::routes()).merge(api_router)
+    Router::new()
+        .merge(openapi::routes())
+        .merge(api_router)
+        .layer(OtelInResponseLayer)
+        .layer(OtelAxumLayer::default())
 }

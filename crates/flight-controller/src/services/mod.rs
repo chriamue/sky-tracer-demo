@@ -1,7 +1,12 @@
 use crate::models::Flight;
+use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_tracing::TracingMiddleware;
+use http::Extensions;
+use opentelemetry::global;
+use reqwest::{Request, Response};
+use reqwest_middleware::{
+    ClientBuilder, ClientWithMiddleware, Middleware, Next, Result as MiddlewareResult,
+};
 use sky_tracer::protocol::flights::CreateFlightRequest;
 use sky_tracer::protocol::satellite::{CalculatePositionRequest, CalculatePositionResponse};
 use sky_tracer::protocol::SATELLITES_POSITION_API_PATH;
@@ -9,6 +14,37 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, instrument, warn};
+use tracing_opentelemetry::OpenTelemetrySpanExt;
+
+struct HeaderInjector<'a>(&'a mut reqwest::header::HeaderMap);
+
+impl opentelemetry::propagation::Injector for HeaderInjector<'_> {
+    fn set(&mut self, key: &str, value: String) {
+        if let Ok(name) = reqwest::header::HeaderName::from_bytes(key.as_bytes()) {
+            if let Ok(val) = reqwest::header::HeaderValue::from_str(&value) {
+                self.0.insert(name, val);
+            }
+        }
+    }
+}
+
+struct OtelMiddleware;
+
+#[async_trait]
+impl Middleware for OtelMiddleware {
+    async fn handle(
+        &self,
+        mut req: Request,
+        extensions: &mut Extensions,
+        next: Next<'_>,
+    ) -> MiddlewareResult<Response> {
+        let cx = tracing::Span::current().context();
+        global::get_text_map_propagator(|propagator| {
+            propagator.inject_context(&cx, &mut HeaderInjector(req.headers_mut()));
+        });
+        next.run(req, extensions).await
+    }
+}
 
 #[derive(Clone, Default)]
 pub struct FlightService {
@@ -19,7 +55,7 @@ pub struct FlightService {
 impl FlightService {
     pub fn new() -> Self {
         let http_client = ClientBuilder::new(reqwest::Client::new())
-            .with(TracingMiddleware::default())
+            .with(OtelMiddleware)
             .build();
 
         Self {
