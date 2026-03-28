@@ -1,9 +1,9 @@
 use crate::models::FlightPositionRequest;
 use crate::services::{SatelliteService, SatelliteServiceError};
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
 use serde_json::json;
 use sky_tracer::protocol::satellite::{
