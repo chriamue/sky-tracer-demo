@@ -22,6 +22,7 @@ Demo for Rust web services with Yew, Axum, Traefik and MCP.
 - [[Satellite Positioning]]
 - [[Delay Monitoring]]
 - [[AI Integration]]
+- [[Flight Map]]
 - [[Distributed Tracing]]
 
 ## Infrastructure
