@@ -1,0 +1,347 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>Sky Tracer Demo - OpenTelemetry & Distributed Tracing</title>
+
+        <!-- Reveal.js CDN Links -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reset.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.css"
+        />
+
+        <!-- Theme used for syntax highlighting of code -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.css"
+        />
+
+        <!-- Custom styles -->
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <h1>Distributed Tracing</h1>
+                    <p>OpenTelemetry & Tracing</p>
+                    <p>Sky Tracer Demo</p>
+                </section>
+
+                <section>
+                    <h2>Distributed Tracing</h2>
+                    <ul>
+                        <li>Tracks requests across multiple services</li>
+                        <li>Visualizes system interactions</li>
+                        <li>Measures performance and latency</li>
+                        <li>Identifies bottlenecks and errors</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>OpenTelemetry Components</h2>
+                    <ul>
+                        <li>Traces: End-to-end request flows</li>
+                        <li>Spans: Individual operations</li>
+                        <li>Context: Metadata and relationships</li>
+                        <li>Attributes: Key-value pairs</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>OpenTelemetry Protocol (OTEL)</h2>
+                    <ul>
+                        <li>Standardized telemetry data format</li>
+                        <li>Language-agnostic specification</li>
+                        <li>Supports multiple backends</li>
+                        <li>Extensible and vendor-neutral</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Jaeger Integration</h2>
+                    <ul>
+                        <li>OTEL collector receives traces</li>
+                        <li>Processes and enriches data</li>
+                        <li>Stores in Jaeger backend</li>
+                        <li>Visualizes in Jaeger UI</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Benefits of Tracing</h2>
+                    <div class="grid grid-2" style="padding: 0 40px;">
+                        <div>
+                            <h3>Debugging</h3>
+                            <ul>
+                                <li>Request flow visualization</li>
+                                <li>Error propagation tracking</li>
+                                <li>Performance bottlenecks</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>Monitoring</h3>
+                            <ul>
+                                <li>Service health metrics</li>
+                                <li>Latency measurements</li>
+                                <li>Error rates and patterns</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Real-world Example</h2>
+                        <div class="mermaid">
+                            <pre>
+sequenceDiagram
+    participant C as Cockpit
+    participant FC as Flight Controller
+    participant OB as Orbital Beacon
+
+    C->>FC: Get Flight Position
+    FC->>OB: Calculate Position
+    OB-->>FC: Position Data
+    FC-->>C: Updated Position
+                            </pre>
+                        </div>
+                        <p>Each arrow represents a traced operation</p>
+                    </section>
+
+                    <section>
+                        <h2>Trace Example with Spans</h2>
+                        <div class="mermaid">
+                            <pre>
+sequenceDiagram
+    participant C as Cockpit
+    participant FC as Flight Controller
+    participant OB as Orbital Beacon
+    participant AA as Airport Anywhere
+
+    Note over C,AA: Trace ID: abc-123
+
+    C->>+FC: Get Flight Position
+    Note right of FC: Span: handle_request
+
+    FC->>AA: Fetch Airport Data
+    AA-->>FC: Airport Coordinates
+
+    FC->>+OB: Calculate Position
+    Note right of OB: Span: compute_position
+    OB->>OB: Process Flight Path
+    OB-->>-FC: Position Data
+
+    FC-->>-C: Updated Position
+    Note over C,FC: End Trace
+                            </pre>
+                        </div>
+                        <p>Shows trace context and span relationships</p>
+                    </section>
+
+                    <section>
+                        <h2>Trace vs Span vs Context</h2>
+                        <div class="mermaid">
+                            <pre>
+                    sequenceDiagram
+                        participant C as Cockpit Dashboard
+                        participant TB as Tower of Babel
+                        participant FC as Flight Controller
+                        participant OB as Orbital Beacon
+                        participant AA as Airport Anywhere
+
+                        Note over C,AA: Trace: t.4bf9...4736 (Flight Position Request)
+                        Note over C,AA: Root Span: s.6c96...f990
+
+                        C->>+TB: Get Flight Position
+                        Note right of TB: Span Context
+                        Note right of TB: Trace: t.4bf9...4736
+                        Note right of TB: Span: s.7859...5d4f
+                        Note right of TB: Parent: s.6c96...f990
+
+                        TB->>+FC: Fetch Flight Details
+                        Note right of FC: Span Context
+                        Note right of FC: Trace: t.4bf9...4736
+                        Note right of FC: Span: s.9c79...c2f8
+                        Note right of FC: Parent: s.7859...5d4f
+
+                        FC->>AA: Get Airport Data
+                        AA-->>FC: Airport Coordinates
+
+                        FC->>+OB: Calculate Position
+                        Note right of OB: Span Context
+                        Note right of OB: Trace: t.4bf9...4736
+                        Note right of OB: Span: s.3e45...a1b2
+                        Note right of OB: Parent: s.9c79...c2f8
+
+                        OB-->>-FC: Satellite Position
+                        FC-->>-TB: Flight Position
+                        TB-->>-C: Current Location
+                            </pre>
+                        </div>
+                    </section>
+                    <section>
+                        <ul>
+                            <li>
+                                <b>Trace:</b> Complete flight position request
+                                across all services
+                            </li>
+                            <li>
+                                <b>Spans:</b> Individual operations (API calls,
+                                calculations)
+                            </li>
+                            <li>
+                                <b>Context:</b> Carries trace and span IDs plus
+                                metadata
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Span Context Example</h2>
+                        <pre><code class="json">
+                    {
+                      "trace_id": "t.4bf9...4736",
+                      "span_id": "s.9c79...c2f8",
+                      "trace_flags": "01",
+                      "trace_state": {
+                        "flight_number": "FRA123",
+                        "departure": "FRA",
+                        "arrival": "LIS",
+                        "satellite_id": "sat-789"
+                      }
+                    }
+                        </code></pre>
+                        <ul>
+                            <li>
+                                <b>trace_id:</b> Identifies entire flight
+                                position request flow
+                            </li>
+                            <li>
+                                <b>span_id:</b> Unique ID for flight controller
+                                operation
+                            </li>
+                            <li>
+                                <b>trace_state:</b> Flight-specific context data
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Trace Flags</h2>
+                        <ul>
+                            <li>
+                                Represent tracing options, typically related to
+                                sampling
+                            </li>
+                            <li>
+                                A single byte (8 bits), where the least
+                                significant bit represents the "sampled" flag
+                            </li>
+                            <li>"01" indicates the trace should be sampled</li>
+                            <li>
+                                Sampling is the mechanism to reduce volume of
+                                traces to manage backend costs
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Trace State</h2>
+                        <ul>
+                            <li>
+                                Carries vendor-specific trace information as
+                                key-value pairs
+                            </li>
+                            <li>
+                                Allows vendors to propagate context and
+                                correlate traces across their systems
+                            </li>
+                            <li>
+                                <b>Hypothetical Example:</b>
+                                <code>acme_geo=lat:50.033,lon:8.571</code>
+                                <ul>
+                                    <li>
+                                        A hypothetical geospatial data provider
+                                        <code>acme_geo</code> might include the
+                                        current latitude and longitude
+                                    </li>
+                                    <li>
+                                        This information could be used for later
+                                        analysis or visualization
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                Keys and values are specific to the vendor and
+                                implementation
+                            </li>
+                        </ul>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Live Demo</h2>
+                    <ol>
+                        <li>Create a new flight</li>
+                        <li>Track position updates</li>
+                        <li>View trace in Jaeger UI</li>
+                        <li>Analyze performance</li>
+                    </ol>
+                </section>
+
+                <section>
+                    <h2>Best Practices</h2>
+                    <ul>
+                        <li>Meaningful span names</li>
+                        <li>Relevant attributes</li>
+                        <li>Proper error handling</li>
+                        <li>Context propagation</li>
+                        <li>Sampling strategy</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Thank You!</h2>
+                    <p>Questions?</p>
+                </section>
+            </div>
+        </div>
+
+        <!-- Reveal.js Scripts from CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js-mermaid-plugin@11.4.1/plugin/mermaid/mermaid.js"></script>
+
+        <script>
+            Reveal.initialize({
+                hash: true,
+                slideNumber: true,
+                plugins: [
+                    RevealMarkdown,
+                    RevealHighlight,
+                    RevealNotes,
+                    RevealMermaid,
+                ],
+                controls: true,
+                progress: true,
+                center: true,
+                transition: "slide",
+            });
+        </script>
+    </body>
+</html>
