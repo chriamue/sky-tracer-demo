@@ -1,0 +1,902 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>Sky Tracer Demo - MCP Server</title>
+
+        <!-- Reveal.js CDN Links -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reset.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.css"
+        />
+
+        <!-- Theme used for syntax highlighting of code -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.css"
+        />
+
+        <!-- Custom styles -->
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <!-- Title -->
+                <section>
+                    <h1>Model Context Protocol</h1>
+                    <p>Building AI-Powered Services</p>
+                    <p>Sky Nexus MCP Server</p>
+                </section>
+
+                <!-- ========== PART 1: MCP THEORY ========== -->
+                <section>
+                    <section>
+                        <h2>What is MCP?</h2>
+                        <p>
+                            Model Context Protocol (MCP) is an open protocol that enables seamless
+                            integration between LLM applications and external data sources and
+                            tools.
+                        </p>
+                        <p style="font-size: 0.9em; margin-top: 2rem;">
+                            Similar to Language Server Protocol (LSP) for code editors, MCP standardizes
+                            how to integrate context and tools into the AI ecosystem.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>Why MCP?</h2>
+                        <ul>
+                            <li>🔗 Connect LLMs to any data source or tool</li>
+                            <li>📦 Standardized, vendor-neutral protocol</li>
+                            <li>🔄 Seamless integration with AI applications</li>
+                            <li>🛡️ Built-in security and consent mechanisms</li>
+                            <li>♻️ Composable and reusable integrations</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Inspired by Language Server Protocol (LSP)</h2>
+                        <div class="grid grid-2" style="padding: 0 40px;">
+                            <div>
+                                <h3>📝 Language Server Protocol</h3>
+                                <ul style="font-size: 0.85em;">
+                                    <li>Standardizes language support</li>
+                                    <li>Works across many editors</li>
+                                    <li>One implementation → many tools</li>
+                                    <li>Examples: TypeScript, Python, Rust</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>🤖 Model Context Protocol</h3>
+                                <ul style="font-size: 0.85em;">
+                                    <li>Standardizes AI tool integration</li>
+                                    <li>Works across many AI apps</li>
+                                    <li>One server → many AI models</li>
+                                    <li>Examples: Claude, LM Studio</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p style="margin-top: 2rem; font-size: 0.9em;">
+                            Just as LSP eliminated the need for language support in every editor,
+                            MCP eliminates the need for integration in every AI application.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>How LSP Works (Before & After)</h2>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                            <div>
+                                <h3 style="font-size: 1.2em;">❌ Without LSP</h3>
+                                <div class="mermaid">
+                                    <pre>
+                graph TD
+                    VS["VS Code<br/>TypeScript Support"]
+                    Sublime["Sublime Text<br/>TypeScript Support"]
+                    Vim["Vim<br/>TypeScript Support"]
+                    Neovim["Neovim<br/>TypeScript Support"]
+
+                    style VS fill:#d32f2f,stroke:#fff,stroke-width:2px,color:#fff
+                    style Sublime fill:#d32f2f,stroke:#fff,stroke-width:2px,color:#fff
+                    style Vim fill:#d32f2f,stroke:#fff,stroke-width:2px,color:#fff
+                    style Neovim fill:#d32f2f,stroke:#fff,stroke-width:2px,color:#fff
+                    </pre>
+                </div>
+                                <p style="font-size: 0.8em; text-align: center;">
+                                    Each editor implements language support independently
+                                </p>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1.2em;">✅ With LSP</h3>
+                                <div class="mermaid">
+                                    <pre>
+                graph TD
+                    VS["VS Code"]
+                    Sublime["Sublime Text"]
+                    Vim["Vim"]
+                    Neovim["Neovim"]
+
+                    Server["🖥️ TypeScript<br/>Language Server<br/>(one implementation)"]
+
+                    VS -->|LSP| Server
+                    Sublime -->|LSP| Server
+                    Vim -->|LSP| Server
+                    Neovim -->|LSP| Server
+
+                    style VS fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style Sublime fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style Vim fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style Neovim fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style Server fill:#1976d2,stroke:#fff,stroke-width:2px,color:#fff
+                    </pre>
+                </div>
+                                <p style="font-size: 0.8em; text-align: center;">
+                                    All editors connect to one server via standard protocol
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>MCP Applies the Same Pattern</h2>
+                        <div class="mermaid">
+                            <pre>
+                graph TD
+                    Claude["Claude Desktop"]
+                    LMStudio["LM Studio"]
+                    OpenAI["Other AI Apps"]
+
+                    Server["🏗️ Sky Nexus<br/>MCP Server<br/>(one implementation)"]
+
+                    Claude -->|MCP| Server
+                    LMStudio -->|MCP| Server
+                    OpenAI -->|MCP| Server
+
+                    Server --> AA["🏢 Airport<br/>Data"]
+                    Server --> FC["🎮 Flight<br/>Data"]
+                    Server --> OB["🛰️ Satellite<br/>Data"]
+
+                    style Claude fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style LMStudio fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style OpenAI fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style Server fill:#1976d2,stroke:#fff,stroke-width:2px,color:#fff
+                    style AA fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                    style FC fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                    style OB fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                            </pre>
+                        </div>
+                        <p style="margin-top: 1rem; text-align: center;">
+                            One MCP server provides tools to any AI application
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>MCP Architecture</h2>
+                        <div class="mermaid">
+                            <pre>
+                graph TB
+                    Host["🎯 Host (LLM App)"]
+                    Client["📱 Client (Connector)"]
+                    Server["🖥️ Server (Service)"]
+
+                    Host -->|initiates| Client
+                    Client -->|JSON-RPC 2.0| Server
+                    Server -->|responds| Client
+                    Client -->|context| Host
+
+                    style Host fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style Client fill:#1976d2,stroke:#fff,stroke-width:2px,color:#fff
+                    style Server fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                            </pre>
+                        </div>
+                        <ul>
+                            <li><b>Host:</b> The LLM application (Claude Desktop, etc.)</li>
+                            <li><b>Client:</b> Connector within the host</li>
+                            <li><b>Server:</b> External service providing context and capabilities</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Server Features</h2>
+                        <div class="grid grid-3" style="padding: 0 20px;">
+                            <div>
+                                <h3>📚 Resources</h3>
+                                <p>Context and data for the AI model to use</p>
+                                <p style="font-size: 0.8em;">Files, documents, structured data</p>
+                            </div>
+                            <div>
+                                <h3>🛠️ Tools</h3>
+                                <p>Functions the AI can execute</p>
+                                <p style="font-size: 0.8em;">API calls, data queries</p>
+                            </div>
+                            <div>
+                                <h3>💬 Prompts</h3>
+                                <p>Templated messages and workflows</p>
+                                <p style="font-size: 0.8em;">Reusable message templates</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>How MCP Works</h2>
+                        <ol>
+                            <li>Host establishes connection to MCP Server</li>
+                            <li>Server declares capabilities (resources, tools, prompts)</li>
+                            <li>Host/AI system can now use server's capabilities</li>
+                            <li>JSON-RPC 2.0 messages carry requests/responses</li>
+                            <li>Server can request LLM sampling with user consent</li>
+                        </ol>
+                    </section>
+
+                    <section>
+                        <h2>The Protocol: JSON-RPC 2.0</h2>
+                        <p>MCP messages are JSON-RPC 2.0 over a transport (HTTP/SSE, stdio):</p>
+                        <div class="grid grid-2" style="padding: 0 20px; font-size: 0.75em;">
+                            <div>
+                                <p><b>Request</b></p>
+                                <pre><code class="json">
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "list_flights",
+    "arguments": {
+      "departure": "FRA"
+    }
+  }
+}
+                                </code></pre>
+                            </div>
+                            <div>
+                                <p><b>Response</b></p>
+                                <pre><code class="json">
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[{\"flight\": \"LH100\",
+          \"dest\": \"JFK\"}]"
+      }
+    ]
+  }
+}
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>Protocol Lifecycle</h2>
+                        <div class="mermaid">
+                            <pre>
+sequenceDiagram
+    participant Host as Host (LM Studio)
+    participant Server as MCP Server (Sky Nexus)
+
+    Note over Host,Server: 1. Initialization
+    Host->>Server: initialize (client capabilities)
+    Server-->>Host: server capabilities + tool list
+    Host->>Server: notifications/initialized
+
+    Note over Host,Server: 2. Discovery
+    Host->>Server: tools/list
+    Server-->>Host: [{name, description, inputSchema}]
+
+    Note over Host,Server: 3. Tool Call
+    Host->>Server: tools/call {name, arguments}
+    Server-->>Host: {content: [{type, text}]}
+
+    Note over Host,Server: 4. Shutdown
+    Host->>Server: close connection
+                            </pre>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>Communication Flow</h2>
+                        <div class="mermaid">
+                            <pre>
+sequenceDiagram
+    participant AI as AI System
+    participant Client as MCP Client
+    participant Server as MCP Server
+    participant Data as External Data
+
+    AI->>Client: Use tool "list_flights"
+    Client->>Server: JSON-RPC tools/call
+    Server->>Data: Query flights
+    Data-->>Server: Flight data
+    Server-->>Client: Tool result
+    Client-->>AI: Flight information
+                            </pre>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>Security & Trust</h2>
+                        <ul>
+                            <li>✅ User consent required for data access</li>
+                            <li>✅ User control over what data is shared</li>
+                            <li>✅ Tool execution requires explicit approval</li>
+                            <li>✅ LLM sampling requests need user approval</li>
+                            <li>✅ Clear documentation of security implications</li>
+                        </ul>
+                        <p style="margin-top: 2rem; font-size: 0.9em;">
+                            <b>Key Principle:</b> Users must understand and consent to all data
+                            access and operations.
+                        </p>
+                    </section>
+                </section>
+
+                <!-- ========== PART 2: SKY NEXUS IMPLEMENTATION ========== -->
+                <section>
+                    <section>
+                        <h2>Sky Nexus: An MCP Server</h2>
+                        <p>
+                            Sky Nexus is a Model Context Protocol server that provides comprehensive
+                            aviation data services.
+                        </p>
+                        <p style="margin-top: 2rem;">
+                            It acts as a central hub, integrating with multiple microservices and
+                            exposing aviation data through both REST API and MCP tools.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>Sky Nexus Architecture</h2>
+                        <div class="mermaid">
+                            <pre>
+                graph TD
+                    AI["🤖 AI Assistant"]
+                    Web["🌐 Web Client"]
+                    MCP["📱 MCP Client"]
+
+                    AI -->|REST API| Nexus
+                    Web -->|REST API| Nexus
+                    MCP -->|MCP Protocol| Nexus
+
+                    Nexus["🏗️ Sky Nexus<br/>Axum + rmcp"]
+
+                    Nexus --> AA["🏢 Airport<br/>Anywhere"]
+                    Nexus --> FC["🎮 Flight<br/>Controller"]
+                    Nexus --> OB["🛰️ Orbital<br/>Beacon"]
+                    Nexus --> TB["🗼 Tower of<br/>Babel"]
+
+                    style AI fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style Web fill:#2e7d32,stroke:#fff,stroke-width:2px,color:#fff
+                    style MCP fill:#d32f2f,stroke:#fff,stroke-width:2px,color:#fff
+                    style Nexus fill:#1976d2,stroke:#fff,stroke-width:2px,color:#fff
+                    style AA fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                    style FC fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                    style OB fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                    style TB fill:#f57c00,stroke:#fff,stroke-width:2px,color:#fff
+                            </pre>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>Technology Stack</h2>
+                        <div class="grid grid-2" style="padding: 0 40px;">
+                            <div>
+                                <h3>Framework</h3>
+                                <ul style="font-size: 0.9em;">
+                                    <li>⚡ Axum (web framework)</li>
+                                    <li>🚀 Tokio (async runtime)</li>
+                                    <li>📦 rmcp (MCP SDK)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>Features</h3>
+                                <ul style="font-size: 0.9em;">
+                                    <li>🔍 OpenAPI docs (Swagger UI)</li>
+                                    <li>📡 OpenTelemetry tracing</li>
+                                    <li>🌍 Multiple MCP endpoints</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>MCP Endpoints Overview</h2>
+                        <ul>
+                            <li>
+                                <b>🏢 /mcp/airports</b> - Airport lookup and information
+                            </li>
+                            <li>
+                                <b>🎮 /mcp/flights</b> - Flight management and search
+                            </li>
+                            <li>
+                                <b>🛰️ /mcp/satellites</b> - Satellite positioning and tracking
+                            </li>
+                            <li>
+                                <b>⏰ /mcp/datetime</b> - Timezone and time utilities
+                            </li>
+                            <li>
+                                <b>🗼 /mcp/babel</b> - Flight tracking and aggregation
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Airport Tools</h2>
+                        <pre><code class="json" style="font-size: 0.8em;">
+{
+  "tools": [
+    {
+      "name": "list_airports",
+      "description": "List all available airports",
+      "inputSchema": {}
+    },
+    {
+      "name": "get_airport",
+      "description": "Get airport details by code",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string", "description": "IATA code"}
+        }
+      }
+    }
+  ]
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Flight Tools</h2>
+                        <ul>
+                            <li><b>list_flights</b> - List all flights with optional filters</li>
+                            <li><b>get_flight</b> - Get detailed flight information</li>
+                            <li><b>create_flight</b> - Create a new flight</li>
+                            <li>
+                                <b>search_flights_by_route</b> - Search by departure and arrival
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Satellite Tools</h2>
+                        <ul>
+                            <li><b>list_satellites</b> - List all satellites</li>
+                            <li><b>create_satellite</b> - Create a new satellite</li>
+                            <li><b>update_satellite_status</b> - Update satellite status</li>
+                            <li>
+                                <b>calculate_position</b> - Calculate flight position using satellites
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>DateTime Tools</h2>
+                        <ul>
+                            <li>
+                                <b>get_current_datetime</b> - Get time in any timezone with custom
+                                formatting
+                            </li>
+                            <li>
+                                <b>get_aviation_times</b> - Get current time in major aviation hubs
+                            </li>
+                            <li>
+                                <b>get_timezone_difference</b> - Calculate time difference between
+                                timezones
+                            </li>
+                        </ul>
+                        <p style="margin-top: 1rem; font-size: 0.9em;">
+                            🌍 Supports all IANA timezone identifiers
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>Babel Tools</h2>
+                        <p>Flight tracking and aggregation across multiple services</p>
+                        <ul style="margin-top: 1.5rem;">
+                            <li>
+                                <b>track_flight</b> - Track real-time flight position and status
+                            </li>
+                            <li>
+                                <b>search_flights</b> - Search flights across the network
+                            </li>
+                            <li>
+                                <b>get_flight_aggregation</b> - Get aggregated flight data
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <section>
+                            <h2>MCP Integration Options</h2>
+                            <p>Sky Nexus can integrate with multiple AI frontends:</p>
+                            <div class="grid grid-2" style="padding: 0 40px; margin-top: 2rem;">
+                                <div>
+                                    <h3>🎯 Claude Desktop</h3>
+                                    <p style="font-size: 0.9em;">Official MCP support via config file</p>
+                                </div>
+                                <div>
+                                    <h3>🛠️ LM Studio</h3>
+                                    <p style="font-size: 0.9em;">MCP Host with mcp.json configuration</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h2>Claude Desktop Configuration</h2>
+                            <p>Start docker compose, then add to Claude Desktop config:</p>
+                            <pre><code class="json" style="font-size: 0.65em;">
+{
+  "mcpServers": {
+    "sky-nexus-airports": {
+      "url": "http://localhost:8000/mcp/airports"
+    },
+    "sky-nexus-flights": {
+      "url": "http://localhost:8000/mcp/flights"
+    },
+    "sky-nexus-satellites": {
+      "url": "http://localhost:8000/mcp/satellites"
+    },
+    "sky-nexus-datetime": {
+      "url": "http://localhost:8000/mcp/datetime"
+    },
+    "sky-nexus-babel": {
+      "url": "http://localhost:8000/mcp/babel"
+    }
+  }
+}
+                            </code></pre>
+                            <p style="margin-top: 1rem; font-size: 0.85em;">
+                                All endpoints are routed through Traefik on port 8000
+                            </p>
+                        </section>
+
+                        <section>
+                            <h2>LM Studio Configuration</h2>
+                            <p>Configure Sky Nexus MCP endpoints via LM Studio:</p>
+                            <ol>
+                                <li>Start docker compose: <code>docker compose up -d</code></li>
+                                <li>Open LM Studio</li>
+                                <li>Program tab (right sidebar) → "Install > Edit mcp.json"</li>
+                                <li>Add Sky Nexus servers</li>
+                            </ol>
+                            <pre><code class="json" style="font-size: 0.65em; margin-top: 1rem;">
+{
+  "mcpServers": {
+    "sky-nexus-airports": {
+      "url": "http://localhost:8000/mcp/airports"
+    },
+    "sky-nexus-flights": {
+      "url": "http://localhost:8000/mcp/flights"
+    },
+    "sky-nexus-satellites": {
+      "url": "http://localhost:8000/mcp/satellites"
+    },
+    "sky-nexus-datetime": {
+      "url": "http://localhost:8000/mcp/datetime"
+    },
+    "sky-nexus-babel": {
+      "url": "http://localhost:8000/mcp/babel"
+    }
+  }
+}
+                            </code></pre>
+                        </section>
+
+                        <section>
+                            <h2>LM Studio as MCP Host</h2>
+                            <ul>
+                                <li>💻 Local frontend for any LLM</li>
+                                <li>🔌 Connects MCP servers to the app</li>
+                                <li>🛡️ Manages all MCP tool access</li>
+                                <li>⚙️ Configuration via <code>mcp.json</code></li>
+                                <li>🔐 Supports authentication headers if needed</li>
+                            </ul>
+                            <p style="margin-top: 2rem; font-size: 0.9em;">
+                                ⚠️ Only install MCPs from trusted sources - they can execute code
+                                and access local files
+                            </p>
+                        </section>
+                    </section>
+
+                    <section>
+                        <h2>Testing with MCP Inspector</h2>
+                        <p>Test each MCP service independently (with docker compose running):</p>
+                        <pre><code style="font-size: 0.8em;">
+# Test airports
+npx @modelcontextprotocol/inspector \
+  http://localhost:8000/mcp/airports
+
+# Test flights
+npx @modelcontextprotocol/inspector \
+  http://localhost:8000/mcp/flights
+
+# Test satellites
+npx @modelcontextprotocol/inspector \
+  http://localhost:8000/mcp/satellites
+
+# Test datetime
+npx @modelcontextprotocol/inspector \
+  http://localhost:8000/mcp/datetime
+
+# Test babel (flight tracking)
+npx @modelcontextprotocol/inspector \
+  http://localhost:8000/mcp/babel
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Docker Compose Setup</h2>
+                        <p>Sky Nexus configuration in docker compose:</p>
+                        <pre><code style="font-size: 0.7em;">
+sky-nexus:
+  build:
+    context: .
+    dockerfile: crates/sky-nexus/Dockerfile
+  environment:
+    - RUST_LOG=info,sky_nexus=debug
+    - PORT=8080
+    - SERVICE_NAME=nexus
+    - AIRPORT_SERVICE_BASE_URL=http://airport-anywhere:3000
+    - FLIGHT_SERVICE_BASE_URL=http://flight-controller:3001
+    - SATELLITE_SERVICE_BASE_URL=http://orbital-beacon:3002
+    - BABEL_SERVICE_BASE_URL=http://tower-of-babel:3003
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+                        </code></pre>
+                        <p style="margin-top: 1rem; font-size: 0.9em;">
+                            All services communicate via Docker Compose network
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>REST API Endpoints</h2>
+                        <p>Sky Nexus also provides traditional REST API via Traefik:</p>
+                        <pre><code style="font-size: 0.8em;">
+# With docker compose running on localhost:8000
+
+GET  http://localhost:8000/api/v1/nexus/airports
+GET  http://localhost:8000/api/v1/nexus/airports/{code}
+
+GET  http://localhost:8000/api/v1/nexus/flights
+POST http://localhost:8000/api/v1/nexus/flights
+GET  http://localhost:8000/api/v1/nexus/flights/{flight_number}
+
+GET  http://localhost:8000/api/v1/nexus/satellites
+POST http://localhost:8000/api/v1/nexus/satellites
+
+GET  http://localhost:8000/api/v1/nexus/datetime/current
+GET  http://localhost:8000/api/v1/nexus/datetime/aviation-times
+
+# Documentation
+GET  http://localhost:8000/nexus/docs (Swagger UI)
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Deployment with Docker Compose</h2>
+                        <p>Sky Nexus is integrated into the full stack:</p>
+                        <pre><code style="font-size: 0.8em;">
+# Start the entire Sky Tracer stack
+docker compose up -d
+
+# Sky Nexus is available at:
+# - REST API: http://localhost:8000/mcp/...
+# - MCP endpoints: http://localhost:8000/mcp/airports, /mcp/flights, etc.
+# - Swagger UI: http://localhost:8000/nexus/docs
+
+# View logs
+docker compose logs -f sky-nexus
+
+# Stop services
+docker compose down
+                        </code></pre>
+                        <p style="margin-top: 1rem; font-size: 0.9em;">
+                            Sky Nexus automatically connects to all services through Docker Compose
+                            networking
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2>Use Cases</h2>
+                        <ul>
+                            <li>
+                                ✈️ <b>Flight Planning</b> - AI-assisted flight scheduling across
+                                timezones
+                            </li>
+                            <li>
+                                👥 <b>Crew Management</b> - Intelligent crew scheduling
+                            </li>
+                            <li>
+                                📊 <b>Operations Support</b> - Real-time coordination and analysis
+                            </li>
+                            <li>
+                                🔍 <b>Flight Tracking</b> - Live flight position monitoring
+                            </li>
+                            <li>
+                                ⏰ <b>Time Coordination</b> - Multi-timezone operations
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <section>
+                            <h2>Example: Using Sky Nexus</h2>
+                            <p>Once configured in your frontend (Claude, LM Studio, etc.):</p>
+                            <blockquote style="font-size: 0.9em; margin-top: 1.5rem;">
+                                "Find all flights departing from Frankfurt (FRA) to Lisbon (LIS) in
+                                the next 24 hours"
+                            </blockquote>
+                            <p style="margin-top: 1.5rem;">The LLM will:</p>
+                            <ol style="font-size: 0.9em;">
+                                <li>Call <code>search_flights_by_route</code> tool</li>
+                                <li>Receive flight data from Sky Nexus</li>
+                                <li>Present results in natural language</li>
+                            </ol>
+                        </section>
+
+                        <section>
+                            <h2>Example: Multi-Timezone Flight Planning</h2>
+                            <blockquote style="font-size: 0.9em;">
+                                "What time does flight SK123 depart from Copenhagen and what time will
+                                it arrive in Sydney? Show both in local times."
+                            </blockquote>
+                            <p style="margin-top: 1.5rem;">Sky Nexus tools handle:</p>
+                            <ol style="font-size: 0.9em;">
+                                <li>Get flight details (SK123)</li>
+                                <li>Retrieve airport timezone info</li>
+                                <li>Convert times using <code>get_current_datetime</code></li>
+                                <li>Return localized flight times</li>
+                            </ol>
+                        </section>
+
+                        <section>
+                            <h2>Example: Real-time Satellite Tracking</h2>
+                            <blockquote style="font-size: 0.9em;">
+                                "Where is flight BA286 right now? Use satellite data to calculate its
+                                position."
+                            </blockquote>
+                            <p style="margin-top: 1.5rem;">Workflow:</p>
+                            <ol style="font-size: 0.9em;">
+                                <li>Get flight info from Flight Controller</li>
+                                <li>Use <code>calculate_position</code> with satellite data</li>
+                                <li>Get departure/arrival from airports</li>
+                                <li>Present location with context</li>
+                            </ol>
+                        </section>
+                    </section>
+                </section>
+
+                <!-- ========== CONCLUSION ========== -->
+                <section>
+                    <section>
+                        <h2>Key Takeaways</h2>
+                        <ul>
+                            <li>
+                                🔗 MCP standardizes AI/tool integration (like LSP for code)
+                            </li>
+                            <li>📦 Sky Nexus provides aviation data via MCP and REST API</li>
+                            <li>🛠️ Tools, Resources, and Prompts are the core features</li>
+                            <li>🛡️ Security and user consent are paramount</li>
+                            <li>
+                                💼 Integration with Claude Desktop enables AI-powered workflows
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Benefits of MCP</h2>
+                        <div class="grid grid-3" style="padding: 0 20px;">
+                            <div>
+                                <h3>For Developers</h3>
+                                <ul style="font-size: 0.85em;">
+                                    <li>Standardized API</li>
+                                    <li>SDK support</li>
+                                    <li>Easy integration</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>For Users</h3>
+                                <ul style="font-size: 0.85em;">
+                                    <li>Powerful AI tools</li>
+                                    <li>Data control</li>
+                                    <li>Clear consent</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>For Organizations</h3>
+                                <ul style="font-size: 0.85em;">
+                                    <li>Composable services</li>
+                                    <li>Vendor neutral</li>
+                                    <li>Future-proof</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>Resources</h2>
+                        <ul style="font-size: 0.9em;">
+                            <li>
+                                📖
+                                <a href="https://modelcontextprotocol.io" target="_blank"
+                                    >Model Context Protocol Specification</a
+                                >
+                            </li>
+                            <li>
+                                🦀
+                                <a
+                                    href="https://github.com/modelcontextprotocol/rust-sdk"
+                                    target="_blank"
+                                    >Rust MCP SDK</a
+                                >
+                            </li>
+                            <li>
+                                 🧪
+                                <a
+                                    href="https://github.com/modelcontextprotocol/inspector"
+                                    target="_blank"
+                                    >MCP Inspector</a
+                                >
+                            </li>
+                            <li>
+                                 💻
+                                <a href="https://lmstudio.ai/docs/app/mcp" target="_blank"
+                                    >LM Studio MCP Documentation</a
+                                >
+                            </li>
+                            <li>
+                                🏗️
+                                <a
+                                    href="https://github.com/chriamue/sky-tracer-demo"
+                                    target="_blank"
+                                    >Sky Tracer Demo</a
+                                >
+                            </li>
+                        </ul>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Thank You!</h2>
+                    <p>Questions?</p>
+                </section>
+            </div>
+        </div>
+
+        <!-- Reveal.js Scripts from CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js-mermaid-plugin@11.4.1/plugin/mermaid/mermaid.js"></script>
+
+        <script>
+            Reveal.initialize({
+                hash: true,
+                slideNumber: true,
+                plugins: [
+                    RevealMarkdown,
+                    RevealHighlight,
+                    RevealNotes,
+                    RevealMermaid,
+                ],
+                controls: true,
+                progress: true,
+                center: true,
+                transition: "slide",
+            });
+        </script>
+    </body>
+</html>
