@@ -1,9 +1,15 @@
-use crate::mcp::tools::{AirportTools, BabelTools, DateTimeTools, FlightTools, SatelliteTools};
+use crate::mcp::prompts::SkyNexusPrompts;
+use crate::mcp::resources;
+
+use crate::mcp::tools::{AirportTools, BabelTools, DateTimeTools, FlightTools, MapTools, SatelliteTools};
 use rmcp::{
     RoleServer, ServerHandler,
+    handler::server::prompt::PromptContext,
     model::{
-        CallToolResult, Implementation, ListToolsResult, PaginatedRequestParams,
-        ServerCapabilities, ServerInfo,
+        CallToolResult, GetPromptRequestParams, GetPromptResult, Implementation,
+        ListPromptsResult, ListResourceTemplatesResult, ListResourcesResult, ListToolsResult,
+        PaginatedRequestParams, ReadResourceRequestParams, ReadResourceResult, ServerCapabilities,
+        ServerInfo,
     },
     service::RequestContext,
 };
@@ -16,6 +22,8 @@ pub struct SkyNexusTools {
     satellites: SatelliteTools,
     datetime: DateTimeTools,
     babel: BabelTools,
+    map: MapTools,
+    prompts: SkyNexusPrompts,
 }
 
 impl SkyNexusTools {
@@ -26,22 +34,28 @@ impl SkyNexusTools {
             satellites: SatelliteTools::new(),
             datetime: DateTimeTools::new(),
             babel: BabelTools::new(),
+            map: MapTools::new(),
+            prompts: SkyNexusPrompts::new(),
         }
     }
 }
 
 impl ServerHandler for SkyNexusTools {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "Sky Nexus MCP server — comprehensive aviation data.\n\
-                Airports: list_airports, get_airport\n\
-                Flights: list_flights, get_flight, create_flight, search_flights_by_route\n\
-                Satellites: list_satellites, create_satellite, update_satellite_status, calculate_position\n\
-                DateTime: get_current_datetime, get_aviation_times, get_timezone_difference, compare_timezones\n\
-                Tracking: get_flights_by_airport, get_flight_position",
-            )
+        ServerInfo::new(
+            ServerCapabilities::builder()
+                .enable_tools()
+                .enable_resources()
+                .enable_prompts()
+                .build(),
+        )
+        .with_server_info(Implementation::from_build_env())
+        .with_instructions(
+            "Sky Nexus MCP server — comprehensive aviation data.\n\
+            Tools: list/get airports, manage flights, track satellites, calculate positions, check delays\n\
+            Resources: airports://{code} — live airport data by IATA code\n\
+            Prompts: airport-briefing, flight-route-analysis, delay-investigation, aviation-network-overview",
+        )
     }
 
     async fn list_tools(
@@ -74,7 +88,13 @@ impl ServerHandler for SkyNexusTools {
                 .await?
                 .tools,
         );
-        tools.extend(self.babel.list_tools(request, context).await?.tools);
+        tools.extend(
+            self.babel
+                .list_tools(request.clone(), context.clone())
+                .await?
+                .tools,
+        );
+        tools.extend(self.map.list_tools(request, context).await?.tools);
         Ok(ListToolsResult::with_all_items(tools))
     }
 
@@ -83,8 +103,6 @@ impl ServerHandler for SkyNexusTools {
         request: rmcp::model::CallToolRequestParams,
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, rmcp::ErrorData> {
-        // Dispatch to the sub-handler that owns the requested tool.
-        // Tool names correspond to #[tool] definitions in each tools/* file.
         match request.name.as_ref() {
             "list_airports" | "get_airport" => self.airports.call_tool(request, context).await,
             "list_flights" | "get_flight" | "create_flight" | "search_flights_by_route" => {
@@ -101,10 +119,63 @@ impl ServerHandler for SkyNexusTools {
             "get_flights_by_airport"
             | "get_flight_position"
             | "search_flights_by_airport_pattern" => self.babel.call_tool(request, context).await,
+            "generate_flight_map" => self.map.call_tool(request, context).await,
             name => Err(rmcp::ErrorData::invalid_params(
                 format!("unknown tool: {name}"),
                 None,
             )),
         }
+    }
+
+    async fn list_resources(
+        &self,
+        _request: Option<PaginatedRequestParams>,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<ListResourcesResult, rmcp::ErrorData> {
+        Ok(resources::list_resources())
+    }
+
+    async fn list_resource_templates(
+        &self,
+        _request: Option<PaginatedRequestParams>,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<ListResourceTemplatesResult, rmcp::ErrorData> {
+        Ok(resources::list_resource_templates())
+    }
+
+    async fn read_resource(
+        &self,
+        request: ReadResourceRequestParams,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<ReadResourceResult, rmcp::ErrorData> {
+        resources::read_resource(request).await
+    }
+
+    async fn list_prompts(
+        &self,
+        _request: Option<PaginatedRequestParams>,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<ListPromptsResult, rmcp::ErrorData> {
+        Ok(ListPromptsResult {
+            prompts: self.prompts.prompt_router.list_all(),
+            next_cursor: None,
+            meta: None,
+        })
+    }
+
+    async fn get_prompt(
+        &self,
+        request: GetPromptRequestParams,
+        context: RequestContext<RoleServer>,
+    ) -> Result<GetPromptResult, rmcp::ErrorData> {
+        self.prompts
+            .prompt_router
+            .get_prompt(PromptContext::new(
+                &self.prompts,
+                request.name,
+                request.arguments,
+                context,
+            ))
+            .await
     }
 }
