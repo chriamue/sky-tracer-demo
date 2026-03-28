@@ -10,11 +10,19 @@ up:
     docker compose up -d
     @echo "Services are starting..."
     @echo "Access the applications at:"
-    @echo "- Cockpit Dashboard: http://localhost:8080"
-    @echo "- Airport Anywhere: http://localhost:3000"
-    @echo "- Flight Controller: http://localhost:3001"
-    @echo "- Orbital Beacon: http://localhost:3002"
-    @echo "- Structurizr: http://localhost:8082"
+    @echo "- Landing Page:        http://localhost:8000"
+    @echo "- Cockpit Dashboard:   http://localhost:8000/cockpit"
+    @echo "- Delay-O-Rama:        http://localhost:8000/delays"
+    @echo "- Flightmare:          http://localhost:8000/flightmare"
+    @echo "- Airport Anywhere:    http://localhost:8000/airports"
+    @echo "- Flight Controller:   http://localhost:8000/flights"
+    @echo "- Orbital Beacon:      http://localhost:8000/satellites"
+    @echo "- Tower of Babel:      http://localhost:8000/babel"
+    @echo "- Sky Nexus (MCP):     http://localhost:8000/mcp"
+    @echo "- Sky Nexus API Docs:  http://localhost:8000/nexus/docs"
+    @echo "- Traefik Dashboard:   http://localhost:8080"
+    @echo "- Jaeger Tracing:      http://localhost:16686"
+    @echo "- Structurizr:         http://localhost:8082"
 
 # Stop all services
 down:
@@ -66,3 +74,22 @@ structurizr:
 # Stop Structurizr
 structurizr-down:
     docker compose down structurizr
+
+# Start Sky Nexus MCP server (and its dependencies)
+nexus:
+    docker compose up -d sky-nexus
+    @echo "Sky Nexus is starting..."
+    @echo "- MCP endpoint:  http://localhost:8000/mcp"
+    @echo "- API docs:      http://localhost:8000/nexus/docs"
+
+# Stop Sky Nexus
+nexus-down:
+    docker compose down sky-nexus
+
+# View Sky Nexus logs
+nexus-logs:
+    docker compose logs -f sky-nexus
+
+# Test Sky Nexus MCP server with MCP Inspector
+mcp-inspect:
+    npx @modelcontextprotocol/inspector http://localhost:8000/mcp
