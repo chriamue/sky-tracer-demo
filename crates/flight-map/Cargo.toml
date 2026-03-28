@@ -2,14 +2,15 @@
 name = "flight-map"
 version = "0.1.0"
 edition = "2021"
-description = "SVG flight map generator using Yew SSR"
+description = "SVG flight map generator using geo-svg"
 
 [dependencies]
-yew = { version = "0.23", features = ["ssr"] }
-tokio = { workspace = true }
+geo-svg = "0.8"
+geo-types = "0.7"
+geojson = "1.0"
 resvg = "0.44"
 tiny-skia = "0.11"
-geojson = "1.0"
 
 [dev-dependencies]
+tokio = { workspace = true }
 png = "0.17"

@@ -1,5 +1,5 @@
 /// A single airport pin on the map.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct AirportPin {
     pub code: String,
     pub lat: f64,
@@ -7,7 +7,7 @@ pub struct AirportPin {
 }
 
 /// A flight route arc with an optional current position.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct RouteArc {
     pub label: String,
     pub dep_lat: f64,

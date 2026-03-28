@@ -24,21 +24,23 @@ pub fn rasterize(svg: &str) -> Result<Vec<u8>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AirportPin, RouteArc, render_flight_map};
+    use crate::{render_flight_map, AirportPin};
 
-    #[tokio::test]
-    async fn png_starts_with_png_header() {
-        let svg = render_flight_map(vec![], vec![], None).await;
+    #[test]
+    fn png_starts_with_png_header() {
+        let svg = render_flight_map(vec![], vec![], None);
         let png = rasterize(&svg).expect("rasterize failed");
         assert_eq!(&png[..8], b"\x89PNG\r\n\x1a\n");
     }
 
-    #[tokio::test]
-    async fn png_has_correct_dimensions() {
-        let airports = vec![
-            AirportPin { code: "FRA".to_string(), lat: 50.033, lon: 8.570 },
-        ];
-        let svg = render_flight_map(airports, vec![], Some("Test".to_string())).await;
+    #[test]
+    fn png_has_correct_dimensions() {
+        let airports = vec![AirportPin {
+            code: "FRA".to_string(),
+            lat: 50.033,
+            lon: 8.570,
+        }];
+        let svg = render_flight_map(airports, vec![], Some("Test".to_string()));
         let png = rasterize(&svg).expect("rasterize failed");
 
         let decoder = png::Decoder::new(std::io::Cursor::new(&png));

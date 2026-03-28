@@ -1,29 +1,19 @@
-pub mod components;
+mod continents;
 mod geo;
+mod map;
 mod raster;
+mod types;
 
-pub use components::{AirportPin, FlightMapProps, FlightMapSvg, RouteArc};
 pub use raster::rasterize;
+pub use types::{AirportPin, RouteArc};
 
-/// Render the flight map SVG to a string using Yew SSR.
-///
-/// `hydratable(false)` disables SSR hydration markers so the output is
-/// clean, standalone SVG with no `<!--<[]>-->` comments.
-pub async fn render_flight_map(
+/// Render the flight map to an SVG string.
+pub fn render_flight_map(
     airports: Vec<AirportPin>,
     routes: Vec<RouteArc>,
     title: Option<String>,
 ) -> String {
-    use yew::ServerRenderer;
-
-    ServerRenderer::<FlightMapSvg>::with_props(move || FlightMapProps {
-        airports,
-        routes,
-        title,
-    })
-    .hydratable(false)
-    .render()
-    .await
+    map::render(airports, routes, title)
 }
 
 #[cfg(test)]
@@ -50,50 +40,47 @@ mod tests {
         }
     }
 
-    #[tokio::test]
-    async fn svg_root_element_present() {
-        let svg = render_flight_map(vec![], vec![], None).await;
+    #[test]
+    fn svg_root_element_present() {
+        let svg = render_flight_map(vec![], vec![], None);
         assert!(svg.contains("<svg"));
         assert!(svg.contains("</svg>"));
     }
 
-    #[tokio::test]
-    async fn airport_codes_appear_in_output() {
-        let svg = render_flight_map(vec![fra(), jfk()], vec![], None).await;
+    #[test]
+    fn airport_codes_appear_in_output() {
+        let svg = render_flight_map(vec![fra(), jfk()], vec![], None);
         assert!(svg.contains("FRA"));
         assert!(svg.contains("JFK"));
     }
 
-    #[tokio::test]
-    async fn route_arc_produces_path_elements() {
-        let svg = render_flight_map(vec![fra(), jfk()], vec![lh400()], None).await;
+    #[test]
+    fn route_arc_produces_path_elements() {
+        let svg = render_flight_map(vec![fra(), jfk()], vec![lh400()], None);
         assert!(svg.contains("<path"));
     }
 
-    #[tokio::test]
-    async fn title_appears_when_provided() {
-        let svg =
-            render_flight_map(vec![], vec![], Some("Test Map".to_string())).await;
+    #[test]
+    fn title_appears_when_provided() {
+        let svg = render_flight_map(vec![], vec![], Some("Test Map".to_string()));
         assert!(svg.contains("Test Map"));
     }
 
-    #[tokio::test]
-    async fn position_marker_rendered_when_in_flight() {
+    #[test]
+    fn position_marker_rendered_when_in_flight() {
         let route = RouteArc {
             pos_lat: Some(48.0),
             pos_lon: Some(-20.0),
             ..lh400()
         };
-        let svg = render_flight_map(vec![fra(), jfk()], vec![route], None).await;
+        let svg = render_flight_map(vec![fra(), jfk()], vec![route], None);
         assert!(svg.contains("#fbbf24"));
     }
 
-    #[tokio::test]
-    async fn empty_map_has_continent_paths_but_no_routes() {
-        let svg = render_flight_map(vec![], vec![], None).await;
-        // Continents produce paths; no flight routes or airport code labels
+    #[test]
+    fn empty_map_has_continent_paths_but_no_routes() {
+        let svg = render_flight_map(vec![], vec![], None);
         assert!(svg.contains("<path"));
         assert!(!svg.contains("stroke-dasharray"));
-        assert!(!svg.contains("monospace\">F")); // no airport code labels
     }
 }
