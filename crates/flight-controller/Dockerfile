@@ -1,4 +1,4 @@
-FROM rust:1.94 AS builder
+FROM rust:1.94-trixie AS builder
 
 WORKDIR /usr/src/app
 
@@ -11,7 +11,7 @@ COPY . .
 
 RUN cargo build --release -p flight-controller
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 
