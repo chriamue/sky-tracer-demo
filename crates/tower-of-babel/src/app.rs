@@ -12,7 +12,7 @@ pub fn app(babel_service: BabelService) -> Router {
     Router::new()
         .merge(openapi::routes()) // Now works with generic state
         .merge(api_routes) // This has the BabelService state
-        .layer(OtelInResponseLayer::default())
+        .layer(OtelInResponseLayer)
         .layer(OtelAxumLayer::default())
         .layer(
             CorsLayer::new()

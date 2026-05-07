@@ -41,7 +41,7 @@ pub fn app(satellite_service: SatelliteService) -> Router {
                 .allow_methods(Any)
                 .allow_headers(Any),
         )
-        .layer(OtelInResponseLayer::default())
+        .layer(OtelInResponseLayer)
         .layer(OtelAxumLayer::default())
         .with_state(satellite_service)
 }

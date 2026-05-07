@@ -70,9 +70,9 @@ pub async fn fetch_flights_by_airport(
         }
         status => {
             error!(status = %status, airport_code = %airport_code, "Failed to fetch flights");
-            Err(BabelServiceError::Network(reqwest::Error::from(
+            Err(BabelServiceError::Network(
                 resp.error_for_status().unwrap_err(),
-            )))
+            ))
         }
     }
 }
@@ -114,9 +114,9 @@ pub async fn fetch_flight_position(
         ))),
         status => {
             error!(status = %status, flight_number = %flight_number, "Failed to fetch flight position");
-            Err(BabelServiceError::Network(reqwest::Error::from(
+            Err(BabelServiceError::Network(
                 resp.error_for_status().unwrap_err(),
-            )))
+            ))
         }
     }
 }

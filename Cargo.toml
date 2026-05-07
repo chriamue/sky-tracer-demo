@@ -1,9 +1,15 @@
 [package]
 name = "sky-tracer-demo"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
-resolver = "2"
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Sky Tracer Team"]
+license = "MIT"
+repository = "https://github.com/chriamue/sky-tracer-demo"
 
 [workspace]
 members = [
@@ -22,15 +28,15 @@ members = [
 [workspace.dependencies]
 # Common dependencies with fixed versions
 axum = { version = "0.8", features = ["macros"] }
-tokio = { version = "1.43.0", features = ["full"] }
+tokio = { version = "1.43", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.15", features = ["v4", "serde"] }
 yew = { version = "0.21" }
 tower-http = { version = "0.6", features = ["cors"] }
-reqwest = { version = "0.13.2", features = ["json"] }
-thiserror = "2.0.12"
+reqwest = { version = "0.13", features = ["json"] }
+thiserror = "2.0"
 utoipa = { version = "5.4", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "9.0", features = ["axum"] }
 
@@ -41,18 +47,8 @@ init-tracing-opentelemetry = { version = "0.36", features = [
     "otlp",
     "tracing_subscriber_ext",
 ] }
-reqwest-middleware = { version = "0.5.1", features = ["json", "query"] }
+reqwest-middleware = { version = "0.5", features = ["json", "query"] }
 opentelemetry = "0.31"
 tracing-opentelemetry = "0.32"
 async-trait = "0.1"
 http = "1"
-
-[dependencies]
-sky-tracer = { path = "crates/sky-tracer" }
-airport-anywhere = { path = "crates/airport-anywhere" }
-flight-controller = { path = "crates/flight-controller" }
-flightmare-tracker = { path = "crates/flightmare-tracker" }
-cockpit = { path = "crates/cockpit" }
-orbital-beacon = { path = "crates/orbital-beacon" }
-tower-of-babel = { path = "crates/tower-of-babel" }
-delay-orama = { path = "crates/delay-orama" }

@@ -1,12 +1,12 @@
 [package]
 name = "sky-nexus"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 description = "Model Context Protocol server providing comprehensive aviation data services"
-authors = ["Sky Tracer Team"]
-license = "MIT"
+authors.workspace = true
+license.workspace = true
 readme = "README.md"
-repository = "https://github.com/chriamue/sky-tracer-demo"
+repository.workspace = true
 keywords = ["aviation", "mcp", "api", "microservice", "openapi"]
 categories = ["web-programming", "aerospace"]
 

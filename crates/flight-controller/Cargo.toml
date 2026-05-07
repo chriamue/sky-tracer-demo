@@ -1,12 +1,12 @@
 [package]
 name = "flight-controller"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition = "2024"
 description = "Core flight management and tracking service with position calculation capabilities"
-authors = ["Sky Tracer Team"]
-license = "MIT"
+authors.workspace = true
+license.workspace = true
 readme = "../../README.md"
-repository = "https://github.com/chriamue/sky-tracer-demo"
+repository.workspace = true
 keywords = [
     "flight-management",
     "aviation",

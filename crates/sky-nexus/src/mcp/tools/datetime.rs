@@ -186,7 +186,7 @@ impl DateTimeTools {
                 req.to_timezone, -diff_hours, req.from_timezone
             )
         } else {
-            format!("Both timezones are in sync")
+            "Both timezones are in sync".to_string()
         };
 
         // Create response object

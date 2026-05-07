@@ -1,12 +1,12 @@
 [package]
 name = "orbital-beacon"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 description = "Satellite tracking and position calculation service for flight path monitoring"
-authors = ["Sky Tracer Team"]
-license = "MIT"
+authors.workspace = true
+license.workspace = true
 readme = "../../README.md"
-repository = "https://github.com/chriamue/sky-tracer-demo"
+repository.workspace = true
 keywords = [
     "satellite",
     "orbital-tracking",
@@ -32,7 +32,7 @@ utoipa-swagger-ui = { workspace = true }
 chrono = { workspace = true }
 reqwest = { workspace = true }
 uuid = { workspace = true }
-thiserror = "1.0"
+thiserror = { workspace = true }
 
 # SSR
 yew = { workspace = true, optional = true, features = ["ssr"] }

@@ -7,6 +7,12 @@ use sky_tracer::protocol::{
 use thiserror::Error;
 use tracing::{error, info, instrument, warn};
 
+type AirportDelaysInfo = (
+    Vec<(FlightResponse, Option<FlightPositionResponse>)>,
+    Option<(f64, f64)>,
+    Option<String>,
+);
+
 #[derive(Error, Debug)]
 pub enum DelayServiceError {
     #[error("HTTP request failed: {0}")]
@@ -163,11 +169,7 @@ impl DelayService {
     pub async fn get_airport_delays_with_errors(
         &self,
         airport_code: &str,
-    ) -> (
-        Vec<(FlightResponse, Option<FlightPositionResponse>)>,
-        Option<(f64, f64)>,
-        Option<String>,
-    ) {
+    ) -> AirportDelaysInfo {
         info!(
             "Getting complete delay information for airport: {}",
             airport_code

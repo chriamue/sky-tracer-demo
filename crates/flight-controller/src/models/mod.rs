@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn test_get_arrival_time_with_explicit_time() {
         let departure_time = Utc::now();
-        let arrival_time = Some(departure_time + chrono::Duration::hours(3));
+        let expected_arrival = departure_time + chrono::Duration::hours(3);
 
         let flight = Flight::new(
             "LH1234".to_string(),
@@ -97,10 +97,10 @@ mod tests {
             "FRA".to_string(),
             "LIS".to_string(),
             departure_time,
-            arrival_time,
+            Some(expected_arrival),
         );
 
-        assert_eq!(flight.get_arrival_time(), arrival_time.unwrap());
+        assert_eq!(flight.get_arrival_time(), expected_arrival);
     }
 
     #[test]

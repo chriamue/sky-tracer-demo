@@ -1,12 +1,12 @@
 [package]
 name = "airport-anywhere"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition = "2024"
 description = "A service providing worldwide airport information and search capabilities"
-authors = ["Sky Tracer Team"]
-license = "MIT"
+authors.workspace = true
+license.workspace = true
 readme = "../../README.md"
-repository = "https://github.com/chriamue/sky-tracer-demo"
+repository.workspace = true
 keywords = ["airports", "aviation", "search", "database", "web-service"]
 categories = ["web-programming", "aerospace"]
 

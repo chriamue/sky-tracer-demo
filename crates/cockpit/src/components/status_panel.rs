@@ -13,7 +13,7 @@ enum ConnectionStatus {
 pub fn status_panel() -> Html {
     let connection_status = use_state(|| ConnectionStatus::Checking);
     let flight_count = use_state(|| 0);
-    let last_update = use_state(|| chrono::Local::now());
+    let last_update = use_state(chrono::Local::now);
 
     // Check API connection and fetch flight count periodically
     {

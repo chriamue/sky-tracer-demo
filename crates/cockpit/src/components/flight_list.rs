@@ -19,15 +19,14 @@ fn calculate_flight_progress(flight: &FlightResponse) -> f64 {
         let elapsed = now - departure;
 
         (elapsed.num_seconds() as f64 / total_duration.num_seconds() as f64 * 100.0)
-            .min(100.0)
-            .max(0.0)
+            .clamp(0.0, 100.0)
     }
 }
 
 fn get_progress_class(progress: f64) -> &'static str {
     match progress {
-        p if p == 0.0 => "not-started",
-        p if p == 100.0 => "completed",
+        0.0 => "not-started",
+        100.0 => "completed",
         _ => "in-progress",
     }
 }

@@ -36,16 +36,14 @@ pub fn flight_map(props: &FlightMapProps) -> Html {
                 }).collect::<Vec<_>>()
             });
 
-            if let Some(window) = web_sys::window() {
-                if let Some(init_fn) =
-                    js_sys::Reflect::get(&window, &"initializeFlightsMap".into()).ok()
-                {
-                    let _ = init_fn.dyn_into::<js_sys::Function>().unwrap().call2(
-                        &window,
-                        &(*map_id).as_str().into(),
-                        &map_data.to_string().into(),
-                    );
-                }
+            if let Some(window) = web_sys::window()
+                && let Ok(init_fn) = js_sys::Reflect::get(&window, &"initializeFlightsMap".into())
+            {
+                let _ = init_fn.dyn_into::<js_sys::Function>().unwrap().call2(
+                    &window,
+                    &(*map_id).as_str().into(),
+                    &map_data.to_string().into(),
+                );
             }
         }
     };
