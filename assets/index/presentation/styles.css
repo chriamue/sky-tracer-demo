@@ -23,9 +23,215 @@
     color: #42affa;
 }
 
+/* Reveal presentation theme overrides */
+body.presentation-deck {
+    display: block;
+    padding: 0;
+    align-items: initial;
+    justify-content: initial;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(237, 247, 255, 0.94)),
+        linear-gradient(135deg, #dff3ff 0%, #f8fbff 46%, #e7f7f2 100%);
+    color: #102033;
+}
+
+body.presentation-deck.reveal-viewport {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(237, 247, 255, 0.94)),
+        linear-gradient(135deg, #dff3ff 0%, #f8fbff 46%, #e7f7f2 100%);
+}
+
+body.presentation-deck .reveal {
+    color: #102033;
+    background: transparent;
+}
+
+body.presentation-deck .reveal .slides {
+    text-shadow: none;
+}
+
+body.presentation-deck .reveal h1,
+body.presentation-deck .reveal h2,
+body.presentation-deck .reveal h3 {
+    color: #0f3557;
+    text-shadow: none;
+}
+
+body.presentation-deck .reveal p,
+body.presentation-deck .reveal li,
+body.presentation-deck .reveal ol,
+body.presentation-deck .reveal ul {
+    color: #24384c;
+}
+
+body.presentation-deck .reveal strong,
+body.presentation-deck .reveal b {
+    color: #0f3557;
+}
+
+body.presentation-deck .reveal a {
+    color: #0070b8;
+}
+
+body.presentation-deck .reveal code {
+    background: rgba(10, 77, 117, 0.1);
+    color: #0b5a86;
+    border-radius: 4px;
+    padding: 0.06em 0.22em;
+}
+
+body.presentation-deck .reveal pre {
+    box-shadow: 0 16px 40px rgba(28, 63, 96, 0.16);
+}
+
+body.presentation-deck .reveal pre code {
+    background: #142337;
+    color: inherit;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+body.presentation-deck .reveal blockquote {
+    background: rgba(255, 255, 255, 0.76);
+    border-left: 5px solid #1f9fd0;
+    box-shadow: 0 14px 34px rgba(28, 63, 96, 0.14);
+    color: #102033;
+}
+
+body.presentation-deck .reveal .controls {
+    color: #0b6fa4;
+}
+
+body.presentation-deck .reveal .progress {
+    color: #0b6fa4;
+}
+
+body.presentation-deck .reveal .slide-number {
+    background: rgba(255, 255, 255, 0.78);
+    color: #0f3557;
+}
+
+body.presentation-deck .reveal section img,
+body.presentation-deck .mermaid svg {
+    box-shadow: 0 14px 34px rgba(28, 63, 96, 0.13);
+}
+
+body.presentation-deck .reveal .primitives-slide h2 {
+    font-size: 1.25em !important;
+    margin-bottom: 0.45em !important;
+    white-space: nowrap;
+}
+
+body.presentation-deck .reveal .primitive-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding: 0 54px;
+}
+
+body.presentation-deck .reveal .primitive-card {
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 8px;
+    min-height: 150px;
+    padding: 0.55rem 0.65rem;
+    box-shadow: 0 12px 28px rgba(28, 63, 96, 0.12);
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-tool {
+    border-top: 4px solid #1d4ed8;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-resource {
+    border-top: 4px solid #15803d;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-prompt {
+    border-top: 4px solid #7e22ce;
+}
+
+body.presentation-deck .reveal .primitive-card h3 {
+    font-size: 0.62em !important;
+    margin-bottom: 0.45rem;
+    white-space: nowrap;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-tool h3 {
+    color: #1d4ed8;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-resource h3 {
+    color: #15803d;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-prompt h3 {
+    color: #7e22ce;
+}
+
+body.presentation-deck .reveal .primitive-card p {
+    color: #1f3347;
+    font-size: 0.34em !important;
+    line-height: 1.25;
+    margin: 0.25rem 0;
+}
+
+body.presentation-deck .reveal .primitive-card code {
+    background: rgba(15, 53, 87, 0.08);
+    display: inline-block;
+    font-size: 0.35em !important;
+    margin-top: 0.25rem;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-tool code {
+    color: #174ea6;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-resource code {
+    color: #0f6b35;
+}
+
+body.presentation-deck .reveal .primitive-card.primitive-prompt code {
+    color: #6b21a8;
+}
+
+body.presentation-deck .reveal .apps-extension-callout {
+    max-width: 850px;
+    margin: 0.65rem auto 0;
+    padding: 0.48rem 0.7rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-left: 5px solid #0ea5e9;
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(28, 63, 96, 0.12);
+}
+
+body.presentation-deck .reveal .apps-extension-callout h3 {
+    color: #0369a1;
+    font-size: 0.5em !important;
+    margin: 0 0 0.18rem 0;
+}
+
+body.presentation-deck .reveal .apps-extension-callout p {
+    color: #1f3347;
+    font-size: 0.32em !important;
+    line-height: 1.24;
+    margin: 0;
+}
+
+body.presentation-deck .reveal .apps-extension-callout code {
+    background: rgba(3, 105, 161, 0.12);
+    display: inline-block;
+    color: #075985;
+    font-size: 0.32em !important;
+    margin-top: 0.22rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 /* Mermaid diagram styling */
 .mermaid svg {
-    background-color: #f5f5f5;
+    background-color: #f8fbff;
     max-width: 900px;
     max-height: 500px;
 }

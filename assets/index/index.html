@@ -371,6 +371,7 @@
             .tag-tool     { background: #dbeafe; color: #1d4ed8; }
             .tag-resource { background: #dcfce7; color: #15803d; }
             .tag-prompt   { background: #f3e8ff; color: #7e22ce; }
+            .tag-app      { background: #e0f2fe; color: #0369a1; }
             .tag-count    { background: #f1f5f9; color: #475569; }
 
             .tool-list {
@@ -972,6 +973,13 @@
                             { name: "generate_flight_map", desc: "PNG world map with routes" },
                         ],
                     },
+                    {
+                        icon: "📊",
+                        name: "MCP Apps",
+                        tools: [
+                            { name: "flight_dashboard", desc: "Interactive Leaflet dashboard" },
+                        ],
+                    },
                 ];
 
                 const totalTools = toolCategories.reduce((s, c) => s + c.tools.length, 0);
@@ -1006,6 +1014,8 @@
                             is an open standard that lets AI models communicate with external systems over
                             <strong>HTTP Streamable</strong> (or stdio). The client connects once, discovers capabilities
                             via <code>initialize</code>, then calls tools, reads resources, or invokes prompts as needed.
+                            Sky Nexus also exposes an <a href="https://modelcontextprotocol.io/extensions/apps/overview" target="_blank" style="color:#007bff;">MCP App</a>:
+                            a tool declares a <code>ui://</code> resource, and compatible hosts render that HTML in a sandboxed iframe.
                         </p>
                         <div class="proto-diagram">  AI Client  ──── HTTP POST /mcp ────▶  MCP Server
   (LM Studio,        JSON-RPC 2.0            (Sky Nexus)
@@ -1053,6 +1063,15 @@
                                 </div>
                             </div>
                         `).join("")}
+
+                        <div class="mcp-section" style="margin-top:0.7rem;">
+                            <h4>📊 MCP App <span class="tag tag-app">ui://flight-dashboard</span></h4>
+                            <p style="font-size:0.83rem; color:#444; margin:0.4rem 0;">
+                                <code>flight_dashboard</code> is intentionally listed as a tool. Its tool metadata includes
+                                <code>_meta.ui.resourceUri</code>, so MCP Apps-capable hosts fetch
+                                <code>ui://flight-dashboard</code> and render the bundled Leaflet dashboard while passing tool results through the app bridge.
+                            </p>
+                        </div>
 
                         <hr class="divider"/>
 

@@ -19,7 +19,7 @@
         />
         <link
             rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.css"
+            href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/white.css"
         />
 
         <!-- Theme used for syntax highlighting of code -->
@@ -29,9 +29,9 @@
         />
 
         <!-- Custom styles -->
-        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="styles.css?v=3" />
     </head>
-    <body>
+    <body class="presentation-deck">
         <div class="reveal">
             <div class="slides">
                 <!-- Title -->
@@ -208,31 +208,34 @@
                         </ul>
                     </section>
 
-                    <section>
-                        <h2>Three Primitives</h2>
-                        <div class="grid grid-3" style="padding: 0 20px;">
-                            <div style="background: rgba(59,130,246,0.15); border-top: 3px solid #3b82f6; border-radius: 8px; padding: 1rem;">
-                                <h3 style="color: #60a5fa;">🔧 Tools</h3>
-                                <p style="font-size: 0.8em;"><b>Model decides</b> when to call them</p>
-                                <p style="font-size: 0.75em; opacity: 0.8;">Execute actions, query data, mutate state — like function calls</p>
-                                <code style="font-size: 0.7em; color: #93c5fd;">list_flights()</code>
+                    <section class="primitives-slide">
+                        <h2>MCP Primitives + Apps</h2>
+                        <div class="primitive-grid">
+                            <div class="primitive-card primitive-tool">
+                                <h3>🔧 Tools</h3>
+                                <p><b>Model decides</b> when to call them</p>
+                                <code>list_flights()</code>
                             </div>
-                            <div style="background: rgba(34,197,94,0.15); border-top: 3px solid #22c55e; border-radius: 8px; padding: 1rem;">
-                                <h3 style="color: #4ade80;">📦 Resources</h3>
-                                <p style="font-size: 0.8em;"><b>Client reads</b> them by URI</p>
-                                <p style="font-size: 0.75em; opacity: 0.8;">Read-only data injected as context — like a typed file system for the model</p>
-                                <code style="font-size: 0.7em; color: #86efac;">airports://FRA</code>
+                            <div class="primitive-card primitive-resource">
+                                <h3>📦 Resources</h3>
+                                <p><b>Client reads</b> them by URI</p>
+                                <code>airports://FRA</code>
                             </div>
-                            <div style="background: rgba(168,85,247,0.15); border-top: 3px solid #a855f7; border-radius: 8px; padding: 1rem;">
-                                <h3 style="color: #c084fc;">💬 Prompts</h3>
-                                <p style="font-size: 0.8em;"><b>User invokes</b> them by name</p>
-                                <p style="font-size: 0.75em; opacity: 0.8;">Pre-built conversation templates filled with live data — for structured workflows</p>
-                                <code style="font-size: 0.7em; color: #d8b4fe;">airport-briefing</code>
+                            <div class="primitive-card primitive-prompt">
+                                <h3>💬 Prompts</h3>
+                                <p><b>User invokes</b> them by name</p>
+                                <code>airport-briefing</code>
                             </div>
                         </div>
-                        <p style="margin-top: 1.5rem; font-size: 0.8em; opacity: 0.7;">
-                            Each primitive has a different controller: the <b>model</b>, the <b>client</b>, or the <b>user</b>.
-                        </p>
+                        <div class="apps-extension-callout">
+                            <h3>📊 Apps are an extension</h3>
+                            <p>
+                                Apps are not a fourth core primitive. They extend <b>tools</b> with
+                                <code>_meta.ui.resourceUri</code> pointing to a <code>ui://</code>
+                                HTML resource rendered by compatible hosts.
+                            </p>
+                            <code>flight_dashboard → ui://flight-dashboard</code>
+                        </div>
                     </section>
 
                     <section>
@@ -555,8 +558,8 @@ sequenceDiagram
                         <pre><code style="font-size: 1em; text-align: center;">http://localhost:8000/mcp</code></pre>
                         <div class="grid grid-3" style="padding: 0 20px; margin-top: 1.5rem; font-size: 0.8em;">
                             <div>
-                                <p style="color: #60a5fa;">🔧 18 Tools</p>
-                                <p style="font-size: 0.85em; opacity: 0.8;">Airports, Flights, Satellites, DateTime, Tracking, Map</p>
+                                <p style="color: #60a5fa;">🔧 19 Tools</p>
+                                <p style="font-size: 0.85em; opacity: 0.8;">Airports, Flights, Satellites, DateTime, Tracking, Map, App</p>
                             </div>
                             <div>
                                 <p style="color: #4ade80;">📦 8 Resources</p>
@@ -635,6 +638,9 @@ sequenceDiagram
                                 <b>get_timezone_difference</b> - Calculate time difference between
                                 timezones
                             </li>
+                            <li>
+                                <b>compare_timezones</b> - Side-by-side comparison for multiple zones
+                            </li>
                         </ul>
                         <p style="margin-top: 1rem; font-size: 0.9em;">
                             🌍 Supports all IANA timezone identifiers
@@ -671,6 +677,56 @@ sequenceDiagram
                             </ul>
                             <p style="margin-top: 1rem; opacity: 0.8;">Returns a <b>base64-encoded PNG</b> image via <code>Content::image("image/png")</code></p>
                             <p style="opacity: 0.8;">Built with: Natural Earth GeoJSON → geo-svg → resvg → PNG</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2>📊 MCP App: Flight Dashboard</h2>
+                        <p style="font-size: 0.82em;">
+                            <code>flight_dashboard</code> is a normal MCP tool with App metadata.
+                            The host reads the linked <code>ui://flight-dashboard</code> resource,
+                            renders the HTML in a sandboxed iframe, then bridges UI messages back to MCP.
+                        </p>
+                        <div class="mermaid" style="font-size: 11px;">
+                            <pre>
+sequenceDiagram
+    participant User as User
+    participant Host as MCP Host
+    participant Server as Sky Nexus MCP
+    participant App as Sandboxed iframe
+    participant Data as Flight services
+
+    Host->>Server: tools/list
+    Server-->>Host: flight_dashboard with UI resource URI
+    User->>Host: Show the flight dashboard
+    Host->>Server: tools/call flight_dashboard
+    Server->>Data: fetch_flights()
+    Data-->>Server: flight rows
+    Server-->>Host: JSON tool result
+    Host->>Server: resources/read ui://flight-dashboard
+    Server-->>Host: MCP App HTML resource
+    Host->>App: render HTML and push tool result
+    App->>Host: postMessage ui ready
+    App->>Host: postMessage tools call list_flights
+    Host->>Server: tools/call list_flights
+    Server-->>Host: latest flight data
+    Host-->>App: JSON-RPC response
+    App->>App: draw Leaflet map and flight list
+                            </pre>
+                        </div>
+                        <div class="grid grid-3" style="padding: 0 20px; font-size: 0.7em; margin-top: 0.8rem;">
+                            <div>
+                                <p style="color: #60a5fa;"><b>Tool</b></p>
+                                <p><code>_meta.ui.resourceUri</code> links the model-visible tool to the app resource.</p>
+                            </div>
+                            <div>
+                                <p style="color: #4ade80;"><b>Resource</b></p>
+                                <p><code>ui://flight-dashboard</code> returns bundled HTML plus CSP metadata.</p>
+                            </div>
+                            <div>
+                                <p style="color: #facc15;"><b>Bridge</b></p>
+                                <p>The iframe uses <code>postMessage</code>; the host proxies allowed MCP calls.</p>
+                            </div>
                         </div>
                     </section>
 
@@ -751,7 +807,7 @@ sequenceDiagram
 }
                             </code></pre>
                             <p style="margin-top: 1rem; font-size: 0.85em;">
-                                One server — all 18 tools, 8 resources, and 4 prompts auto-discovered via <code>initialize</code>
+                                One server — all 19 tools, 8 resources, and 4 prompts auto-discovered via <code>initialize</code>
                             </p>
                         </section>
 
