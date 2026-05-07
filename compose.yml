@@ -279,15 +279,15 @@ services:
       - sky-tracer
 
   structurizr:
-    image: structurizr/lite:latest
-    platform: linux/amd64
+    image: structurizr/structurizr
+    command: local
     ports:
       - "8082:8080"
     volumes:
       - ./docs/:/usr/local/structurizr/
     environment:
-      - STRUCTURIZR_WORKSPACE_PATH=.
-      - STRUCTURIZR_URL=http://localhost:8082
+      - STRUCTURIZR_AUTOSAVEINTERVAL=5000
+      - STRUCTURIZR_AUTOREFRESHINTERVAL=2000
 
   # Jaeger backend
   jaeger:
