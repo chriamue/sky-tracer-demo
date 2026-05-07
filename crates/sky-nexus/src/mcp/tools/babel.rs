@@ -2,7 +2,7 @@ use crate::services::babel::{BabelServiceError, fetch_flight_position, fetch_fli
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
+    model::{CallToolResult, Content},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -34,7 +34,10 @@ impl BabelTools {
         }
     }
 
-    #[tool(description = "Get future flights departing from or arriving at a specific airport")]
+    #[tool(
+        description = "Get future flights departing from or arriving at a specific airport",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn get_flights_by_airport(
         &self,
         Parameters(req): Parameters<GetFlightsByAirportRequest>,
@@ -118,7 +121,10 @@ impl BabelTools {
         }
     }
 
-    #[tool(description = "Get current position and status of a specific flight")]
+    #[tool(
+        description = "Get current position and status of a specific flight",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn get_flight_position(
         &self,
         Parameters(req): Parameters<GetFlightPositionRequest>,
@@ -170,7 +176,10 @@ impl BabelTools {
         }
     }
 
-    #[tool(description = "Search for flights by airport code pattern")]
+    #[tool(
+        description = "Search for flights by airport code pattern",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn search_flights_by_airport_pattern(
         &self,
         Parameters(req): Parameters<SearchFlightsByPatternRequest>,
@@ -245,26 +254,4 @@ pub struct SearchFlightsByPatternRequest {
 }
 
 #[tool_handler]
-impl ServerHandler for BabelTools {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "Tower of Babel flight tracking tools for Sky Nexus:\n\
-                - get_flights_by_airport: Get future flights departing from or arriving at a specific airport\n\
-                - get_flight_position: Get current position and status of a specific flight in real-time\n\
-                - search_flights_by_airport_pattern: Search for flights using airport code patterns\n\
-                \n\
-                These tools provide access to live flight data including:\n\
-                - Future flight schedules by airport\n\
-                - Real-time flight positions with GPS coordinates\n\
-                - Flight status and tracking information\n\
-                \n\
-                Note: Flight position data includes latitude, longitude and timestamp only.\n\
-                Additional flight details (aircraft, route, schedule) are available via airport search.\n\
-                \n\
-                Useful for flight tracking, airport operations, and passenger information."
-                    .to_string(),
-            )
-    }
-}
+impl ServerHandler for BabelTools {}

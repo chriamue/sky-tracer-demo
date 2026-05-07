@@ -7,7 +7,7 @@ use chrono_tz::{OffsetName, Tz};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
+    model::{CallToolResult, Content},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -47,7 +47,15 @@ impl DateTimeTools {
         }
     }
 
-    #[tool(description = "Get the current date and time")]
+    #[tool(
+        description = "Get the current date and time",
+        annotations(
+            read_only_hint = true,
+            destructive_hint = false,
+            idempotent_hint = false,
+            open_world_hint = false
+        )
+    )]
     pub async fn get_current_datetime(
         &self,
         Parameters(req): Parameters<GetCurrentDateTimeRequest>,
@@ -98,7 +106,15 @@ impl DateTimeTools {
         }
     }
 
-    #[tool(description = "Get current time in multiple aviation-relevant timezones")]
+    #[tool(
+        description = "Get current time in multiple aviation-relevant timezones",
+        annotations(
+            read_only_hint = true,
+            destructive_hint = false,
+            idempotent_hint = false,
+            open_world_hint = false
+        )
+    )]
     pub async fn get_aviation_times(&self) -> Result<CallToolResult, McpError> {
         info!("Getting current time in aviation-relevant timezones");
 
@@ -136,7 +152,13 @@ impl DateTimeTools {
     /// Compare two timezones and return their time difference as structured content
     #[tool(
         name = "compare_timezones",
-        description = "Compare two timezones and show the time difference"
+        description = "Compare two timezones and show the time difference",
+        annotations(
+            read_only_hint = true,
+            destructive_hint = false,
+            idempotent_hint = true,
+            open_world_hint = false
+        )
     )]
     pub async fn compare_timezones(
         &self,
@@ -228,7 +250,15 @@ impl DateTimeTools {
         Ok(CallToolResult::structured(json_result))
     }
 
-    #[tool(description = "Calculate time difference between two timezones")]
+    #[tool(
+        description = "Calculate time difference between two timezones",
+        annotations(
+            read_only_hint = true,
+            destructive_hint = false,
+            idempotent_hint = true,
+            open_world_hint = false
+        )
+    )]
     pub async fn get_timezone_difference(
         &self,
         Parameters(req): Parameters<TimezoneDifferenceRequest>,
@@ -283,18 +313,4 @@ impl DateTimeTools {
 }
 
 #[tool_handler]
-impl ServerHandler for DateTimeTools {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "DateTime tools for Sky Nexus:\n\
-                - get_current_datetime: Get current date and time with optional timezone and formatting\n\
-                - get_aviation_times: Get current time in major aviation hubs around the world\n\
-                - get_timezone_difference: Calculate time difference between two timezones\n\
-                \n\
-                Useful for flight scheduling, coordination across time zones, and aviation operations."
-                    .to_string(),
-            )
-    }
-}
+impl ServerHandler for DateTimeTools {}

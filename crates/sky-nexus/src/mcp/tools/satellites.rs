@@ -4,7 +4,7 @@ use crate::services::satellites::{
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
+    model::{CallToolResult, Content},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -62,7 +62,10 @@ impl SatelliteTools {
         }
     }
 
-    #[tool(description = "List all satellites")]
+    #[tool(
+        description = "List all satellites",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn list_satellites(&self) -> Result<CallToolResult, McpError> {
         info!("Listing satellites");
         let satellites = fetch_satellites().await.map_err(|e| {
@@ -87,7 +90,10 @@ impl SatelliteTools {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    #[tool(description = "Create a new satellite")]
+    #[tool(
+        description = "Create a new satellite",
+        annotations(read_only_hint = false, destructive_hint = false, idempotent_hint = false)
+    )]
     pub async fn create_satellite(
         &self,
         Parameters(CreateSatelliteToolRequest { name }): Parameters<CreateSatelliteToolRequest>,
@@ -108,7 +114,10 @@ impl SatelliteTools {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    #[tool(description = "Update satellite status")]
+    #[tool(
+        description = "Update satellite status",
+        annotations(read_only_hint = false, destructive_hint = true, idempotent_hint = true)
+    )]
     pub async fn update_satellite_status(
         &self,
         Parameters(UpdateSatelliteStatusToolRequest { id, status }): Parameters<
@@ -144,7 +153,10 @@ impl SatelliteTools {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    #[tool(description = "Calculate flight position using satellites")]
+    #[tool(
+        description = "Calculate flight position using satellites",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn calculate_position(
         &self,
         Parameters(req): Parameters<CalculatePositionToolRequest>,
@@ -208,17 +220,4 @@ impl SatelliteTools {
 }
 
 #[tool_handler]
-impl ServerHandler for SatelliteTools {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "Satellite tools for Sky Nexus:\n\
-                - list_satellites: List all satellites\n\
-                - create_satellite: Create a new satellite\n\
-                - update_satellite_status: Update satellite status\n\
-                - calculate_position: Calculate flight position using satellites"
-                    .to_string(),
-            )
-    }
-}
+impl ServerHandler for SatelliteTools {}

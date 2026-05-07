@@ -3,7 +3,7 @@ use askama::Template;
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
+    model::{CallToolResult, Content},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::{Deserialize, Serialize};
@@ -52,7 +52,8 @@ impl FlightDashboardTools {
     }
 
     #[tool(
-        description = "Show an interactive flight dashboard panel with a Leaflet map. Use when the user asks to see, show, display, or track flights — optionally filtered by departure or arrival airport code."
+        description = "Show an interactive flight dashboard panel with a Leaflet map. Use when the user asks to see, show, display, or track flights — optionally filtered by departure or arrival airport code.",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
     )]
     pub async fn flight_dashboard(
         &self,
@@ -103,12 +104,4 @@ impl FlightDashboardTools {
 }
 
 #[tool_handler]
-impl ServerHandler for FlightDashboardTools {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "Flight dashboard tool — renders interactive HTML panel with Leaflet map",
-            )
-    }
-}
+impl ServerHandler for FlightDashboardTools {}

@@ -2,7 +2,7 @@ use crate::services::airports::{fetch_airport_by_code, fetch_airports};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
+    model::{CallToolResult, Content},
     schemars, tool, tool_handler, tool_router,
 };
 use serde_json::json;
@@ -27,7 +27,10 @@ impl AirportTools {
         }
     }
 
-    #[tool(description = "List all airports")]
+    #[tool(
+        description = "List all airports",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn list_airports(&self) -> Result<CallToolResult, McpError> {
         info!("Listing airports");
 
@@ -53,7 +56,10 @@ impl AirportTools {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    #[tool(description = "Get information about a specific airport by code")]
+    #[tool(
+        description = "Get information about a specific airport by code",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn get_airport(
         &self,
         Parameters(GetAirportRequest { code }): Parameters<GetAirportRequest>,
@@ -78,15 +84,4 @@ impl AirportTools {
 }
 
 #[tool_handler]
-impl ServerHandler for AirportTools {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "Airport tools for Sky Nexus:\n\
-                - list_airports: List all airports with their codes and coordinates\n\
-                - get_airport: Get detailed information about a specific airport by code"
-                    .to_string(),
-            )
-    }
-}
+impl ServerHandler for AirportTools {}

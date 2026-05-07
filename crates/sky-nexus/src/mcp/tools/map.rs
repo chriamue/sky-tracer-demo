@@ -6,7 +6,7 @@ use flight_map::{AirportPin, RouteArc, rasterize, render_flight_map};
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
+    model::{CallToolResult, Content},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -42,7 +42,8 @@ impl MapTools {
     /// Only airports that participate in at least one route are shown.
     /// If a current position is known for a flight it is shown as a yellow dot.
     #[tool(
-        description = "Generate a flight map image showing participating airports and active routes. Returns a base64-encoded SVG image."
+        description = "Generate a flight map image showing participating airports and active routes. Returns a base64-encoded SVG image.",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
     )]
     pub async fn generate_flight_map(
         &self,
@@ -156,16 +157,4 @@ impl MapTools {
 }
 
 #[tool_handler]
-impl ServerHandler for MapTools {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "Flight map tool for Sky Nexus:\n\
-                - generate_flight_map: Render a world map with airport pins and flight route arcs.\n\
-                  Only airports participating in active routes are shown.\n\
-                  Returns a base64-encoded SVG image (image/svg+xml)."
-                    .to_string(),
-            )
-    }
-}
+impl ServerHandler for MapTools {}

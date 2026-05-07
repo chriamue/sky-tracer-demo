@@ -2,7 +2,7 @@ use crate::services::flights::{create_flight, fetch_flight_by_number, fetch_flig
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
+    model::{CallToolResult, Content},
     schemars, tool, tool_handler, tool_router,
 };
 use serde::Deserialize;
@@ -54,7 +54,10 @@ impl FlightTools {
         }
     }
 
-    #[tool(description = "List all flights with optional filters")]
+    #[tool(
+        description = "List all flights with optional filters",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn list_flights(
         &self,
         Parameters(req): Parameters<ListFlightsToolRequest>,
@@ -122,7 +125,10 @@ impl FlightTools {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    #[tool(description = "Get detailed information about a specific flight")]
+    #[tool(
+        description = "Get detailed information about a specific flight",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn get_flight(
         &self,
         Parameters(GetFlightRequest { flight_number }): Parameters<GetFlightRequest>,
@@ -159,7 +165,10 @@ impl FlightTools {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    #[tool(description = "Create a new flight")]
+    #[tool(
+        description = "Create a new flight",
+        annotations(read_only_hint = false, destructive_hint = false, idempotent_hint = false)
+    )]
     pub async fn create_flight(
         &self,
         Parameters(req): Parameters<CreateFlightToolRequest>,
@@ -238,7 +247,10 @@ impl FlightTools {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    #[tool(description = "Search flights by route")]
+    #[tool(
+        description = "Search flights by route",
+        annotations(read_only_hint = true, destructive_hint = false, idempotent_hint = true)
+    )]
     pub async fn search_flights_by_route(
         &self,
         Parameters(req): Parameters<ListFlightsToolRequest>,
@@ -254,17 +266,4 @@ impl FlightTools {
 }
 
 #[tool_handler]
-impl ServerHandler for FlightTools {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::from_build_env())
-            .with_instructions(
-                "Flight tools for Sky Nexus:\n\
-                - list_flights: List all flights with optional filters (departure, arrival, date)\n\
-                - get_flight: Get detailed information about a specific flight by flight number\n\
-                - create_flight: Create a new flight with aircraft, route, and schedule details\n\
-                - search_flights_by_route: Search flights by departure and arrival airports"
-                    .to_string(),
-            )
-    }
-}
+impl ServerHandler for FlightTools {}
