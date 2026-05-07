@@ -1,5 +1,5 @@
 use crate::routes;
-use axum::{response::Redirect, routing::get, Router};
+use axum::{Router, response::Redirect, routing::get};
 use sky_tracer::protocol::airports::{
     AirportResponse, Position, SearchAirportsRequest, SearchAirportsResponse,
 };

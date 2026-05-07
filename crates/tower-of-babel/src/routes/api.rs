@@ -1,12 +1,12 @@
 use crate::services::{BabelService, BabelServiceError};
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use sky_tracer::protocol::{
-    flights::ErrorResponse, BABEL_AIRPORT_API_PATH, BABEL_POSITION_API_PATH,
+    BABEL_AIRPORT_API_PATH, BABEL_POSITION_API_PATH, flights::ErrorResponse,
 };
 use tracing::{error, instrument};
 

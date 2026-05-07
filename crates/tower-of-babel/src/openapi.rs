@@ -1,4 +1,4 @@
-use axum::{response::Redirect, routing::get, Router};
+use axum::{Router, response::Redirect, routing::get};
 use sky_tracer::protocol::flights::ErrorResponse;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;

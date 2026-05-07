@@ -6,7 +6,7 @@ pub mod services;
 #[cfg(feature = "ssr")]
 pub mod ui;
 
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
 use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use sky_tracer::protocol::{AIRPORTS_API_PATH, AIRPORTS_SEARCH_API_PATH};
 use tower_http::cors::{Any, CorsLayer};

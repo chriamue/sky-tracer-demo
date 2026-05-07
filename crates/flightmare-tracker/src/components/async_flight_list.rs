@@ -1,9 +1,9 @@
+use crate::FlightWithDelay;
 use crate::components::FlightWithDelayComponent;
 use crate::grund::get_random_grund;
-use crate::FlightWithDelay;
 use gloo_net::http::Request;
 use gloo_timers::future::sleep;
-use sky_tracer::protocol::{flights::FlightResponse, FLIGHTS_API_PATH};
+use sky_tracer::protocol::{FLIGHTS_API_PATH, flights::FlightResponse};
 use std::time::Duration;
 use yew::prelude::*;
 use yew::suspense::use_future;

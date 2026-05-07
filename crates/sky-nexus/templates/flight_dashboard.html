@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Tracer — Flight Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 8px 14px;
+            background: #16213e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #0f3460;
+            flex-shrink: 0;
+        }
+
+        header h1 { font-size: 14px; font-weight: 600; }
+        #flight-count { font-size: 12px; color: #888; margin-left: auto; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #map { width: 100%; height: 100%; }
+
+        .sidebar {
+            background: #16213e;
+            border-left: 1px solid #0f3460;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-title {
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            border-bottom: 1px solid #0f3460;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .flight-list { overflow-y: auto; flex: 1; }
+
+        .flight-item {
+            padding: 9px 12px;
+            border-bottom: 1px solid #0f3460;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .flight-item:hover { background: #0f3460; }
+
+        .flight-item.active {
+            background: #0f3460;
+            border-left: 3px solid #4cc9f0;
+            padding-left: 9px;
+        }
+
+        .fn { font-weight: 700; font-size: 13px; color: #4cc9f0; }
+        .route { font-size: 12px; color: #ccc; margin-top: 2px; }
+        .time { font-size: 11px; color: #666; margin-top: 2px; }
+
+        .empty {
+            padding: 32px 16px;
+            text-align: center;
+            color: #555;
+            font-size: 13px;
+        }
+
+        #status {
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid #0f3460;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span>✈️</span>
+        <h1>Sky Tracer — Flight Dashboard</h1>
+        <span id="flight-count">Loading…</span>
+    </header>
+
+    <div class="layout">
+        <div id="map"></div>
+        <div class="sidebar">
+            <div class="sidebar-title">Flights</div>
+            <div class="flight-list" id="flight-list">
+                <div class="empty">Loading flights…</div>
+            </div>
+            <div id="status">Connecting…</div>
+        </div>
+    </div>
+
+    <script>
+        // ── Map setup ──────────────────────────────────────────────────────────
+        const map = L.map('map').setView([51.0, 10.0], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        const layers = new Map();
+
+        // Known airport coordinates (subset — real impl calls airport-anywhere)
+        const AIRPORTS = {
+            FRA: [50.033, 8.570], LIS: [38.774, -9.135], OPO: [41.248, -8.681],
+            CDG: [49.009, 2.548], LHR: [51.477, -0.461], MAD: [40.472, -3.561],
+            AMS: [52.308, 4.765], MUC: [48.354, 11.786], FCO: [41.800, 12.239],
+            BCN: [41.297, 2.078], VIE: [48.110, 16.570], ZRH: [47.458, 8.548],
+            BRU: [50.901, 4.484], CPH: [55.618, 12.656], ARN: [59.651, 17.919],
+            HEL: [60.317, 24.963], WAW: [52.165, 20.967], PRG: [50.108, 14.260],
+        };
+
+        // ── Render helpers ────────────────────────────────────────────────────
+        function setStatus(msg) {
+            document.getElementById('status').textContent = msg;
+        }
+
+        function renderFlights(flights) {
+            document.getElementById('flight-count').textContent =
+                `${flights.length} flight${flights.length !== 1 ? 's' : ''}`;
+
+            const list = document.getElementById('flight-list');
+            if (!flights.length) {
+                list.innerHTML = '<div class="empty">No flights found</div>';
+                return;
+            }
+
+            list.innerHTML = flights.map((f, i) => `
+                <div class="flight-item" data-i="${i}">
+                    <div class="fn">${f.flight_number}</div>
+                    <div class="route">${f.departure} → ${f.arrival}</div>
+                    <div class="time">${f.departure_time}</div>
+                </div>
+            `).join('');
+
+            list.querySelectorAll('.flight-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    list.querySelectorAll('.flight-item').forEach(e => e.classList.remove('active'));
+                    el.classList.add('active');
+                    focusFlight(flights[+el.dataset.i]);
+                });
+            });
+
+            // Clear old layers
+            layers.forEach(l => { l.line?.remove(); l.marker?.remove(); });
+            layers.clear();
+
+            const bounds = [];
+            flights.forEach(f => {
+                const dep = AIRPORTS[f.departure];
+                const arr = AIRPORTS[f.arrival];
+                if (!dep || !arr) return;
+
+                const mid = [(dep[0] + arr[0]) / 2, (dep[1] + arr[1]) / 2];
+                bounds.push(dep, arr);
+
+                const line = L.polyline([dep, arr], {
+                    color: '#4cc9f0', weight: 1.5, opacity: 0.4, dashArray: '6,4'
+                }).addTo(map);
+
+                const marker = L.circleMarker(mid, {
+                    radius: 5, fillColor: '#4cc9f0', color: '#fff',
+                    weight: 1.5, opacity: 1, fillOpacity: 0.85
+                }).addTo(map)
+                .bindPopup(`<b>${f.flight_number}</b><br>${f.departure} → ${f.arrival}<br>${f.departure_time}`);
+
+                layers.set(f.flight_number, { marker, line });
+            });
+
+            if (bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
+        }
+
+        function focusFlight(f) {
+            const entry = layers.get(f.flight_number);
+            if (entry?.marker) {
+                entry.marker.openPopup();
+                map.setView(entry.marker.getLatLng(), 6, { animate: true });
+            }
+        }
+
+        // ── MCP Apps postMessage bridge ───────────────────────────────────────
+        let msgId = 1;
+        const pending = new Map(); // id → resolve
+
+        function sendToHost(method, params) {
+            return new Promise((resolve) => {
+                const id = msgId++;
+                pending.set(id, resolve);
+                window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, '*');
+            });
+        }
+
+        window.addEventListener('message', (event) => {
+            const msg = event.data;
+            if (!msg || typeof msg !== 'object') return;
+
+            // JSON-RPC response to one of our tool calls
+            if (msg.jsonrpc === '2.0' && msg.id !== undefined && msg.result !== undefined) {
+                const resolve = pending.get(msg.id);
+                if (resolve) {
+                    pending.delete(msg.id);
+                    resolve(msg.result);
+                }
+                return;
+            }
+
+            // Host-pushed tool result (push model)
+            if (msg.method === 'ui/toolResult') {
+                const text = msg.params?.result?.content?.[0]?.text;
+                if (text) handleFlightJson(text);
+            }
+        });
+
+        function handleFlightJson(text) {
+            try {
+                const flights = JSON.parse(text);
+                if (Array.isArray(flights)) {
+                    renderFlights(flights);
+                    setStatus(`Updated ${new Date().toLocaleTimeString()}`);
+                }
+            } catch {
+                setStatus('Parse error');
+            }
+        }
+
+        // ── Pull data by calling list_flights tool ────────────────────────────
+        async function loadFlights() {
+            setStatus('Fetching flights…');
+            try {
+                // Read departure filter from URL params if provided
+                const params = new URLSearchParams(window.location.search);
+                const args = {};
+                if (params.get('departure')) args.departure = params.get('departure');
+                if (params.get('arrival'))   args.arrival   = params.get('arrival');
+
+                const result = await sendToHost('tools/call', {
+                    name: 'list_flights',
+                    arguments: args
+                });
+
+                const text = result?.content?.[0]?.text;
+                if (text) {
+                    // list_flights returns formatted text — try to extract JSON from flight_dashboard
+                    // Prefer calling flight_dashboard for structured JSON
+                    const dashResult = await sendToHost('tools/call', {
+                        name: 'flight_dashboard',
+                        arguments: args
+                    });
+                    const json = dashResult?.content?.[0]?.text;
+                    if (json) handleFlightJson(json);
+                    else setStatus('No data received');
+                }
+            } catch (e) {
+                setStatus(`Error: ${e.message}`);
+            }
+        }
+
+        // Signal ready then pull data
+        window.parent.postMessage({ jsonrpc: '2.0', method: 'ui/ready' }, '*');
+        loadFlights();
+    </script>
+</body>
+</html>

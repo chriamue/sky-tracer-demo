@@ -1,15 +1,17 @@
 use crate::mcp::prompts::SkyNexusPrompts;
 use crate::mcp::resources;
-
-use crate::mcp::tools::{AirportTools, BabelTools, DateTimeTools, FlightTools, MapTools, SatelliteTools};
+use crate::mcp::tools::flight_dashboard::FlightDashboardTemplate;
+use crate::mcp::tools::{
+    AirportTools, BabelTools, DateTimeTools, FlightDashboardTools, FlightTools, MapTools,
+    SatelliteTools,
+};
 use rmcp::{
     RoleServer, ServerHandler,
     handler::server::prompt::PromptContext,
     model::{
-        CallToolResult, GetPromptRequestParams, GetPromptResult, Implementation,
-        ListPromptsResult, ListResourceTemplatesResult, ListResourcesResult, ListToolsResult,
-        PaginatedRequestParams, ReadResourceRequestParams, ReadResourceResult, ServerCapabilities,
-        ServerInfo,
+        CallToolResult, GetPromptRequestParams, GetPromptResult, Implementation, ListPromptsResult,
+        ListResourceTemplatesResult, ListResourcesResult, ListToolsResult, PaginatedRequestParams,
+        ReadResourceRequestParams, ReadResourceResult, ServerCapabilities, ServerInfo,
     },
     service::RequestContext,
 };
@@ -19,6 +21,7 @@ use rmcp::{
 pub struct SkyNexusTools {
     airports: AirportTools,
     flights: FlightTools,
+    flight_dashboard: FlightDashboardTools,
     satellites: SatelliteTools,
     datetime: DateTimeTools,
     babel: BabelTools,
@@ -31,6 +34,7 @@ impl SkyNexusTools {
         Self {
             airports: AirportTools::new(),
             flights: FlightTools::new(),
+            flight_dashboard: FlightDashboardTools::new(),
             satellites: SatelliteTools::new(),
             datetime: DateTimeTools::new(),
             babel: BabelTools::new(),
@@ -94,6 +98,25 @@ impl ServerHandler for SkyNexusTools {
                 .await?
                 .tools,
         );
+        let mut dashboard_tools = self
+            .flight_dashboard
+            .list_tools(request.clone(), context.clone())
+            .await?
+            .tools;
+        // Inject MCP Apps ui resource URI so Claude renders an interactive panel
+        for tool in &mut dashboard_tools {
+            if tool.name == "flight_dashboard" {
+                let mut meta = rmcp::model::Meta::new();
+                meta.insert(
+                    "ui".to_string(),
+                    serde_json::json!({
+                        "resourceUri": "ui://flight-dashboard"
+                    }),
+                );
+                tool.meta = Some(meta);
+            }
+        }
+        tools.extend(dashboard_tools);
         tools.extend(self.map.list_tools(request, context).await?.tools);
         Ok(ListToolsResult::with_all_items(tools))
     }
@@ -120,6 +143,7 @@ impl ServerHandler for SkyNexusTools {
             | "get_flight_position"
             | "search_flights_by_airport_pattern" => self.babel.call_tool(request, context).await,
             "generate_flight_map" => self.map.call_tool(request, context).await,
+            "flight_dashboard" => self.flight_dashboard.call_tool(request, context).await,
             name => Err(rmcp::ErrorData::invalid_params(
                 format!("unknown tool: {name}"),
                 None,
@@ -148,6 +172,32 @@ impl ServerHandler for SkyNexusTools {
         request: ReadResourceRequestParams,
         _context: RequestContext<RoleServer>,
     ) -> Result<ReadResourceResult, rmcp::ErrorData> {
+        if request.uri == "ui://flight-dashboard" {
+            let html = FlightDashboardTemplate::render_html().map_err(|e| {
+                rmcp::ErrorData::internal_error(
+                    "Template render failed",
+                    Some(serde_json::json!({ "error": e.to_string() })),
+                )
+            })?;
+            let mut meta = rmcp::model::Meta::new();
+            meta.insert(
+                "ui".to_string(),
+                serde_json::json!({
+                    "csp": {
+                        "resourceDomains": [
+                            "https://unpkg.com",
+                            "https://cdn.jsdelivr.net",
+                            "https://tile.openstreetmap.org"
+                        ]
+                    }
+                }),
+            );
+            return Ok(ReadResourceResult::new(vec![
+                rmcp::model::ResourceContents::text(html, "ui://flight-dashboard")
+                    .with_mime_type("text/html;profile=mcp-app")
+                    .with_meta(meta),
+            ]));
+        }
         resources::read_resource(request).await
     }
 

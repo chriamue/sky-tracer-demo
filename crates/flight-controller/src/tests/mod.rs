@@ -99,7 +99,7 @@ async fn it_should_create_flight() {
 
 #[tokio::test]
 async fn it_response_with_list_of_flights_with_multiple_entries() {
-    use serde_json_assert::{assert_json_matches, CompareMode, Config};
+    use serde_json_assert::{CompareMode, Config, assert_json_matches};
 
     // Given
     let app = app();

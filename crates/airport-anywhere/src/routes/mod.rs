@@ -1,4 +1,4 @@
-use axum::{extract::Query, Json};
+use axum::{Json, extract::Query};
 use sky_tracer::protocol::airports::{SearchAirportsRequest, SearchAirportsResponse};
 use sky_tracer::protocol::{AIRPORTS_API_PATH, AIRPORTS_SEARCH_API_PATH};
 use tracing::{error, info, instrument};
@@ -86,10 +86,12 @@ mod tests {
         };
         let response = search_airports(Query(params)).await;
         assert!(!response.airports.is_empty());
-        assert!(response
-            .airports
-            .iter()
-            .any(|a| a.name.contains("Frankfurt")));
+        assert!(
+            response
+                .airports
+                .iter()
+                .any(|a| a.name.contains("Frankfurt"))
+        );
     }
 
     #[tokio::test]

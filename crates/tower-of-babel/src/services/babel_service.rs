@@ -1,8 +1,8 @@
 use chrono::Utc;
 use reqwest_middleware::ClientWithMiddleware;
 use sky_tracer::protocol::{
-    flights::{FlightPositionResponse, FlightResponse},
     FLIGHTS_API_PATH, FLIGHTS_POSITION_API_PATH,
+    flights::{FlightPositionResponse, FlightResponse},
 };
 use thiserror::Error;
 use tracing::{debug, error, info, instrument, warn};

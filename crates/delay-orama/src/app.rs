@@ -1,5 +1,5 @@
 use crate::{routes, services::DelayService};
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
 use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use tower_http::cors::{Any, CorsLayer};
 

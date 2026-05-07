@@ -21,11 +21,19 @@ mod tests {
     use super::*;
 
     fn fra() -> AirportPin {
-        AirportPin { code: "FRA".to_string(), lat: 50.033, lon: 8.570 }
+        AirportPin {
+            code: "FRA".to_string(),
+            lat: 50.033,
+            lon: 8.570,
+        }
     }
 
     fn jfk() -> AirportPin {
-        AirportPin { code: "JFK".to_string(), lat: 40.639, lon: -73.778 }
+        AirportPin {
+            code: "JFK".to_string(),
+            lat: 40.639,
+            lon: -73.778,
+        }
     }
 
     fn lh400() -> RouteArc {

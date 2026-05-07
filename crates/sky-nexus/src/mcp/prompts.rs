@@ -3,8 +3,7 @@ use crate::services::babel::fetch_flights_by_airport;
 use rmcp::{
     handler::server::{router::prompt::PromptRouter, wrapper::Parameters},
     model::{GetPromptResult, PromptMessage, PromptMessageRole},
-    prompt, prompt_router,
-    schemars,
+    prompt, prompt_router, schemars,
 };
 use serde::Deserialize;
 
@@ -95,7 +94,10 @@ impl SkyNexusPrompts {
                 ),
             ),
         ])
-        .with_description(format!("Airport briefing for {}", p.airport_code.to_uppercase()))
+        .with_description(format!(
+            "Airport briefing for {}",
+            p.airport_code.to_uppercase()
+        ))
     }
 
     /// Analyse a flight route between two airports.

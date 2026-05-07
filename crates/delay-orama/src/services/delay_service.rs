@@ -1,8 +1,8 @@
 use reqwest_middleware::ClientWithMiddleware;
 use sky_tracer::protocol::{
+    AIRPORTS_SEARCH_API_PATH, BABEL_API_PATH,
     airports::SearchAirportsResponse,
     flights::{FlightPositionResponse, FlightResponse},
-    AIRPORTS_SEARCH_API_PATH, BABEL_API_PATH,
 };
 use thiserror::Error;
 use tracing::{error, info, instrument, warn};
@@ -166,10 +166,7 @@ impl DelayService {
 
     /// Get complete delay information with detailed error handling
     #[instrument(skip(self), fields(airport_code = %airport_code))]
-    pub async fn get_airport_delays_with_errors(
-        &self,
-        airport_code: &str,
-    ) -> AirportDelaysInfo {
+    pub async fn get_airport_delays_with_errors(&self, airport_code: &str) -> AirportDelaysInfo {
         info!(
             "Getting complete delay information for airport: {}",
             airport_code

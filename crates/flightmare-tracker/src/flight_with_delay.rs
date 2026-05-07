@@ -1,5 +1,5 @@
-use super::grund::get_random_grund;
 use super::Grund;
+use super::grund::get_random_grund;
 use sky_tracer::protocol::flights::FlightResponse;
 
 #[derive(Clone, PartialEq)]

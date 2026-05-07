@@ -1,5 +1,5 @@
 use crate::continents::continent_svg_elements;
-use crate::geo::{arc_path, lat_to_y, lon_to_x, PAD, SVG_HEIGHT, SVG_WIDTH};
+use crate::geo::{PAD, SVG_HEIGHT, SVG_WIDTH, arc_path, lat_to_y, lon_to_x};
 use crate::types::{AirportPin, RouteArc};
 
 pub fn render(airports: Vec<AirportPin>, routes: Vec<RouteArc>, title: Option<String>) -> String {
@@ -30,9 +30,8 @@ pub fn render(airports: Vec<AirportPin>, routes: Vec<RouteArc>, title: Option<St
 }
 
 fn render_grid() -> String {
-    let mut out = String::from(
-        "<g id=\"grid\" stroke=\"#1e3a5f\" stroke-width=\"0.3\" opacity=\"0.7\">",
-    );
+    let mut out =
+        String::from("<g id=\"grid\" stroke=\"#1e3a5f\" stroke-width=\"0.3\" opacity=\"0.7\">");
 
     for lon in (-180..=180_i32).step_by(30) {
         let x = lon_to_x(lon as f64);

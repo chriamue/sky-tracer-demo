@@ -7,9 +7,9 @@ use reqwest::{Request, Response};
 use reqwest_middleware::{
     ClientBuilder, ClientWithMiddleware, Middleware, Next, Result as MiddlewareResult,
 };
+use sky_tracer::protocol::SATELLITES_POSITION_API_PATH;
 use sky_tracer::protocol::flights::CreateFlightRequest;
 use sky_tracer::protocol::satellite::{CalculatePositionRequest, CalculatePositionResponse};
-use sky_tracer::protocol::SATELLITES_POSITION_API_PATH;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;

@@ -5,10 +5,10 @@ use crate::{
     ui::pages::{Home, HomeProps},
 };
 use axum::{
+    Router,
     extract::{Query, State},
     response::Html,
     routing::{get, post},
-    Router,
 };
 use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use chrono::{DateTime, Utc};

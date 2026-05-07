@@ -6,25 +6,22 @@ pub fn rasterize(svg: &str) -> Result<Vec<u8>, String> {
     let height = SVG_HEIGHT as u32;
 
     let options = resvg::usvg::Options::default();
-    let tree = resvg::usvg::Tree::from_str(svg, &options)
-        .map_err(|e| format!("SVG parse error: {e}"))?;
+    let tree =
+        resvg::usvg::Tree::from_str(svg, &options).map_err(|e| format!("SVG parse error: {e}"))?;
 
-    let mut pixmap = tiny_skia::Pixmap::new(width, height)
-        .ok_or("Failed to allocate pixmap")?;
+    let mut pixmap = tiny_skia::Pixmap::new(width, height).ok_or("Failed to allocate pixmap")?;
 
-    resvg::render(
-        &tree,
-        tiny_skia::Transform::default(),
-        &mut pixmap.as_mut(),
-    );
+    resvg::render(&tree, tiny_skia::Transform::default(), &mut pixmap.as_mut());
 
-    pixmap.encode_png().map_err(|e| format!("PNG encode error: {e}"))
+    pixmap
+        .encode_png()
+        .map_err(|e| format!("PNG encode error: {e}"))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{render_flight_map, AirportPin};
+    use crate::{AirportPin, render_flight_map};
 
     #[test]
     fn png_starts_with_png_header() {

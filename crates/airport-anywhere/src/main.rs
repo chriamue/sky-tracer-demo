@@ -2,7 +2,7 @@ use airport_anywhere::{
     services::AirportService,
     ui::pages::{Home, HomeProps},
 };
-use axum::{extract::Query, response::Html, routing::get, Router};
+use axum::{Router, extract::Query, response::Html, routing::get};
 use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use serde::Deserialize;
 use sky_tracer::protocol::airports::AirportResponse;

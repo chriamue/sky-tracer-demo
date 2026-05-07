@@ -361,6 +361,7 @@ services:
       - AIRPORT_SERVICE_BASE_URL=http://airport-anywhere:3000
       - FLIGHT_SERVICE_BASE_URL=http://flight-controller:3001
       - SATELLITE_SERVICE_BASE_URL=http://orbital-beacon:3002
+      - BABEL_SERVICE_BASE_URL=http://tower-of-babel:3003
 
       # Application Configuration
       - BIND_ADDRESS=0.0.0.0:8080

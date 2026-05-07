@@ -1,6 +1,6 @@
 use crate::geo::{lat_to_y, lon_to_x};
 use geo_svg::{Color, ToSvg};
-use geo_types::{coord, LineString, Polygon};
+use geo_types::{LineString, Polygon, coord};
 use geojson::{GeoJson, GeometryValue, Position};
 
 const LAND_GEOJSON: &str = include_str!("data/ne_110m_land.geojson");

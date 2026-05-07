@@ -1,5 +1,5 @@
 use crate::{openapi, routes, services::BabelService};
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
 use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use sky_tracer::protocol::{BABEL_AIRPORT_API_PATH, BABEL_POSITION_API_PATH};
 use tower_http::cors::{Any, CorsLayer};

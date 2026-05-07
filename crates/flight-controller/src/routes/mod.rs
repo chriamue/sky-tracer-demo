@@ -1,9 +1,9 @@
 use crate::services::FlightService;
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::StatusCode,
     response::{IntoResponse, Response},
-    Json,
 };
 use chrono::{DateTime, Utc};
 use sky_tracer::protocol::flights::{
