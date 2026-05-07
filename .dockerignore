@@ -1,9 +1,39 @@
+# Build artifacts
 target/
 **/target/
+.cargo/
+
+# Version control
 .git/
 .gitignore
+.github/
+
+# Environment and config
 .env
+.env.local
+.env*.local
+
+# Docker and deployment
 Dockerfile
 **/Dockerfile
+docker-compose*.yml
 compose.yml
+.dockerignore
+
+# Documentation
 README.md
+**/*.md
+docs/
+
+# IDE and OS
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Other
+Makefile
+*.log
+.cache/

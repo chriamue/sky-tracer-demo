@@ -1,7 +1,11 @@
+# syntax=docker/dockerfile:1.4
 FROM rust:1.94-trixie AS builder
 
-# Install trunk and required dependencies
-RUN cargo install trunk && \
+ARG TARGETPLATFORM
+
+RUN --mount=type=cache,id=${TARGETPLATFORM}-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,id=${TARGETPLATFORM}-git,target=/usr/local/cargo/git \
+    cargo install trunk && \
     rustup target add wasm32-unknown-unknown && \
     apt-get update && \
     apt-get install -y pkg-config libssl-dev && \
@@ -10,17 +14,15 @@ RUN cargo install trunk && \
 WORKDIR /usr/src/app
 COPY . .
 
-# Build the application
-RUN cd crates/cockpit && \
+RUN --mount=type=cache,id=${TARGETPLATFORM}-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,id=${TARGETPLATFORM}-git,target=/usr/local/cargo/git \
+    --mount=type=cache,id=${TARGETPLATFORM}-target,target=/usr/src/app/target \
+    cd crates/cockpit && \
     trunk build --release
 
-# Production stage
 FROM nginx:alpine
 
-# Copy the built assets
 COPY --from=builder /usr/src/app/crates/cockpit/dist /usr/share/nginx/html
-
-# Copy nginx configuration
 COPY crates/cockpit/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080

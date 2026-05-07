@@ -1,21 +1,27 @@
+# syntax=docker/dockerfile:1.4
 FROM rust:1.94-trixie AS builder
+
+ARG TARGETPLATFORM
 
 WORKDIR /usr/src/app
 
-# Install build dependencies
 RUN apt-get update && \
     apt-get install -y pkg-config libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
-RUN cargo build --release -p flight-controller
+RUN --mount=type=cache,id=${TARGETPLATFORM}-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,id=${TARGETPLATFORM}-git,target=/usr/local/cargo/git \
+    --mount=type=cache,id=${TARGETPLATFORM}-target,target=/usr/src/app/target \
+    cargo build --release -p flight-controller && \
+    cp /usr/src/app/target/release/flight-controller /tmp/flight-controller
 
 FROM debian:trixie-slim
 
 RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/src/app/target/release/flight-controller /usr/local/bin/flight-controller
+COPY --from=builder /tmp/flight-controller /usr/local/bin/flight-controller
 
 EXPOSE 3001
 
