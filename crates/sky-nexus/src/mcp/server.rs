@@ -127,7 +127,9 @@ impl ServerHandler for SkyNexusTools {
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, rmcp::ErrorData> {
         match request.name.as_ref() {
-            "list_airports" | "get_airport" => self.airports.call_tool(request, context).await,
+            "list_airports" | "get_airport" | "resolve_airport" => {
+                self.airports.call_tool(request, context).await
+            }
             "list_flights" | "get_flight" | "create_flight" | "search_flights_by_route" => {
                 self.flights.call_tool(request, context).await
             }
